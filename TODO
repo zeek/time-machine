@@ -1,6 +1,101 @@
 TODOs
 
-* ORDER AND CLEANUP THIS LIST ;-)
+A) The smaller items:
+=====================
+
+* Move build system to cmake. Can probably borrow quite some chunks from
+  Bro's new build system. 
+
+* TM restart. This is probably the most pressing issue!
+  Currently when the TM restarts (or crashes) it cannot use
+  the data it still has on its disk. It would be great if the restart
+  could take this data into account. There are several options to do
+  this:
+
+  + Re-read the stored files (they are in pcap format) and/or the index
+    files and rebuild the full internal state and continue after the
+    last file. This enables queries for stored data. However, when
+    large disk-storage is used re-reading the files might well take
+    several hours
+
+  + Do not re-read the stored files, but learn about them and include
+    them in buffer management. I.e., the TM starts building its internal
+    state only from data that newly arrives, but it knows that there are
+    old files lying around and it will delete the old files in order to
+    stay within the buffer budget. Then the old files can be searched
+    manually with tcpdump/tcpslice/whatever and restart is pretty much
+    instantaneous.
+
+* TM-cluster mode. This should be fairly easy. We would need a TM
+  cluster front-end. Bro would then communicate with the front-end. The
+  front-end sends the request to its workers (maybe with some
+  intelligence to only query the workers that see the traffic according
+  to the load balancing scheme) and gathers the results from the works,
+  sorts them (by time) and delivers them to the requesting Bro.
+
+* Use a directory/inventory for disk searches. Currently disk queries
+  are done using pcapnav to try to find the "right" location in a
+  file (probabilistically jump to an offset and try to see if the
+  offset is a valid start of a pcap-record).
+  It would be good if the TM could store a directory for each pcap file
+  it writes. The directory could then contain the file offset of
+  each n-th packet + timestamp. A query can then just check the
+  directory for the best location to jump to. No probabilist search.
+  (Maybe this should be part of (B) though)
+  We can then get rid of pcapnav as a dependency
+
+
+B) TM code rework
+=================
+
+In general some of the biggest problems of the TM are IMHO:
+
+* poor write performance. The memory buffer is not really used as elastic
+  storage (packets are only moved from memory to disk once the memory buffer
+  is full). Thus disk can block the capturing thread and thus lead to packet
+  loss.
+  Solution: have the most current packets in memory and on disk at the same
+  time by
+  + write to memory first. A second disk-writer thread will then read
+	packets from memory and write them to disk as soon as possible (TODO:
+	try to minimize lock/unlock operations
+  + write to memory and a to-disk-queue at the same time. A disk-writer
+    thread will then pick up the data from this to-disk-queue and write it
+	to disk. 
+
+
+* Index generation. Currently the capture thread generates for each stored
+  packet IndexField* (i.e., the index keys for this packet) and then places 
+  these pointers in per-Index queues. The index threads then pick up the 
+  IndexFields from these queues and store them. 
+  When we rework how packets are stored on disk (see above) it might be
+  worthwhile to also change the way the IndexFields are passed to the 
+  Index threads. E.g., if start using a disk-writer thread then this 
+  disk writer thread could generate the IndexField* and pass them on to
+  the Index threads. This would reduce the number of lock/unlocks the 
+  capture thread needs to do. 
+
+* inflexible, hard-coded indexes. Slow-ish lookup performance for on-disk
+  queries.
+  All possible key combinations (e.g.,
+  2-tuple, 5-tuple, etc.) have to be specified at compile-time. It would
+  be great if the TM could support queries for any combination of
+  IP,IP,port,port,transport.
+  Using fastbit and an indirection could help here. I have some
+  early ideas on how this could be done.
+
+* Keep flow records in addition to packet data and keep it *longer*.
+  The TM pretty implicitly keeps "flow" data for the connections it
+  has in its storage. We could extend this to actually write the flow
+  records to disk and assign a separate disk budget for such flow
+  records. This would allow us to store flow records for significantly
+  longer than just packet data. So it would increase the amount of time
+  we can "travel back", but with less information.
+
+
+-------------------------------
+UNSORTED ITEMS:
+
 
 FOR THE PAPER
 * Concurrent queries
@@ -30,8 +125,6 @@ intervals
 * Handle Queries with syntax errors
 * There's an awful mix of iostreams, Strings, char *, stdout, stderr .... ==> Solve this.
 * Make stats logfile configureable
-* There are heaps of different typedefs for sizes in the Fifos, but none is used
-consistently. 
 * held_bytes / stored_bytes / total_bytes / ... whatever they may be called are
 inconsistend. Some use caplen, some wirelen, some caplen+pcap_header, etc.
 
