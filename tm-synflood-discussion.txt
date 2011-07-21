@@ -1,0 +1,62 @@
+Summary of the discussion about synflood preventation
+
+* drop connections where we have only seen packets from one side
+(add them to the conn table, expire them quickly, don't generate
+index entries)
+
+* shorter timeout for connections that have only seen packets from 
+one side (to keep the conntable smaller)
+
+* how to handle ICMP floods (they don't go into the conn table but
+might go into the connection2 index). 
+
+* configureable per class
+
+* use some sort of threshold as 'under attack' trigger. 
+
+* maybe distinguish between spread out flood (many sources, victims
+involed, e.g. worm??) and concentrated flood (single src and/or single 
+target, resp. small target set)A
+
+* Let the tm decide if it can cope with a flood or if it must take 
+countermeassures. 
+
+Vern: 
+1.  There's a basic question regarding the philosophy behind the Time
+    Machine: it already has a core notion that some traffic is much more
+    interesting than other (bulky) traffic, so it discards the latter
+    in order to better preserve the former.
+
+    Should we view floods as as basically the same sort of heavy tails
+    that the current design already leverages?  Or as operational aberrations
+    that should be dealt with using custom code.
+
+    If we adopt the first approach, then the user should be able to
+    add per-class configuration for various sorts of additional heavy tails,
+    such as: fan-in threshold, pps threshold, unidirectional-connections
+    threshold.  These would apply consistently to the traffic (whether the
+    TM is under load or not) and just be another form of tradeoff we make
+    to maximize forensic utility.
+
+    If we adopt the second approach, then it would only kick in when TM
+    determines it is under stress (not necessarily that easy), and can be
+    handcrafted for specific stresses we find we encounter operationally.
+
+2.  Of these two, I favor the first, as it seems cleaner to me.  But
+    I think there are points to be made for either.
+
+3.  Regarding RED or such, the natural algorithms to draw upon here
+    are the sample-and-hold ones of Estan/Varghese and the related
+    "superspreaders" from Dawn Song of CMU.
+
+4.  Regarding needing to run BPF matching multiple times, this actually
+    has been on my packet filter wish-list for a long time.  (I have a
+    number of other such wishes, which have been partially impelmented to
+    varying degrees - just in case anyone's looking for a project!  :-) 
+
+    What we'd like is for BPF to return a token that identifies all of the
+    subpatterns that a given packet matches.  One difficulty here is
+    figuring out how to compile a tcpdump expression such that the association
+    between matched subpattern remains - the BPF optimizer makes this hard.
+
+------------

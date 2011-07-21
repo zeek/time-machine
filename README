@@ -1,0 +1,19 @@
+You can find new version of the timemachine at:
+http://www.net.t-labs.tu-berlin.de/research/tm/
+
+Please think about subscribing to tm-announce@lists.net.t-labs.tu-berlin.de,
+where bugfixes ans new relaeses will be announced (very low volume). In order
+to subscribe, visit: 
+http://lists.net.t-labs.tu-berlin.de/cgi-bin/mailman/listinfo/tm-announce
+
+
+ see Documentation/TM_HOWTO
+
+see also Documentation/TUNING on how to get good
+performance from the timemachine
+
+And don't forget the papers about the TM and about coupling a TM 
+with a NIDS.
+
+ATTENTION FreeBSD Users: You really want to read the MEMORY
+ALLOCATOR section of the the TUNING file.

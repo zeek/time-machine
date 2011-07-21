@@ -1,0 +1,286 @@
+$Id: tm-architecture.txt 127 2006-11-17 05:05:19Z gregor $
+Multithreaded Timemachine Architecture
+
+slightlt out of date. General idea and number of threads
+are still acurate though.
+
+
+OVERVIEW
+
+The TM consists of the following "components" 
+
+- Packet Capture and Fifo Management. This is one thread
+- Indexing System (serveral threads). One thread for every index.
+	One index aggregation thread, responsible for maintaining and 
+	aggregating the index files on harddisk. 
+- Local console interface (one thread)
+- Remote console interface (tcp client/server). One thread
+	controlling the listen socket. One thread for every incoming
+	connection.
+- StatisticsLog. Writes tm.log file. One thread
+- broccoli. Number of threads unknown to me. Prbably just one. 
+
+
+The following threads are persistent and are started directly from main()
+I.e. these threads are started when the 
+TM starts and they keep running until the TM is shut down. Note that
+some of these thread can be deactivated in the config file (i.e. if one
+disabled the local console interface). 
+
+- a Storage object is created (and stored in the global variable Storage). 
+The constructor of Storage spawns the capture thread. Furthemore
+the constructor of Storage spwans a thread for each configured index. 
+- index_aggregation_thread
+- server_listen_thread (for remote console interface)
+- cli_console_thread (for local console)
+- broccoli_thread
+- statisticslog_thread
+- main thread. This thread does nothing an just waits for cli_console_thread
+to finish (pthread_join). This should probably be changed. 
+
+
+More, non-persistent, threads are spwaned from server_listen_thread and proably
+from broccoli_thread too.
+
+The central point of the TM is an instance of the Storage class. This instance
+spwans the capture thread, keeps the connection table, the fifo, spwans the
+index threads etc. Theoreticly more than one Storage can be instanciated and
+used but some parts of the TM still depend on the global storage object. 
+
+
+
+PACKET CAPTURE AND FIFO MANAGEMENT. 
+
+Packet capture and fifo management is done from the Storage class. 
+
+For each configured class a Fifo is created. The Fifo object itself capsulates
+a FifoMem and a FifoDisk instance and moves packets from FifoMem to
+FifoDisk if necessary. Storage keeps track about these fifos in a std::list.
+
+For each configured index, storage creates the appropriate Index<T> 
+class and starts an index maintainer thread for this index. Furthermore
+the index is added to the indexes member, which keeps track of all
+configured indexes. This index book keeping is done through the 
+Indexes class (declared in Index.hh)
+
+The packet capture and fifo management is done in one thread. The capture
+thread runs pcap_loop and uses callback() as dispatcher function for
+pcap_loop.  callback() just calls storage->addPkt() with the header and 
+packet data.  pcap_loop uses the global storage variable!
+
+addPkt() updates the connection table and checks if this connections is 
+subscribed. If the connection is already known in the connection table, the
+approriate fifo is returned by the connection table. If the connection resp.
+its fifo is unknown, all fifos (all configured classes) are checked until
+a matching fifo with the highest precedence is found. 
+The appropriate Fifo::addPkt() function is called with the packet. Here
+the cutoff is done (if necessary).
+If the packet was successfully added (i.e. if it wasn't cutoff), the
+packet is added to every configured index. 
+If the connection has been subscribed, the appropriate QueryRequest 
+object has been aquired from the connection table and the packet is
+send down the QueryRequest channel. Using QueryRequest::sendPkt(). 
+QueryRequests are discussed later. 
+
+
+
+
+INDEXING SYSTEM
+
+The goal is to index the stored packets. Keys for indexing can be any
+fields from the packet header. All indexes / connection are considered 
+bi-directional. That is: The two directions of a connection are not 
+distinguished.
+To actually locate the indexed packets, we store time intervals in the
+Index data structures. That is if e.g. a connection was active
+between t1 and t2. Then had a long period of inactivity then was active
+again from t3 to t4, then the index would store the intervals [t1,t2] 
+and [t3,t4]. The "inactivity period" is, of course, configurable and 
+will depend on the expected inter-arrival-time of packets on the link
+
+
+INDEX DATA TYPES
+
+Every Index is stored through the templated Index<T> class. T is a class
+derived from IndexField. The Index class keeps the most recent part of
+the index in main memory. After some time the entries from memory
+are swapped to disk. The IndexClass has a member disk_index 
+(and IndexFile<T> instance) that takes care of the files on disk. 
+
+IndexField:
+Examples for IndexFields are ConnectionIF4, ConnectionIF3, SrcPort, etc. 
+If you want to index packets according to the connection tupel
+(proto, ip, port, ip, port), then you must instanciate a Index<ConnectionIF4>
+class. An IndexField class has two meaningings: 
+* An instance of an IndexField class is used to represent a key for an index
+entry (e.g. a ConnectionIF4 instance can store: tcp 1.2.4.5:6 -> 7.8.9.10:11
+* The class itself is used to describe the index (getIndexNameStatic()) 
+and to generate instances of the appropriate IndexField class throug genKeys()
+
+
+Some properties/methods of IndexField derivates
+	- getIndexName(), getIndexNameStatic():
+	returns a (unique) name for this Index. This index name
+	is hardcoded in the appropriate class definition. It is used to as part
+	of the filename of the index files, for quering a specific index. In the
+	future it is planned to dynamicly add/delete index during runtime. For this
+	the index name would be used too. 
+	- getConstKeyPtr(). Returns a (void *) to the key stored in this class. For
+	ConnectionIF4 this would be a pointer to a mem location containing (proto,
+	ip, port, ip, port) in some packed form. Different keys can be compared using
+	memcmp. 
+	- getKeySize(). Returns the length of the mem area returned by getConstKeyPtr()
+	- hash(). Returns a hash value for the stored key.
+	- static genKeys(). Returns a list of pointers to instances of the IndexField 
+	class. The genKeys() is passed a pointer to the packet data. It then extracts
+	the appropriate fields, creates the appropriate number of IndexField derivate
+	class instances and returns them. Since the direction of a connection is 
+	not used, the fields are ordered, so that a packet from 1.2.3.4:55 -> 7.8.9.10:11
+	has the same key (as defined by getConstKeyPtr()) as 7.8.9.10:11->1.2.3.4:55.
+	Why do we need to return a list of class pointers? Consider the case of an
+	index of Ip-Adresses. We need both, the src and the dst IP, so genKeys() must
+	return two pointers. Another example: ConnectionIF3 uses a 3-tupel 
+	(ip, ip, port). But again, since we don't care about the direction we
+	must generate two keys per packet (ip, ip, srcport) and (ip, ip, dstport).
+	And again, the IPs must be order to be direction independent.
+	- static parseQuery(). This function is used from the Query subsystem. 
+	It is passed a string representation of the appropriate key (e.g.
+	for ConnectionIF4 the representation is "proto ip:port ip:port:. This
+	string is parsed (normally using regular expressions), an appropriate
+	IndexField class is generated and returned. This IndexField class
+	can then be compared to the entries stored in the various Indexes 
+	(to be precise: the getConstKeyPtr() can be memcmp'ed)
+
+
+Index<T> manages the index entries in memory. 
+Index uses double buffered hashtables (cur, old) to store the entries. New entries
+are added to the cur hashtable. Whenever the oldest entry in cur is older than
+the oldest entry in the memory fifos, then the old hash is cleared an the hashes
+are swapped. This means that every packet in the memory fifo is indexed by entries
+in the memory. It is ensured that no index entry for a packet in main memory is
+already on disk. We can also conclude that just before rotation, the index in 
+memory spans about twice the time than the timespan of stored packets in FifoMem.
+Just after the rotation, the memory index spans the timespan of the stored 
+packets in FifoMem.
+When the hashes are rotated the old one is written to disk (in fact
+writing the index is only done on every second rotation). Upon the 
+rotation the size of the hashtable is checked an, if needed it is
+adjusted (the size is doubled or halfed)
+
+There is also an IndexType abstract class. Its sole purpose is to
+define a common Interface for all Index<Ts>
+
+The key for the Index hashtables are IndexField*. The values or entries
+are IndexEntry*. I.e. the cur and old hash of Index<T> are defined
+is Hash<IndexField*, IndexEntry*>.
+An IndexEntry stores a vector of (time-)intervals and the key of the
+entry.
+
+
+IntervalSet is a collection of Intverals needed for the query subsystem. 
+Whenever a query is performed, the indexes are searched an the matching
+intervals are returned as an IntervalSet object. Why don't we use 
+IndexEntry for queries? Answer: A query can result in several IndexQuery
+objects (up to one from cur, up to one from old, several from the index 
+files). The IntervalSet ensures, that its Intervals are sorted in ascending
+order and it also ensures that intervals don't overlap. 
+
+
+Disk Index / IndexFiles<T>
+The index  threads write in regular intervals (on every second rotate)
+the indes entries to a file. This file is sorted, to enable fast disk lookups
+using bianary search. A lookup on disk requires to search every file. 
+Since the entries in the hashed are not sorted, we must sort them somehow
+before we can write them to disk. We do this by adding them to a priority
+queue and then writing the priority queue to disk.
+
+Since we have to search every file and since the files are rather small, we
+want to aggregate / merge several of these smaller files into larger
+files. It's possible to repeat this multiple times to get an aggregation
+hierachy with several aggregation levels. When a file is written to disk, it
+is of aggregation level 0. Several of these level 0 files (say 10) are then
+aggregated into one file of level 1, agein several level 1 files can be aggregated
+into one level 2 file. 
+
+The aggregation thread is responsible to for this aggregation of files. The 
+file_number[level] and file_number_oldest[level] arrays are used to keep track of the
+current files of a given level on disk. file_number_oldest is the oldest file (the
+one with the lowest number) on disk. file_number is the next file number that is 
+not yet written. 
+
+
+
+INDEX THREAD MODEL
+
+In indexing a lot of different threads "collide" 
+
+The CaptureThread will call the addPkt() method. The addPkt() method
+will convert the pcap-header and packet data into one ore more 
+IndexField classes, enqueue these IndexField instances (using 
+IndexQueueEntry classes and the input_q member) for further processing
+and signal the thread maintaining this index, that new data has arrived.
+The work of the CaptureThread is then finished. 
+
+For each Index an index maintainer thread is reponsible for maintaining
+the index.  The implementation of this thread is the run() method. 
+The Index mnt. hread sleeps until it get's signaled that IndexField(s) have
+been queued by the CaptureThread. It will then remove the IndexFields from
+the queue, and store them in the internal hash (using addEntry())and it 
+will also do hash maintance (roatating hashes, filling the priority queue, 
+writing the priority queue to disk). 
+
+The indexAggregationThread is a global thread, that is woken
+up every couple of seconds. This thread will call the aggregate()
+methods of all threads. 
+
+The index maintaining thread calls IndexFiles<T>::writeIndex() to create a new index file
+The aggregation thread calls IndexFiles<T>::aggregate() to aggregate/merge files together.
+Query threads call lookup to search for entries on disk. 
+
+Various QueryThreads may be running. These may call lookupMem() and 
+lookupDisk(). 
+
+
+NOTE: The input_q is used to communicate between the capture thread and
+the index maintainer threads. Since the capture thread is time critical
+the goal is to make the time in which the intput_q lock is held by the
+maintainer thread as short as possible. This is done. 
+But: there may be significant waiting times within the maintainer thread,
+since the maintainer thread may be required to wait for the aggregation 
+thread or for queries to finish. 
+
+
+Index.hh and DiskIndex.hh have excessive comments concerning the locking
+and signaling mechanisms between the various threads. 
+
+
+
+
+LOCAL AND REMOTE CONSOLE / QUERIES
+
+Besides the locale console on the controlling terminal, TM also features 
+a remote console over a tcp network connection. The command language 
+on both consoles is the same. The cmd_parser is used to parse and 
+execute commands. Since the parser is not reentrant (and documentation 
+on how to make the parser and scanner reentrant s**ks like hell) we protect
+the actual parser with locks. The locks are automaticly checked and
+aquired when parse_cmd() is called. 
+
+Queries are also made from one of the consoles. The query specification
+contains the index to search and the specification of the desired "key".
+The index to search is the name returned by the IndexField::getIndexName()
+method. The key is a string. This string is parsed with the 
+IndexField::parseQuery() function. The Indexes class (the class keeping
+all the configured indexes for storage) maps index names to Index<T> class
+instances. 
+
+
+The command language is briefly described in TM_HOWTO
+
+
+
+BROCCOLI 
+
+Haven't looked at this code. [gregpr]
+
+EOF

@@ -1,0 +1,99 @@
+TODOs
+
+* ORDER AND CLEANUP THIS LIST ;-)
+
+FOR THE PAPER
+* Concurrent queries
+* Dynamic Classes. 
+	- Add table containing IPs which should be assigned to different clases
+	- Ignore connections that are already in the conn table. 
+	- cutoff changeable per connection
+
+---
+* do this point properly: Close the gap / race condition: might oversee packets in a query, when
+the packets are moved from mem to disk when the query function changes from
+disk to mem.
+* Query with a timespan: don't search files that are obviously too old.
+* query logging: log with complete query command, query status, etc. 
+* Make use of queryIDs
+* Error handling when opening / closing LogFiles
+* Protect DiskIndex against full disks! 
+* speed up subscriptions to connection4 indexes
+* Add BPF Filter string to queries ? 
+* Investigate capture thread and the connection table. I'm pretty sure there are some
+opportunities for speedups there.
+
+
+* Broccoli: if bro is not running, trying connection in regular
+intervals 
+* Query: append to files instead of overwriting them
+* Handle Queries with syntax errors
+* There's an awful mix of iostreams, Strings, char *, stdout, stderr .... ==> Solve this.
+* Make stats logfile configureable
+* There are heaps of different typedefs for sizes in the Fifos, but none is used
+consistently. 
+* held_bytes / stored_bytes / total_bytes / ... whatever they may be called are
+inconsistend. Some use caplen, some wirelen, some caplen+pcap_header, etc.
+
+Maybe for next relaese / Wishlist / Nice to have
+* test index/queries, esp. conn3
+* fix cmd_parser: cleanup QueryResult and QueryRequest when
+  the parse fails, when the index doesn't exist, etc. pp.
+* Restart TM (after crash or after normal shutdown)
+* Add cmd to show stats (timespan disk, mem, #pkts #bytes
+* Add query to_terminal
+* Add help to cmd parser
+* Thread shutdown
+* Make indexes configurable from config file
+* command 'show index <indexname>' must be changed
+* Syn-Floods
+* broccoli  
+* make broccoli listen
+* speed up disk writes, bypass libpcap, maybe use O_DIRECT, maybe disk writer thread
+* out-of-band error handling for broccoli (generate event??)
+* Error handling when writing to disk (index and fifo). eg. when
+  the disk is full. 
+
+Other TODOs with lower priority
+Queries without pcapnav
+Rotate log file. 
+Do syslog? 
+Update tm_architecture
+DiskIndex: check if key is in file before starting binary search
+Check path for to_file on queries
+What happens when several classes are defined and a query is issued? Will
+	the query result be ordered by timestamp?
+Timespan when issueing a query.
+Errors in query must go to network when using rmtconsole
+Consistent error handling
+Make subscriptions work. How to subscribe indexes other than conn4??
+Cleanup config parser
+Do we really need ConnectionID{2,3}? Shouldn't we put those direcly 
+	in IndexField.cc??
+Split IndexField.{hh,cc} in seperate files?
+Should IndexEntry get a .cc file. It's all inline at the moment.
+Put IndexFileReader in a seperate file and compile it. It's inline now.
+DiskIndex, IndexFile class name ambiguity
+Do something with tm.h
+Decent statistics logs
+Keep track of index entries on disk ? 
+Global vars for configuration
+
+grep FIXME *.cc *.hh *.h *.c
+grep TODO *.cc *.hh *.h *.c
+grep XXX *.cc *.hh *.h *.c
+grep DEBUG *.cc *.hh *.h *.c
+
+
+
+
+
+
+
+per class indexes
+configurable d_t
+per connection classification
+# configurable connection inactivity timeout
+
+cutoff variable per flow
+subscription for connections

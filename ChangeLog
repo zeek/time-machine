@@ -1,0 +1,13 @@
+Most significant changes since the last release:
+
+* Many bugfixes and performance improvements.
+	* New connection table code (with less locking)
+	* New index hash tables
+	* Disk write performance
+* Coupling with IDS through broccoli.
+* Support for dynamic classes: The TM can be instructed to (temporarily) 
+    assign a particular host to a different storage class (e.g., if
+	an IDS detected suspicious behavior from that host)
+* Better logging facilities.
+* Subscription support for all indexes.
+

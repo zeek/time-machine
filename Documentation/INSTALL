@@ -1,0 +1,40 @@
+#$Id$
+
+# In theory we use autotools to build the timemachine. Unfortunaly 
+# the autotools aren't completely configured, so maybe you need to
+# handtune the build process. 
+#
+#
+# The timemachine needs:
+# - libpcap
+# - libpcapnav
+# - libpcre, esp. pcrecpp
+# - libpthreads
+# - libreadline
+#
+#optional:
+# - broccoli
+
+
+# Configuration/Build options:
+# If some of the libs above are installed in non-standard directories,
+# you must specify them using LDFLAGS and CXXFLAGS
+# LDFLAGS='-L/path/to/libraries/lib'
+# CXXFLAGS='-I/path/to/libraries/include'
+
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+
+# Configure and compile:
+#	./configure
+#	make
+# Intresting options for configure: 
+#     --disable-broccoli  .... buidl without broccoli support
+#     --enable-debug
+#
+# I suggest you run the timemachine directly from the build directory
+#
+# see Documentation/TUNING on how to get good performance from the
+# timemachine
+#
+# ATTENTION FreeBSD Users: You really want to read the MEMORY
+# ALLOCATOR SECTION of the the TUNING file.

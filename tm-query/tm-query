@@ -1,0 +1,137 @@
+#! /usr/bin/env python
+#
+# A script to issue queries to the TM. 
+#
+# Robin Sommer <robin@icir.org>
+
+import optparse
+import sys
+import re
+import time
+
+import broccoli
+
+Name = "tm-query"
+Version = 0.2
+
+def checkIP(ip):
+    if not re.match("^[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?$", ip):
+        optparser.error("cannot parse IP address %s" % ip)
+
+optparser = optparse.OptionParser(usage="%s [Options] <tm-host>[:port] [<trace-file>|<ip>]" % Name)
+optparser.add_option("-d", "--debug", help="enable debug output", action="store_true", dest="debug", default=False)
+optparser.add_option("-i", "--ip", help="query for all traffic involving IP address", action="store", type="string", dest="host", default=None)
+optparser.add_option("-c", "--connection", help="query for the traffic of connection <ip1>:<port1>-<ip2>:<port2>", action="store", type="string", dest="conn", default=None)
+optparser.add_option("-u", "--udp", help="query for a UDP flow", action="store_const", dest="type", const="udp")
+optparser.add_option("-t", "--tcp", help="query for a TCP connection", action="store_const", dest="type", const="tcp")
+optparser.add_option("-m", "--mem", help="restrict query to in-memory data", action="store_true", dest="mem", default=False)
+optparser.add_option("-T", "--time", help="restrict time window of query (e.g., 5m, 7h, 11d)", action="store", type="string", dest="time", default=None)
+optparser.add_option("-v", "--version", help="print version", action="store_true", dest="version", default=False)
+optparser.add_option("-s", "--storage-class", help="set dynamic storage class for IP address", action="store", type="string", dest="storage", default=None)
+
+(Options, args) = optparser.parse_args()
+
+if len(args) != 2:
+    optparser.error("wrong number of arguments")
+
+tmhost = args[0]
+
+file = args[1]
+
+if tmhost.find(":") < 0:
+    tmhost += ":47757"
+
+if Options.version:
+    print "%s %s" % (Name, Version)
+    sys.exit(0)
+
+if not Options.conn and not Options.host and not Options.storage:
+    optparser.error("either --ip or --conn or --storage-class must be given")
+
+if Options.conn and not Options.type:
+    optparser.error("either --tcp or --udp must be given when querying for a connection")
+
+if Options.time:
+
+    factor = 1
+    t = Options.time
+    
+    for (u, f) in [("s", 1), ("m", 60), ("h", 60 * 60), ("d", 60 * 60 * 24)]:
+        if t.endswith(u):
+            t = t[:-1]
+            factor = f
+            break
+    
+    try:
+        t = int(t)
+        t *= factor
+    except:
+        optparser.error("cannot parse time specification")
+        
+    Options.time = t
+    
+      
+if Options.host:
+    checkIP(Options.host)
+    index = "ip"
+    key = Options.host
+    
+if Options.conn:
+    
+    try:
+        conn = Options.conn.replace(":", " ").replace("-", " ").replace(">", " ")
+        (ip1, port1, ip2, port2) = conn.split()
+
+        checkIP(ip1)
+        checkIP(ip2)
+        
+        port1 = int(port1)
+        port2 = int(port2)
+        
+    except ValueError:
+        optparser.error("cannot parse connection specification")
+
+    index = "connection4"
+    key = "%s %s:%d %s:%d" % (Options.type, ip1, port1, ip2, port2)
+
+if Options.storage:
+    checkIP(file)
+    query = "set_dyn_class %s %s" % (file, Options.storage)
+    
+else:
+    query = "query to_file \"%s\" index %s \"%s\" " % (file, index, key)
+
+    if Options.time:
+        query += "start %d.0 end 9876543210" % (time.time() - Options.time)
+
+    if Options.mem:
+        query += "mem_only"
+    
+if Options.debug:
+    print >>sys.stderr, "Query:", query
+
+    
+    
+Done = False
+    
+@broccoli.event
+def cmd_done():
+    global Done 
+    Done = True
+
+try:     
+    bc = broccoli.Connection(tmhost)
+except IOError:
+    print >>sys.stderr, "cannot connect to time-machine at %s" % tmhost
+    sys.exit(1)
+
+bc.send("TimeMachine::command", query)
+
+while not Done:
+    bc.processInput()
+        
+        
+        
+    
+
+    
