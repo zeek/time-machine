@@ -1,6 +1,5 @@
-/*
 Timemachine
-Copyright (c) 2005-2007 Technische Universitaet Muenchen,
+Copyright (c) 2005-2013 Technische Universitaet Muenchen,
                         Technische Universitaet Berlin,
                         The Regents of the University of California
 All rights reserved.
@@ -35,5 +34,3 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 Hash Function (c) by Bob Jenkins, May 2006, Public Domain.
-ptmalloc (c) by Wolfram Gloger (see ptmalloc2/COPYRIGHT for details)
-*/
