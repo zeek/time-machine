@@ -64,8 +64,6 @@ set(timemachine_SRCS
     rmtconsole.cc
     tm.h
     types.h
-    util.cc
-    util.h
 )
 
 set(tm_query_benchmark_SRCS

@@ -135,7 +135,7 @@ cmd:
 	}
 	| TOK_HELP {
 		if (cmd_parser_outfp) {
-			fprintf(cmd_parser_outfp, "Online help not yet implemented. See doc/TM_HOWTO\n");
+			fprintf(cmd_parser_outfp, "Online help not yet implemented. See doc/HOWTO\n");
 		}
 	}
 /*
@@ -256,7 +256,6 @@ cmd:
 		if(cmd_parser_outfp)
 			fprintf(cmd_parser_outfp, "BRO_CONNECT  <string> NOT IMPLEMENTED\n");
 		free($2);
-	      
 	}
 // re-establish bro connection
 	| TOK_BRO_CONNECT {

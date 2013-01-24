@@ -1,5 +1,3 @@
-/* $Id: jhash3.h 112 2006-11-11 04:30:51Z gregor $ */
-
 #ifndef JHASH3_H
 #define JHASH3_H
 /*

@@ -275,12 +275,6 @@ all the configured indexes for storage) maps index names to Index<T> class
 instances. 
 
 
-The command language is briefly described in TM_HOWTO
-
-
-
-BROCCOLI 
-
-Haven't looked at this code. [gregpr]
+The command language is briefly described in HOWTO
 
 EOF
