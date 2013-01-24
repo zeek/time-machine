@@ -44,7 +44,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "tm.h"
 #include "config.h"
 
-#ifdef HAVE_LIBBROCCOLI
+#ifdef HAVE_BROCCOLI
 #include <broccoli.h>
 #endif
 
@@ -137,7 +137,7 @@ private:
 };
 
 
-#ifdef HAVE_LIBBROCCOLI
+#ifdef HAVE_BROCCOLI
 
 struct broccoli_worker_thread_data;
 

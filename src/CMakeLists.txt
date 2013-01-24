@@ -9,11 +9,12 @@ bison_target(CONFParser conf_parser.yy ${CMAKE_CURRENT_BINARY_DIR}/conf_parser.c
              HEADER ${CMAKE_CURRENT_BINARY_DIR}/conf_parser.h
              VERBOSE ${CMAKE_CURRENT_BINARY_DIR}/conf_parser.output
              COMPILE_FLAGS "--debug")
-flex_target(CMDScanner conf_scanner.ll ${CMAKE_CURRENT_BINARY_DIR}/conf_scanner.cc)
+flex_target(CONFScanner conf_scanner.ll ${CMAKE_CURRENT_BINARY_DIR}/conf_scanner.cc)
 add_flex_bison_dependency(CONFScanner CONFParser)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-                    ${CMAKE_CURRENT_BINARY_DIR})
+                    ${CMAKE_CURRENT_BINARY_DIR}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 set(timemachine_SRCS
     ${BISON_CMDParser_INPUT}
@@ -30,8 +31,8 @@ set(timemachine_SRCS
     Connection.hh
     Connections.cc
     Connections.hh
-    DiskIndex.cc
-    DiskIndex.hh
+    #DiskIndex.cc
+    #DiskIndex.hh
     DynClass.cc
     DynClass.hh
     Fifo.cc
@@ -42,9 +43,9 @@ set(timemachine_SRCS
     FifoMem.hh
     Hash.cc
     Hash.hh
-    Index.cc
-    Index.hh
-    IndexEntry.hh
+    #Index.cc
+    #Index.hh
+    #IndexEntry.hh
     IndexField.cc
     IndexField.hh
     IndexHash.cc
@@ -57,23 +58,27 @@ set(timemachine_SRCS
     Queue.hh
     Storage.cc
     Storage.hh
-    broSendPkts.cc
-    bropipe.cc
-    client.cc
-    conf.h
-    jhash3.h
+    #broSendPkts.cc
+    #bropipe.cc
+    #client.cc
+    #conf.h
+    #jhash3.h
     main.cc
     packet_headers.h
-    querybm.cc
+    #querybm.cc
     rmtconsole.cc
     tm.h
-    tm_q.cc
+    #tm_q.cc
     types.h
-    util.cc
-    util.h
+    #util.cc
+    #util.h
 )
 
+add_subdirectory(re2)
+
 add_executable(timemachine ${timemachine_SRCS})
+
+target_link_libraries(timemachine ${CMAKE_THREAD_LIBS_INIT} ${PCAP_LIBRARY} ${Readline_LIBRARY} re2Static)
 
 if (NOT TimeMachine_SKIP_INSTALL)
     install(TARGETS timemachine DESTINATION bin)

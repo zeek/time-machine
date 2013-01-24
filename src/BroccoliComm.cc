@@ -36,7 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BroccoliComm.hh"
 
-#ifdef HAVE_LIBBROCCOLI
+#ifdef HAVE_BROCCOLI
 
 #include <errno.h>
 #include <broccoli.h>

@@ -1,38 +1,4 @@
-/*
-Timemachine
-Copyright (c) 2006 Technische Universitaet Muenchen,
-                   Technische Universitaet Berlin,
-                   The Regents of the University of California
-All rights reserved.
-
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in the
-   documentation and/or other materials provided with the distribution.
-3. Neither the names of the copyright owners nor the names of its
-   contributors may be used to endorse or promote products derived from
-   this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED
-WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
 /* cmd_parser.yy         (emacs mode for this is --*-indented-text-*--)
- * $Id: cmd_parser.yy 251 2009-02-04 08:14:24Z gregor $
  *
  * Parse online commands.
  *
@@ -60,7 +26,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	#include "tm.h"
    	#include "config.h"
 
-	#ifdef HAVE_LIBBROCCOLI
+	#ifdef HAVE_BROCCOLI
 	#include "BroccoliComm.hh"
 	#endif
 
@@ -295,12 +261,12 @@ cmd:
 // re-establish bro connection
 	| TOK_BRO_CONNECT {
 //		printf("BRO_CONNECT\n");
-#ifdef HAVE_LIBBROCCOLI
+#ifdef HAVE_BROCCOLI
 		broccoli_start_worker_thread(-1);
 #else
 		if(cmd_parser_outfp) {
-			fprintf(cmd_parser_outfp,
-				PACKAGE " WAS COMPILED WITHOUT BROCCOLI SUPPORT\n");
+			//fprintf(cmd_parser_outfp,
+			//	PACKAGE " WAS COMPILED WITHOUT BROCCOLI SUPPORT\n");
 		}
 #endif
 	}
@@ -407,7 +373,7 @@ queryspec_key:
 
 queryresult: TOK_FEED TOK_ID TOK_TAG TOK_ID {
 		/* TODO: identify bc by $2 */
-#ifdef HAVE_LIBBROCCOLI
+#ifdef HAVE_BROCCOLI
 		if (q_res != NULL) {
 			cmderror("query result object already exists");
 		}
@@ -418,8 +384,8 @@ queryresult: TOK_FEED TOK_ID TOK_TAG TOK_ID {
 		}
 #else
 		if(cmd_parser_outfp) {
-			fprintf(cmd_parser_outfp,
-				PACKAGE " was compiled without broccoli support\n");
+			//fprintf(cmd_parser_outfp,
+			//	PACKAGE " was compiled without broccoli support\n");
 		}
 		q_res=NULL;
 #endif

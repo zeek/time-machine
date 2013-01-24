@@ -1,39 +1,3 @@
-/*
-Timemachine
-Copyright (c) 2006 Technische Universitaet Muenchen,
-                   Technische Universitaet Berlin,
-                   The Regents of the University of California
-All rights reserved.
-
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in the
-   documentation and/or other materials provided with the distribution.
-3. Neither the names of the copyright owners nor the names of its
-   contributors may be used to endorse or promote products derived from
-   this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED
-WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-// $Id: IndexField.cc 251 2009-02-04 08:14:24Z gregor $
-//
 #ifndef INDEXFIELD_CC
 #define INDEXFIELD_CC
 
@@ -74,12 +38,12 @@ IndexField::IndexField(void *p) {
  ******************************************************************************/
 // Static Member initialization
 std::string IPAddress::pattern = "\\s*" + pattern_ip + "\\s*";
-pcrecpp::RE IPAddress::re(IPAddress::pattern);
+RE2 IPAddress::re(IPAddress::pattern);
 
 IndexField* IPAddress::parseQuery(const char *query) {
 	std::string ip;
 
-	if (!re.FullMatch(query, &ip))
+	if (!RE2::FullMatch(query, re, &ip))
 		return NULL;
 
 	return new IPAddress(ip.c_str());
@@ -160,7 +124,7 @@ void DstIPAddress::getBPFStr(char *str, int max_str_len) const {
  ******************************************************************************/
 // Static Member initialization
 std::string Port::pattern = "\\s*(\\d+)\\s*";
-pcrecpp::RE Port::re(Port::pattern);
+RE2 Port::re(Port::pattern);
 
 std::list<Port*> Port::genKeys(const u_char* packet) {
 	std::list<Port*> li;
@@ -172,7 +136,7 @@ std::list<Port*> Port::genKeys(const u_char* packet) {
 IndexField* Port::parseQuery(const char *query) {
 	unsigned port;
 
-	if (!re.FullMatch(query, &port))
+	if (!RE2::FullMatch(query, re, &port))
 		return NULL;
 
 	/*
@@ -264,7 +228,7 @@ void DstPort::getBPFStr(char *str, int max_str_len) const {
 // Static Member initialization
 std::string ConnectionIF4::pattern_connection4 = "\\s*(\\w+)\\s+"
 	+ pattern_ipport + "\\s+" + pattern_ipport + "\\s*";
-pcrecpp::RE ConnectionIF4::re(ConnectionIF4::pattern_connection4);
+RE2 ConnectionIF4::re(ConnectionIF4::pattern_connection4);
 
 std::list<ConnectionIF4*> ConnectionIF4::genKeys(const u_char* packet) {
 	std::list<ConnectionIF4*> li;
@@ -279,7 +243,7 @@ IndexField* ConnectionIF4::parseQuery(const char *query) {
 	proto_t proto;
 
 
-	if (!re.FullMatch(query, &protostr, &src_ip, &src_port, &dst_ip, &dst_port))
+	if (!RE2::FullMatch(query, re, &protostr, &src_ip, &src_port, &dst_ip, &dst_port))
 		return NULL;
 
 	/*
@@ -332,7 +296,7 @@ void ConnectionIF4::getBPFStr(char *str, int max_str_len) const {
 std::string ConnectionIF3::pattern_connection3 = "\\s*(\\w+)\\s+"
 		+ pattern_ip + "\\s+" + pattern_ip + ":"
 		+ "(\\d+)\\s*";
-pcrecpp::RE ConnectionIF3::re(ConnectionIF3::pattern_connection3);
+RE2 ConnectionIF3::re(ConnectionIF3::pattern_connection3);
 
 std::list<ConnectionIF3*>
 ConnectionIF3::genKeys(const u_char* packet) {
@@ -347,7 +311,7 @@ IndexField* ConnectionIF3::parseQuery(const char *query) {
 	unsigned port;
 	proto_t proto;
 	
-	if (!re.FullMatch(query, &protostr, &src_ip, &dst_ip, &port))
+	if (!RE2::FullMatch(query, re, &protostr, &src_ip, &dst_ip, &port))
 		return NULL;
 
 	/*
@@ -386,7 +350,7 @@ void ConnectionIF3::getBPFStr(char *str, int max_str_len) const {
 // Static Member initialization
 std::string ConnectionIF2::pattern_connection2 = 
 		"\\s*" + pattern_ip + "\\s+" + pattern_ip + "\\s*";
-pcrecpp::RE ConnectionIF2::re(ConnectionIF2::pattern_connection2);
+RE2 ConnectionIF2::re(ConnectionIF2::pattern_connection2);
 
 std::list<ConnectionIF2*>
 ConnectionIF2::genKeys(const u_char* packet) {
@@ -399,7 +363,7 @@ ConnectionIF2::genKeys(const u_char* packet) {
 IndexField* ConnectionIF2::parseQuery(const char *query) {
 	std::string src_ip, dst_ip;
 	
-	if (!re.FullMatch(query, &src_ip, &dst_ip))
+	if (!RE2::FullMatch(query, re, &src_ip, &dst_ip))
 		return NULL;
 
 	/*

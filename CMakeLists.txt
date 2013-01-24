@@ -13,6 +13,7 @@ FindRequiredPackage(FLEX)
 FindRequiredPackage(BISON)
 FindRequiredPackage(PCAP)
 FindRequiredPackage(Broccoli)
+FindRequiredPackage(Readline)
 
 set(USE_PCAPNAV false)
 #find_package(PCAPNav)

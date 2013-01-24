@@ -1,39 +1,3 @@
-/*
-Timemachine
-Copyright (c) 2006 Technische Universitaet Muenchen,
-                   Technische Universitaet Berlin,
-                   The Regents of the University of California
-All rights reserved.
-
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in the
-   documentation and/or other materials provided with the distribution.
-3. Neither the names of the copyright owners nor the names of its
-   contributors may be used to endorse or promote products derived from
-   this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED
-WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-// $Id: FifoDisk.cc 269 2011-07-20 17:46:47Z gregor $
-//
 #include <assert.h>
 #include <unistd.h>
 #include <pcap.h>
@@ -238,7 +202,7 @@ void FifoDiskFile::addPkt(pkt_ptr p) {
 
 uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet *set) {
 	uint64_t matches = 0;
-	unsigned scanned_packets=0;
+	uint64_t scanned_packets=0;
 #ifdef HAVE_LIBPCAPNAV
 	ConnectionID4 *c_id;
 	struct timeval tv1, tv2;
@@ -347,7 +311,7 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
 		}
 	}
 	//DEBUG
-	tmlog(TM_LOG_DEBUG, "query", "%d FifoDiskFile::query [HAVE_LIBPCAPNAV] finished; matches %u; examined %u", 
+	tmlog(TM_LOG_DEBUG, "query", "%d FifoDiskFile::query [HAVE_LIBPCAPNAV] finished; matches %" PRIu64 "; examined %" PRId64, 
 			qres->getQueryID(), (unsigned)matches, scanned_packets);
 
 	pcapnav_close(ph);
@@ -384,7 +348,7 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
 		} while (rc==1);
 	}
 	//DEBUG
-	fprintf(stderr, "FifoDiskFile::query [HAVE_LIBPCAPNAV] finished; matches %u\n", matches);
+	fprintf(stderr, "FifoDiskFile::query [HAVE_LIBPCAPNAV] finished; matches %" PRIu64 "\n", matches);
 #endif
 	return matches;
 }

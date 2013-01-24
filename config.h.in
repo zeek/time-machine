@@ -1,0 +1,75 @@
+/* Define if you have the <inttypes.h> header file. */
+#cmakedefine HAVE_INTTYPES_H
+
+/* Define if you have the Bro's Broccoli library. */
+#cmakedefine HAVE_BROCCOLI
+
+/* Define if you have the `pcap' library (-lpcap). */
+#cmakedefine HAVE_LIBPCAP
+
+/* Define if you have libPCAPNav. */
+#cmakedefine USE_PCAPNAV
+
+/* Define if you have the `pcre' library (-lpcre). */
+#cmakedefine HAVE_LIBPCRE
+
+/* Define if you have the `pcrecpp' library (-lpcrecpp). */
+#cmakedefine HAVE_LIBPCRECPP
+
+/* Define if you have the `pthread' library (-lpthread). */
+#cmakedefine HAVE_LIBPTHREAD
+
+/* Define if you have the <memory.h> header file. */
+#cmakedefine HAVE_MEMORY_H
+
+/* Define if you have the <pcapnav.h> header file. */
+#cmakedefine HAVE_PCAPNAV_H
+
+/* Define if you have the <pcap.h> header file. */
+#cmakedefine HAVE_PCAP_H
+
+/* Define if you have the <pcrecpp.h> header file. */
+#cmakedefine HAVE_PCRECPP_H
+
+/* Define if you have the <pthread.h> header file. */
+#cmakedefine HAVE_PTHREAD_H
+
+/* Define if you have the <readline/readline.h> header file. */
+#cmakedefine HAVE_READLINE_READLINE_H
+
+/* Define if you have the <stdint.h> header file. */
+#cmakedefine HAVE_STDINT_H
+
+/* Define if you have the <stdlib.h> header file. */
+#cmakedefine HAVE_STDLIB_H
+
+/* Define if you have the <strings.h> header file. */
+#cmakedefine HAVE_STRINGS_H
+
+/* Define if you have the <string.h> header file. */
+#cmakedefine HAVE_STRING_H
+
+/* Define if you have the <sys/stat.h> header file. */
+#cmakedefine HAVE_SYS_STAT_H
+
+/* Define if you have the <sys/types.h> header file. */
+#cmakedefine HAVE_SYS_TYPES_H
+
+/* Define if you have the <unistd.h> header file. */
+#cmakedefine HAVE_UNISTD_H
+
+/* Define if your C compiler doesn't accept -c and -o together. */
+#cmakedefine NO_MINUS_C_MINUS_O
+
+/* The size of `void*', as computed by sizeof. */
+#cmakedefine SIZEOF_VOIDP
+
+/* Define if you have the ANSI C header files. */
+#cmakedefine STDC_HEADERS
+
+/* Version number of package */
+#define VERSION "@VERSION@"
+
+/* Define if `lex' declares `yytext' as a `char *' by default, not a
+   `char[]'. */
+#cmakedefine YYTEXT_POINTER

@@ -41,7 +41,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FifoDisk.hh"
 
-#ifdef HAVE_LIBBROCCOLI
+#ifdef HAVE_BROCCOLI
 #include <broccoli.h>
 #endif
 
@@ -139,7 +139,7 @@ std::string QueryResultFile::getStr() {
 }
 
 
-#ifdef HAVE_LIBBROCCOLI
+#ifdef HAVE_BROCCOLI
 
 #include "BroccoliComm.hh"
 
@@ -168,6 +168,6 @@ std::string QueryResultBroConn::getStr() {
 	return r;
 }
 
-#endif // HAVE_LIBBROCCOLI
+#endif // HAVE_BROCCOLI
 
 

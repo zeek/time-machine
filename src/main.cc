@@ -1,41 +1,3 @@
-/*
-Timemachine
-Copyright (c) 2006 Technische Universitaet Muenchen,
-                   Technische Universitaet Berlin,
-                   The Regents of the University of California
-All rights reserved.
-
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in the
-   documentation and/or other materials provided with the distribution.
-3. Neither the names of the copyright owners nor the names of its
-   contributors may be used to endorse or promote products derived from
-   this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED
-WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-/* main.cc
- * $Id: main.cc 269 2011-07-20 17:46:47Z gregor $
- *
- */
-
 #include "config.h"
 
 #include <stdio.h>
@@ -67,7 +29,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #include <sys/ioctl.h>
 
-#ifdef HAVE_LIBBROCCOLI
+#ifdef HAVE_BROCCOLI
 #include "BroccoliComm.hh"
 #endif
 
@@ -275,7 +237,7 @@ tmexit() {
 	pthread_join(index_aggregation_thread_tid, NULL);
 	tmlog(TM_LOG_DEBUG, "main",  "Aggreagation thread i DEAD.");
 
-#ifdef HAVE_LIBBROCCOLI
+#ifdef HAVE_BROCCOLI
 	broccoli_exit();
 #endif
 
@@ -567,7 +529,7 @@ void *statisticslog_thread(void* arg) {
 
 //		log_file->log("stats_queries", "%u query subscriptions",
 //					  storage->getConns().getSubscriptions());
-#ifdef HAVE_LIBBROCCOLI
+#ifdef HAVE_BROCCOLI
 //		log_file->log("stats_broccoli", "peak receive queue %d bytes",
 //					  broccoli_recv_q_peak);
 		broccoli_recv_q_peak=0;
@@ -689,10 +651,10 @@ main(int argc, char** argv) {
 	}
 
 	log_file=new LogFile(conf_main_logfile_name);
-	tmlog("main", "timemachine version %s", PACKAGE_VERSION);
+	tmlog("main", "timemachine version %s", VERSION);
 
 	if (!conf_main_daemon)
-		printf("timemachine version %s\n", PACKAGE_VERSION);
+		printf("timemachine version %s\n", VERSION);
 	if (conf_main_daemon && conf_main_console) {
 		tmlog(TM_LOG_WARN, "main", "Cannot have a console when in daemon mode. Deactivating console.");
 		conf_main_console = 0;
@@ -803,7 +765,7 @@ main(int argc, char** argv) {
 		}
 	}
 
-#ifdef HAVE_LIBBROCCOLI
+#ifdef HAVE_BROCCOLI
 	broccoli_init();
 #else
    	if ( conf_main_bro_listen )
