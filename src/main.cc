@@ -29,13 +29,11 @@
 #endif
 #include <sys/ioctl.h>
 
-#ifdef HAVE_BROCCOLI
+#ifdef USE_BROCCOLI
 #include "BroccoliComm.hh"
 #endif
 
-#ifdef HAVE_LIBPCAPNAV
-#include <pcapnav.h>
-#endif
+#include "pcapnav/pcapnav.h"
 
 #include "conf.h"
 #include "types.h"
@@ -233,11 +231,11 @@ tmexit() {
 	// Cancel aggregation thread 
 	tmlog(TM_LOG_DEBUG, "main",  "Canceling aggreagation thread");
 	pthread_cancel(index_aggregation_thread_tid);
-	tmlog(TM_LOG_DEBUG, "main",  "Joining aggreagation thread");
+	tmlog(TM_LOG_DEBUG, "main",  "Joining aggregation thread");
 	pthread_join(index_aggregation_thread_tid, NULL);
-	tmlog(TM_LOG_DEBUG, "main",  "Aggreagation thread i DEAD.");
+	tmlog(TM_LOG_DEBUG, "main",  "Aggregation thread i DEAD.");
 
-#ifdef HAVE_BROCCOLI
+#ifdef USE_BROCCOLI
 	broccoli_exit();
 #endif
 
@@ -337,7 +335,7 @@ void *cli_console_thread(void *arg) {
  */
 void *index_aggregation_thread(void *arg) {
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-	tmlog(TM_LOG_NOTE, "main", "Index Aggregation Thread Started");
+	tmlog(TM_LOG_NOTE, "main", "Index aggregation thread started");
 	while (1) {
 		sleep(2);
 		storage->aggregateIndexFiles();
@@ -529,7 +527,7 @@ void *statisticslog_thread(void* arg) {
 
 //		log_file->log("stats_queries", "%u query subscriptions",
 //					  storage->getConns().getSubscriptions());
-#ifdef HAVE_BROCCOLI
+#ifdef USE_BROCCOLI
 //		log_file->log("stats_broccoli", "peak receive queue %d bytes",
 //					  broccoli_recv_q_peak);
 		broccoli_recv_q_peak=0;
@@ -578,7 +576,7 @@ void *statisticslog_thread(void* arg) {
  */
 
 void usage() {
-	fprintf(stderr, "usage: tm [-i interface] [-r file] [-f filter] [-c config file]\n");
+	fprintf(stderr, "usage: timemachine[-i interface] [-r file] [-f filter] [-c config file]\n");
 	exit(1);
 }
 
@@ -590,12 +588,8 @@ void usage() {
 
 int
 main(int argc, char** argv) {
-	const char *conffile="tm.conf";
-
+	const char *conffile="timemachine.conf";
 	struct sigaction exit_action;
-
-
-
 	int i;
 	inet_aton("127.0.0.1", &conf_main_rmtconsole_listen_addr);
 	inet_aton("127.0.0.1", &conf_main_bro_listen_addr);
@@ -651,10 +645,10 @@ main(int argc, char** argv) {
 	}
 
 	log_file=new LogFile(conf_main_logfile_name);
-	tmlog("main", "timemachine version %s", VERSION);
+	tmlog("main", "TimeMachine version %s", VERSION);
 
 	if (!conf_main_daemon)
-		printf("timemachine version %s\n", VERSION);
+		printf("TimeMachine version %s\n", VERSION);
 	if (conf_main_daemon && conf_main_console) {
 		tmlog(TM_LOG_WARN, "main", "Cannot have a console when in daemon mode. Deactivating console.");
 		conf_main_console = 0;
@@ -698,10 +692,7 @@ main(int argc, char** argv) {
 	 */
 
 
-
-#ifdef HAVE_LIBPCAPNAV
 	pcapnav_init();
-#endif
 
 	// Initialise cmd_parser
 	cmd_parser_init();
@@ -748,7 +739,7 @@ main(int argc, char** argv) {
 	if (conf_main_rmtconsole) {
 		i=pthread_create(&rmtconsole_listen_thread_tid, NULL, rmtconsole_listen_thread, NULL);
 		if (i) {
-			tmlog(TM_LOG_ERROR, "main", "Could not start rmtconsole listen  thread.\n");
+			tmlog(TM_LOG_ERROR, "main", "Could not start remote console listen thread.\n");
 			exit(1);
 		}
 	}
@@ -765,17 +756,17 @@ main(int argc, char** argv) {
 		}
 	}
 
-#ifdef HAVE_BROCCOLI
+#ifdef USE_BROCCOLI
 	broccoli_init();
 #else
-   	if ( conf_main_bro_listen )
+	if ( conf_main_bro_listen )
 		tmlog(TM_LOG_WARN, "main", "Broccoli support not compiled in.\n");
 #endif
 
 		i=pthread_create(&statisticslog_thread_tid, NULL,
 						 statisticslog_thread, &conf_main_log_interval);
 		if (i) {
-			tmlog(TM_LOG_ERROR, "main", "Could not start statisticslog thread.\n");
+			tmlog(TM_LOG_ERROR, "main", "Could not start statistics log thread.\n");
 			exit(1);
 		};
 

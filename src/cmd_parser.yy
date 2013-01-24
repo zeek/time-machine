@@ -24,9 +24,9 @@
 	#include <string>
 
 	#include "tm.h"
-   	#include "config.h"
+	#include "config.h"
 
-	#ifdef HAVE_BROCCOLI
+	#ifdef USE_BROCCOLI
 	#include "BroccoliComm.hh"
 	#endif
 
@@ -135,7 +135,7 @@ cmd:
 	}
 	| TOK_HELP {
 		if (cmd_parser_outfp) {
-			fprintf(cmd_parser_outfp, "Online help not yet implemented. See Documentation/TM_HOWTO\n");
+			fprintf(cmd_parser_outfp, "Online help not yet implemented. See doc/TM_HOWTO\n");
 		}
 	}
 /*
@@ -261,12 +261,12 @@ cmd:
 // re-establish bro connection
 	| TOK_BRO_CONNECT {
 //		printf("BRO_CONNECT\n");
-#ifdef HAVE_BROCCOLI
+#ifdef USE_BROCCOLI
 		broccoli_start_worker_thread(-1);
 #else
 		if(cmd_parser_outfp) {
-			//fprintf(cmd_parser_outfp,
-			//	PACKAGE " WAS COMPILED WITHOUT BROCCOLI SUPPORT\n");
+			fprintf(cmd_parser_outfp,
+			        "TIMEMACHINE WAS COMPILED WITHOUT BROCCOLI SUPPORT\n");
 		}
 #endif
 	}
@@ -373,7 +373,7 @@ queryspec_key:
 
 queryresult: TOK_FEED TOK_ID TOK_TAG TOK_ID {
 		/* TODO: identify bc by $2 */
-#ifdef HAVE_BROCCOLI
+#ifdef USE_BROCCOLI
 		if (q_res != NULL) {
 			cmderror("query result object already exists");
 		}
@@ -384,8 +384,8 @@ queryresult: TOK_FEED TOK_ID TOK_TAG TOK_ID {
 		}
 #else
 		if(cmd_parser_outfp) {
-			//fprintf(cmd_parser_outfp,
-			//	PACKAGE " was compiled without broccoli support\n");
+			fprintf(cmd_parser_outfp,
+			        "TimeMachine was compiled without broccoli support\n");
 		}
 		q_res=NULL;
 #endif

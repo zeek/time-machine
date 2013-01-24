@@ -2,7 +2,7 @@ project(TimeMachine C CXX)
 cmake_minimum_required(VERSION 2.6.3 FATAL_ERROR)
 include(cmake/CommonCMakeConfig.cmake)
 
-file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" TIMEMACHINE_VERSION LIMIT_COUNT 1)
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" VERSION LIMIT_COUNT 1)
 
 ########################################################################
 ## Dependency Configuration
@@ -12,11 +12,17 @@ include(FindRequiredPackage)
 FindRequiredPackage(FLEX)
 FindRequiredPackage(BISON)
 FindRequiredPackage(PCAP)
-FindRequiredPackage(Broccoli)
 FindRequiredPackage(Readline)
 
-set(USE_PCAPNAV false)
-#find_package(PCAPNav)
+# Optional Dependencies
+
+set(USE_BROCCOLI false)
+find_package(Broccoli)
+if (BROCCOLI_FOUND)
+    set(USE_BROCCOLI true)
+    include_directories(BEFORE ${Broccoli_INCLUDE_DIR})
+    list(APPEND OPTLIBS ${Broccoli_LIBRARY})
+endif ()
 
 if (MISSING_PREREQS)
     foreach (prereq ${MISSING_PREREQ_DESCS})
@@ -63,8 +69,7 @@ message(
     "\nCXXFLAGS:          ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${BuildType}}"
     "\nCPP:               ${CMAKE_CXX_COMPILER}"
     "\n"
-    "\nBroccoli:           ${HAVE_BROCCOLI}"
-    "\n"
+    "\nBroccoli:          ${USE_BROCCOLI}"
     "\n================================================================\n"
 )
 

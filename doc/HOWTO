@@ -1,19 +1,13 @@
-$Id: TM_HOWTO 267 2011-07-17 17:26:21Z gregor $
-
-# vim: expandtab
-
-Also have a look at the TM's homepage and at the papers in this
-directory. They give a good idea of what one can do with a
-Time Machine
-
-TIME MACHINE CONFIGURATION
+=========================
+TimeMachine Configuration
+=========================
 
 The Time Machine is customized by a configuration file which contains
 a number of user configuration options.  This includes general options
 such as logfile names, capture device settings as well as the
 configuration of storage classes with the respective parameters.
 
-By default, the configuration file is called `tm.conf' and is read
+By default, the configuration file is called `timemachine.conf' and is read
 from the current working directory.  This can be overridden by the -c
 command line option (see TIME MACHINE COMMAND LINE OPTIONS section
 below).
@@ -21,18 +15,13 @@ below).
 The configuration file is structured in sections.  Options for a
 section are grouped by curly brackets and are separated by semicolons.
 There is exactly one main section, and a number of class configuration
-sections.  For better orientation, see the example tm.conf file in the
-TM package.
-
-The indexes are currently NOT configureable through the config file.
-Currently connection4, connection3, connection2 and ip indexes are 
-defined and configured. If you want to change this edit Storage.cc
-and search for 'INDEX CONFIGURATION'
-
+sections.  For better orientation, see the example timemachine.conf file 
+in the timemachine package.
 
 The configuration sections and options are as follows.
 
-* main section
+main section
+************
 
   General settings for the Time Machine. The following options are available
   in the main section:
@@ -52,19 +41,10 @@ The configuration sections and options are as follows.
     evaluated before any classification takes place.  It is specified in
     tcpdump(1) format.
 
-  bro_connect_str "<hostname>:<port>"
-    DEPRECATED
-    Instructs the Time Machine to connect to a Bro running on <hostname>,
-    TCP port <port> via the Bro communication protocol. The Bro connection
-    is established by the Time Machine upon TM startup. TM uses the
-    Broccoli library for communcation with Bro.
-    This option is deprecated. The new method is that the TM listens for 
-    incomming connections from Bro. See the bro_listen_* options
-
   console 0|1
     Determine whether a command line interface should be displayed on the
     controlling terminal of the tm process.  This CLI can be used to issue
-    TM commands (see below).
+    timemachine commands (see below).
 
   daemon 0|1
     Run the timemachine as a daemon in background mode. Incompatible with
@@ -72,11 +52,11 @@ The configuration sections and options are as follows.
 
   workdir "<path>"
     Determine the working directory where all class storage files and index
-    files should be kept.  This directory must exist upon TM startup.
+    files should be kept.  This directory must exist upon timemachine startup.
 
   indexdir "<path>"
     Path, absolute or relative to `workdir' (see above), where the 
-    disk indexes will reside. This directory must exist upon TM startup.
+    disk indexes will reside. This directory must exist upon timemachine startup.
     It is a performance gain to place the index database files on different
     disk than the class storage files.
 
@@ -89,19 +69,19 @@ The configuration sections and options are as follows.
 
   conn_timeout <number>
     Determine the inactivity timeout in seconds for connections before they
-    are deleted from the TM's connection table.
+    are deleted from the timemachine's connection table.
 
   max_subscriptions <number>
     Maximum number of subscriptions to allow.  0 for no limit.
 
   queryfiledir "<path>"
     Path, absolute or relative to `workdir' (see above), where query result
-    files will be created.  This directory must exist upon TM startup.
+    files will be created.  This directory must exist upon timemachine startup.
 
   rmtconsole 0|1
     Start a remote console listener. This will listen on a network socket
     for incomming connections. When connected a remote user can issue 
-    timemachine commands as could be done from the locale console. I.e. use
+    timemachine commands as could be done from the local console, i.e. use
     telnet to connect. 
     Please note, that this connection is not authenticated and not 
     encrypted. Use with care.
@@ -119,9 +99,9 @@ The configuration sections and options are as follows.
     Start a Bro listener. This will listen on a network socket for
     incoming connections from a remote Bro or a Broccoli client. See
     the tm-query sub-directory for an example client which uses this
-    interface to issue queries to the TM from the command line. See
+    interface to issue queries to the timemachine from the command line. See
     Bro's script policy/time-machine.bro for more information on how
-    to remotely control/query the TM from the NIDS. 
+    to remotely control/query the timemachine from the NIDS. 
     
   bro_listen_port <number>
     The local port to listen for incoming Bro connections.
@@ -134,7 +114,7 @@ The configuration sections and options are as follows.
 
   tweak_capture_thread  priority|scope|no
     This option can only be used on FreeBSD. It will tweak thread scheduling
-    parameters for the capture thread (see Documentation/TUNIG)
+    parameters for the capture thread (see doc/TUNING)
     NOTE NOTE NOTE: You will have to experiment with these settings, since 
     different hardware platforms und FreeBSD releases behave quite differently!
     priority ... Increase the capture thread's priority to realtime priority
@@ -151,7 +131,8 @@ The configuration sections and options are as follows.
     can reduce disk usage. 
 
 
-* class section
+class section
+*************
 
   A class section in the configuration file is started by
 
@@ -200,12 +181,14 @@ The configuration sections and options are as follows.
     seconds after the rule has been set. 
 
 
-INDEXES
+Indexes
+=======
  
-The TM keeps indexes of packets seen. 
+The timemachine keeps indexes of packets seen. 
 
 
-CONNECTION TABLE
+Connection Table
+================
 
 The Time Machine knows of connections.  A connection herein is defined
 as a flow of packets characterized by the 5-tuple of (layer 4
@@ -220,9 +203,9 @@ of the state of the connection: number of bytes, number of packets
 transmitted by the connection, and timestamp of last packet of the
 connection.  A connection table entry is also optionally associated a
 flag to suspend the connection size cutoff, and is optionally marked
-to be subscribed to a TM client.
+to be subscribed to a timemachine client.
 
-The TM keeps state of connections in a connection table in RAM.  Old
+The timemachine keeps state of connections in a connection table in RAM.  Old
 connections are evicted from this table when their last packet arrival
 time is more than a configured timeout in the past (see configuration
 option `conn_timeout' above).  The eviction of connections can be
@@ -231,27 +214,29 @@ suspend_timeout (see TIME MACHINE COMMANDS below).
 
 
 
-SUBSCRIBING
+Subscribing
+===========
 
 A Time Machine user can subscribe for a connection.  This means the user
 requests to be delivered all future packets for this connection
 without having to query explicitly for them.  
 A subscription is valid as long as the connection's state is kept in the
-TM's connection table.
+timemachine's connection table.
 A subscription is issued using the query command with the subscribe flag.
-ONLY connection4 indexes are subscribealbe at the moment.
+ONLY connection4 indexes are subscribe-able at the moment.
 
 
 
-TIME MACHINE COMMANDS
+TimeMachine Commands
+=====================
 
 User commands can be issued to the Time Machine either on the local 
-console (the controlling terminal) line interface of the tm process (
-see also `console' option in CUSTOMIZATION above), by connecting
-to the remote console e.g. usign telnet (telnet localhost 42042), or 
-by issuing the commands using a Broccoli connection (e.g., from an IDS)
+console (the controlling terminal) line interface of the timemachine 
+process (see also `console' option in CUSTOMIZATION above), by connecting
+to the remote console e.g. using telnet (telnet localhost 42042), or 
+by issuing the commands using a Broccoli connection (e.g., from Bro)
 
-The TM knows of the following commands:
+The timemachine knows of the following commands:
 
   query <queryresult> <queryspec> [ <query-flags> ]
   <queryresult> ::= feed <broid> tag <tag> | to_file "<filename>"
@@ -293,9 +278,9 @@ Examples
 # query to_file "file2a.pcap" index connection3 "tcp 1.2.3.4  5.6.7.8:1025" start 1163668495 end 1163669900 
 # query to_file "file3.pcap" index connection2 "1.2.3.4   5.6.7.8"
 # query to_file "file4.pcap" index ip "1.2.3.4"
-After issuing these queries the specified files will be present in the queries 
-directory containing the packets matching the query
 
+After issuing these queries the specified files will be present in the queries 
+directory containing the packets matching the query.
 
   suspend_cutoff "<proto> <ip>:<port>  <ip>:<port>"
 
@@ -312,25 +297,16 @@ directory containing the packets matching the query
     get evicted from the connection table as soon as the regular timeout
     mechanism comes into effect (also see the section CONNECTION TABLE
     above).
+
 Example:
 # supend_cutoff "tcp 1.2.3.4:80 7.8.9.1:1042"
 
-  bro_connect "<hostname>:<port>"
-    DEPRECATED (see CUSTOMIZATION)
-    connect to Bro on <hostname>, TCP port <port> using the Bro communication
-    protocol. Not yet supported
-
-  bro_connect
-    DEPRECATED (see CUSTOMIZATION)
-    (re)connect to the Bro configured in the TM configuration file. Not
-    supported.
-
   show conn "tcp 1.2.3.4:80 7.8.9.1:1042"
-    Display information available on the specified connection in the TM's
+    Display information available on the specified connection in the timemachine's
     connection table (see CONNECTION TABLE above).
 
   show conn sample
-    Display a sample of the newest and oldest connections from the TM's
+    Display a sample of the newest and oldest connections from the timemachine's
     connection table (see CONNECTION TABLE above).
     NOTE/TODO: this function reads the connection table without locking. 
     This might result in race conditions and in the worst case to a 
@@ -356,7 +332,8 @@ Example:
 
 
 
-TIME MACHINE COMMAND LINE OPTIONS
+TimeMachine Command Line Options
+================================
 
 The Time Machine accepts the following command line options.  Command
 line options override the according configuration file settings.
@@ -376,5 +353,5 @@ line options override the according configuration file settings.
 
 -c <filename>
     Read configuration file (see TIME MACHINE CONFIGURATION section above)
-    from specified file rather than from tm.conf in the current working
+    from specified file rather than from timemachine.conf in the current working
     directory, which is the default.

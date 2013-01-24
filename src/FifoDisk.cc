@@ -5,9 +5,7 @@
 #include <pthread.h>
 
 #include "config.h"
-#ifdef HAVE_LIBPCAPNAV
-#include <pcapnav.h>
-#endif
+#include "pcapnav/pcapnav.h"
 
 #include "tm.h"
 #include "FifoDisk.hh"
@@ -203,14 +201,12 @@ void FifoDiskFile::addPkt(pkt_ptr p) {
 uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet *set) {
 	uint64_t matches = 0;
 	uint64_t scanned_packets=0;
-#ifdef HAVE_LIBPCAPNAV
 	ConnectionID4 *c_id;
 	struct timeval tv1, tv2;
 	struct timeval tv;
 	int res;
 	int intcnt=0;
 	int first_pkt_for_this_int;
-
 
 	// FIXME: Protect the pcap_dumper_handle from capture thread!!
 	if (is_open)
@@ -315,40 +311,5 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
 			qres->getQueryID(), (unsigned)matches, scanned_packets);
 
 	pcapnav_close(ph);
-#else
-	//TODO: Check Timespan!
-	printf("FifoDiskFile::query file %s\n", getFilename().c_str());
-
-	char errbuf[PCAP_ERRBUF_SIZE]="";
-	pcap_t *ph=pcap_open_offline(filename.c_str(), errbuf);
-
-	if (!ph) {
-		char *pcap_errstr = pcap_geterr(ph);
-		fprintf(stderr, "FifoDiskFile::query: could not open file %s: %s\n",
-		        filename.c_str(), pcap_errstr);
-	} else {
-		int rc; /* pcap_next_ex rc meanings: 1 no problem, -2 no more packets */
-		do {
-			struct pcap_pkthdr *hdr;
-			const u_char *pkt;
-			rc=pcap_next_ex(ph, &hdr, &pkt);
-			//printf("pcap_next_ex; rc=%d\n", rc);
-			if (rc==1) {
-				/*
-				tm_time_t t=to_tm_time(&hdr->ts);
-				while ( (*i)->getLast() < t && *i != set->end() ) *i++;
-				if (t >= (*i)->getStart() && t <= (*i)->getLast()) {
-				*/
-				if (qreq->matchPkt(hdr, pkt)) {
-					qres->sendPkt(hdr, pkt);
-					matches++;
-				}
-				//	}
-			}
-		} while (rc==1);
-	}
-	//DEBUG
-	fprintf(stderr, "FifoDiskFile::query [HAVE_LIBPCAPNAV] finished; matches %" PRIu64 "\n", matches);
-#endif
 	return matches;
 }

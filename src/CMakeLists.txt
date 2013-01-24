@@ -13,7 +13,6 @@ flex_target(CONFScanner conf_scanner.ll ${CMAKE_CURRENT_BINARY_DIR}/conf_scanner
 add_flex_bison_dependency(CONFScanner CONFParser)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-                    ${CMAKE_CURRENT_BINARY_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 set(timemachine_SRCS
@@ -44,8 +43,8 @@ set(timemachine_SRCS
     Hash.cc
     Hash.hh
     #Index.cc
-    #Index.hh
-    #IndexEntry.hh
+    Index.hh
+    IndexEntry.hh
     IndexField.cc
     IndexField.hh
     IndexHash.cc
@@ -58,33 +57,40 @@ set(timemachine_SRCS
     Queue.hh
     Storage.cc
     Storage.hh
-    #broSendPkts.cc
-    #bropipe.cc
-    #client.cc
-    #conf.h
-    #jhash3.h
+    conf.h
+    jhash3.h
     main.cc
     packet_headers.h
-    #querybm.cc
     rmtconsole.cc
     tm.h
-    #tm_q.cc
     types.h
-    #util.cc
-    #util.h
+    util.cc
+    util.h
+)
+
+set(tm_query_benchmark_SRCS
+    tm_query_benchmark.cc
 )
 
 add_subdirectory(re2)
+add_subdirectory(pcapnav)
+
+if (USE_BROCCOLI)
+    include_directories(${Broccoli_INCLUDE_DIR})
+    list(APPEND OPTLIBS ${Broccoli_LIBRARY})
+
+    add_executable(tm_query_benchmark ${tm_query_benchmark_SRCS})
+    target_link_libraries(tm_query_benchmark ${CMAKE_THREAD_LIBS_INIT} ${OPTLIBS} ${PCAP_LIBRARY} re2Static)
+endif()
 
 add_executable(timemachine ${timemachine_SRCS})
-
-target_link_libraries(timemachine ${CMAKE_THREAD_LIBS_INIT} ${PCAP_LIBRARY} ${Readline_LIBRARY} re2Static)
+target_link_libraries(timemachine ${CMAKE_THREAD_LIBS_INIT} ${PCAP_LIBRARY} ${Readline_LIBRARY} ${OPTLIBS} re2Static pcapnavStatic)
 
 if (NOT TimeMachine_SKIP_INSTALL)
     install(TARGETS timemachine DESTINATION bin)
 endif ()
 
-# This is set to assist superprojects that want to build BinPac
+# This is set to assist superprojects that want to build Time Machine
 # from source and rely on it as a target
 set(TimeMachine_EXE timemachine
     CACHE STRING "TimeMachine executable" FORCE)
