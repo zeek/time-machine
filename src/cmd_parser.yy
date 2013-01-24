@@ -135,7 +135,7 @@ cmd:
 	}
 	| TOK_HELP {
 		if (cmd_parser_outfp) {
-			fprintf(cmd_parser_outfp, "Online help not yet implemented. See doc/HOWTO\n");
+			fprintf(cmd_parser_outfp, "Online help not yet implemented. See doc/howto.rst\n");
 		}
 	}
 /*
