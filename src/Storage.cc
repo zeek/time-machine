@@ -413,8 +413,7 @@ tm_time_t Storage::getOldestTimestampDisk() {
 void Storage::query(QueryRequest *query_req, QueryResult *query_res) {
 	struct timeval t_start, t_end;
 	gettimeofday(&t_start, NULL);
-	fprintf(stderr, "Query ID: %d\n",  query_res->getQueryID());
-
+	//fprintf(stderr, "Query ID: %d\n",  query_res->getQueryID());
 
 	IndexType* idx=indexes->getIndexByName(query_req->getField()->getIndexName());
 	if (!idx) {
