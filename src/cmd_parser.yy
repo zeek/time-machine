@@ -443,6 +443,10 @@ cmderror(const char *msg) {
 /* Don't forget to call cmd_parser_init(), before you call the parser */
 int
 parse_cmd(const char* cmd, FILE *outfp, Storage* s, broccoli_worker_thread_data* thread) {
+	if ( strstr(cmd, "query") != NULL ) {
+		tmlog(TM_LOG_NOTE, "query", "Query submitted: %s", cmd); 
+	}
+
 	pthread_mutex_lock(&cmd_parser_lock);
 	// set variable parser_storage global to conf_parser.cc
 	q_req = NULL;
@@ -450,7 +454,7 @@ parse_cmd(const char* cmd, FILE *outfp, Storage* s, broccoli_worker_thread_data*
 	q_mem_only = false;
 	q_subscribe = false;
 	q_start = 0;
-	q_end = 1e13; /* along time in the future */
+	q_end = 1e13; /* a long time in the future */
 	q_bc_thread = thread;
 	
 	cmd_parser_storage=s;
