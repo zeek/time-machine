@@ -12,15 +12,8 @@
 #include "Query.hh"
 #include "tm.h"
 
-static std::string pattern_ip4 ("(?:\\d+\\.\\d+\\.\\d+\\.\\d+)");
-static std::string pattern_ip6_expanded ("(?:(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4})");
-static std::string pattern_ip6_compressed_hex ("(?:(?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::(?:(?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)");
-static std::string pattern_ip6_6hex4dec ("(?:(?:[0-9A-Fa-f]{1,4}:){6,6})(?:[0-9]+)\\.(?:[0-9]+)\\.(?:[0-9]+)\\.(?:[0-9]+)");
-static std::string pattern_ip6_compressed_6hex4dec ("(?:(?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::(?:(?:[0-9A-Fa-f]{1,4}:)*)(?:[0-9]+)\\.(?:[0-9]+)\\.(?:[0-9]+)\\.(?:[0-9]+)");
-static std::string pattern_ip6 = pattern_ip6_expanded + "|" + pattern_ip6_compressed_hex + "|" + pattern_ip6_6hex4dec + "|" + pattern_ip6_compressed_6hex4dec;
-static std::string pattern_ip = "(" + pattern_ip4 + "|" + pattern_ip6 + ")";
-
-static std::string pattern_ipport = pattern_ip + ":(\\d+)";
+static std::string pattern_ip ("(\\d+\\.\\d+\\.\\d+\\.\\d+)");
+static std::string pattern_ipport ("(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+)");
 
 inline uint32_t revert_uint32(uint32_t i) {
 	uint32_t r;
@@ -54,15 +47,14 @@ void ConnectionID4::init(proto_t proto,
 	v.proto=proto;
 	if (addr_port_canon_lt(s_ip,d_ip,s_port,d_port)) {
 		//    v.is_canonified=true;
-		v.ip1=IPAddr(IPv4, &d_ip, IPAddr::Network);
-		v.ip2=IPAddr(IPv4, &s_ip, IPAddr::Network);
-
+		v.ip1=d_ip;
+		v.ip2=s_ip;
 		v.port1=d_port;
 		v.port2=s_port;
 	} else {
 		//    v.is_canonified=false;
-		v.ip1=IPAddr(IPv4, &s_ip, IPAddr::Network);
-		v.ip2=IPAddr(IPv4, &d_ip, IPAddr::Network);
+		v.ip1=s_ip;
+		v.ip2=d_ip;
 		v.port1=s_port;
 		v.port2=d_port;
 	}
@@ -72,20 +64,20 @@ void ConnectionID3::init(proto_t proto,
 						 uint32_t ip1, uint32_t ip2,
 						 uint16_t port2) {
 	v.proto=proto;
-	v.ip1=IPAddr(IPv4, &ip1, IPAddr::Network);
-	v.ip2=IPAddr(IPv4, &ip2, IPAddr::Network);
+	v.ip1=ip1;
+	v.ip2=ip2;
 	v.port2=port2;
 }
 
 void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
 	if (addr_port_canon_lt(s_ip,d_ip,0,0)) {
 		//    v.is_canonified=true;
-		v.ip1=IPAddr(IPv4, &d_ip, IPAddr::Network);
-		v.ip2=IPAddr(IPv4, &s_ip, IPAddr::Network);
+		v.ip1=d_ip;
+		v.ip2=s_ip;
 	} else {
 		//    v.is_canonified=false;
-		v.ip1=IPAddr(IPv4, &s_ip, IPAddr::Network);
-		v.ip2=IPAddr(IPv4, &d_ip, IPAddr::Network);
+		v.ip1=s_ip;
+		v.ip2=d_ip;
 	}
 }
 
@@ -182,16 +174,29 @@ void ConnectionID2::getStr(char* s, int maxsize) const {
 }
 
 std::string ConnectionID4::getStr() const {
+#define UCP(x) ((unsigned char *)&x)
+
 	std::stringstream ss;
 
+	uint32_t s_ip=v.ip1; //get_s_ip();
+	uint32_t d_ip=v.ip2; //get_d_ip();
+
 	ss << " ConnectionID4 "
-	<< get_proto() << " "
-	// << " canonified " << get_is_canonified() << " "
-	<< get_ip1()->AsString()
+	/*
+	 << " Proto " << 0+get_proto()
+	 << " canonified " << get_is_canonified() << " "
+	*/
+	<< (UCP(s_ip)[0] & 0xff) << "."
+	<< (UCP(s_ip)[1] & 0xff) << "."
+	<< (UCP(s_ip)[2] & 0xff) << "."
+	<< (UCP(s_ip)[3] & 0xff)
 	<< ":"
 	<< ntohs(get_port1())
 	<< " - "
-	<< get_ip2()->AsString()
+	<< (UCP(d_ip)[0] & 0xff) << "."
+	<< (UCP(d_ip)[1] & 0xff) << "."
+	<< (UCP(d_ip)[2] & 0xff) << "."
+	<< (UCP(d_ip)[3] & 0xff)
 	<< ":"
 	<< ntohs(get_port2());
 	return ss.str();
@@ -199,24 +204,46 @@ std::string ConnectionID4::getStr() const {
 
 
 std::string ConnectionID3::getStr() const {
+#define UCP(x) ((unsigned char *)&x)
+
 	std::stringstream ss;
 
+	uint32_t s_ip=get_ip1();//get_s_ip();
+	uint32_t d_ip=get_ip2();//get_d_ip();
+
 	ss << " ConnectionID3 "
-	<< get_ip1()->AsString()
+	<< (UCP(s_ip)[0] & 0xff) << "."
+	<< (UCP(s_ip)[1] & 0xff) << "."
+	<< (UCP(s_ip)[2] & 0xff) << "."
+	<< (UCP(s_ip)[3] & 0xff)
 	<< " - "
-	<< get_ip2()->AsString()
+	<< (UCP(d_ip)[0] & 0xff) << "."
+	<< (UCP(d_ip)[1] & 0xff) << "."
+	<< (UCP(d_ip)[2] & 0xff) << "."
+	<< (UCP(d_ip)[3] & 0xff)
 	<< ":"
 	<< get_port();
 	return ss.str();
 }
 
 std::string ConnectionID2::getStr() const {
+#define UCP(x) ((unsigned char *)&x)
+
 	std::stringstream ss;
 
+	uint32_t s_ip=get_ip1();//get_s_ip();
+	uint32_t d_ip=get_ip2();//get_d_ip();
+
 	ss << " ConnectionID2 "
-	<< get_ip1()->AsString()
+	<< (UCP(s_ip)[0] & 0xff) << "."
+	<< (UCP(s_ip)[1] & 0xff) << "."
+	<< (UCP(s_ip)[2] & 0xff) << "."
+	<< (UCP(s_ip)[3] & 0xff)
 	<< " - "
-	<< get_ip2()->AsString();
+	<< (UCP(d_ip)[0] & 0xff) << "."
+	<< (UCP(d_ip)[1] & 0xff) << "."
+	<< (UCP(d_ip)[2] & 0xff) << "."
+	<< (UCP(d_ip)[3] & 0xff);
 	return ss.str();
 }
 
@@ -224,7 +251,7 @@ std::string ConnectionID2::getStr() const {
 
 // Static Member initialization
 std::string ConnectionID4::pattern_connection4 = "\\s*(\\w+)\\s+"
-	+ pattern_ipport + "\\s+-?\\s*" + pattern_ipport + "\\s*";
+	+ pattern_ipport + "\\s+" + pattern_ipport + "\\s*";
 RE2 ConnectionID4::re(ConnectionID4::pattern_connection4);
 
 ConnectionID4* ConnectionID4::parse(const char *str) {

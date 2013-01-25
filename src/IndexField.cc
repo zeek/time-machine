@@ -11,14 +11,7 @@
 #include "IndexField.hh"
 #include "tm.h"
 
-static std::string pattern_ip4 ("(\\d+\\.\\d+\\.\\d+\\.\\d+)");
-static std::string pattern_ip6_expanded ("(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4})");
-static std::string pattern_ip6_compressed_hex ("(([0-9A-Fa-f]{1,4}(:[0-9A-Fa-f]{1,4})*)?)::(([0-9A-Fa-f]{1,4}(:[0-9A-Fa-f]{1,4})*)?)");
-static std::string pattern_ip6_6hex4dec ("(([0-9A-Fa-f]{1,4}:){6,6})([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)");
-static std::string pattern_ip6_compressed_6hex4dec ("(([0-9A-Fa-f]{1,4}(:[0-9A-Fa-f]{1,4})*)?)::(([0-9A-Fa-f]{1,4}:)*)([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)");
-static std::string pattern_ip6 = "(" + pattern_ip6_expanded + "|" + pattern_ip6_compressed_hex + "|" + pattern_ip6_6hex4dec + "|" + pattern_ip6_compressed_6hex4dec + ")";
-static std::string pattern_ip = "(" + pattern_ip4 + "|" + pattern_ip6 + ")";
-
+static std::string pattern_ip ("(\\d+\\.\\d+\\.\\d+\\.\\d+)");
 static std::string pattern_ipport ("(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+)");
 
 
@@ -64,16 +57,28 @@ std::list<IPAddress*> IPAddress::genKeys(const u_char* packet) {
 }
 
 void IPAddress::getStr(char* s, int maxsize) const {
-	snprintf(s, maxsize, "%s", addr.AsString().c_str());
+	unsigned char *ucp = (unsigned char *)&ip_address;
+
+	snprintf(s, maxsize, "%d.%d.%d.%d",
+			 ucp[0] & 0xff,
+			 ucp[1] & 0xff,
+			 ucp[2] & 0xff,
+			 ucp[3] & 0xff);
 }
 
 std::string IPAddress::getStr() const {
-	return addr.AsString();
+	unsigned char *ucp = (unsigned char *)&ip_address;
+	std::stringstream ss;
+	ss << (ucp[0] & 0xff) << "."
+	<< (ucp[1] & 0xff) << "."
+	<< (ucp[2] & 0xff) << "."
+	<< (ucp[3] & 0xff);
+
+	return ss.str();
 }
 
 void IPAddress::getBPFStr(char *str, int max_str_len) const {
 	int rc = snprintf(str, max_str_len, "host %s", getStr().c_str());
-
 	if ( rc >= max_str_len )
 		tmlog(TM_LOG_ERROR, "query",  "IPAddress::getBPFStr: %s truncated by %d characters",
 				str, rc-max_str_len);
@@ -222,7 +227,7 @@ void DstPort::getBPFStr(char *str, int max_str_len) const {
  **********************************************************************/
 // Static Member initialization
 std::string ConnectionIF4::pattern_connection4 = "\\s*(\\w+)\\s+"
-	+ pattern_ipport + "\\s+-?\\s*" + pattern_ipport + "\\s*";
+	+ pattern_ipport + "\\s+" + pattern_ipport + "\\s*";
 RE2 ConnectionIF4::re(ConnectionIF4::pattern_connection4);
 
 std::list<ConnectionIF4*> ConnectionIF4::genKeys(const u_char* packet) {
@@ -256,16 +261,30 @@ IndexField* ConnectionIF4::parseQuery(const char *query) {
 }
 
 void ConnectionIF4::getBPFStr(char *str, int max_str_len) const {
-	const char *ip1_str = c_id.get_ip1()->AsString().c_str();
-	const char *ip2_str = c_id.get_ip2()->AsString().c_str();
-	uint32_t s_port = c_id.get_port1();
-	uint32_t d_port = c_id.get_port2();
+
+	char s_ip_str[TM_IP_STR_SIZE];
+	char d_ip_str[TM_IP_STR_SIZE];
+	uint32_t s_port;
+	uint32_t d_port;
+	/*
+	if (c_id.get_is_canonified()) {
+	  s_ip=c_id.get_ip2();
+	  d_ip=c_id.get_ip1();
+	  s_port=c_id.get_port2();
+	  d_port=c_id.get_port1();
+	} else {
+	*/
+	ip_to_str(c_id.get_ip1(), s_ip_str, sizeof(s_ip_str));
+	ip_to_str(c_id.get_ip2(), d_ip_str, sizeof(d_ip_str));
+	s_port=c_id.get_port1();
+	d_port=c_id.get_port2();
+	/*  }  */
 
 	snprintf(str, max_str_len,
 			 "host %s and port %d and host %s and port %d",
-			 ip1_str, 
+			 s_ip_str, 
 			 ntohs(s_port),
-			 ip2_str,
+			 d_ip_str,
 			 ntohs(d_port));
 }
 
@@ -275,7 +294,7 @@ void ConnectionIF4::getBPFStr(char *str, int max_str_len) const {
  **********************************************************************/
 // Static Member initialization
 std::string ConnectionIF3::pattern_connection3 = "\\s*(\\w+)\\s+"
-		+ pattern_ip + "\\s+-?\\s*" + pattern_ip + ":"
+		+ pattern_ip + "\\s+" + pattern_ip + ":"
 		+ "(\\d+)\\s*";
 RE2 ConnectionIF3::re(ConnectionIF3::pattern_connection3);
 
@@ -310,8 +329,12 @@ IndexField* ConnectionIF3::parseQuery(const char *query) {
 }
 
 void ConnectionIF3::getBPFStr(char *str, int max_str_len) const {
-	const char *ip1_str = c_id.get_ip1()->AsString().c_str();
-	const char *ip2_str = c_id.get_ip2()->AsString().c_str();
+
+	char ip1_str[TM_IP_STR_SIZE];
+	char ip2_str[TM_IP_STR_SIZE];
+
+	ip_to_str(c_id.get_ip1(), ip1_str, sizeof(ip1_str));
+	ip_to_str(c_id.get_ip2(), ip2_str, sizeof(ip2_str));
 
 	snprintf(str, max_str_len,
 			 "(src host %s and dst host %s and dst port %d) or "
@@ -326,7 +349,7 @@ void ConnectionIF3::getBPFStr(char *str, int max_str_len) const {
  **********************************************************************/
 // Static Member initialization
 std::string ConnectionIF2::pattern_connection2 = 
-		"\\s*" + pattern_ip + "\\s+-?\\s*" + pattern_ip + "\\s*";
+		"\\s*" + pattern_ip + "\\s+" + pattern_ip + "\\s*";
 RE2 ConnectionIF2::re(ConnectionIF2::pattern_connection2);
 
 std::list<ConnectionIF2*>
@@ -352,12 +375,16 @@ IndexField* ConnectionIF2::parseQuery(const char *query) {
 
 void ConnectionIF2::getBPFStr(char *str, int max_str_len) const {
 
-	const char *ip1_str = c_id.get_ip1()->AsString().c_str();
-	const char *ip2_str = c_id.get_ip2()->AsString().c_str();
+	char s_ip_str[TM_IP_STR_SIZE];
+	char d_ip_str[TM_IP_STR_SIZE];
+
+	ip_to_str(c_id.get_ip1(), s_ip_str, sizeof(s_ip_str));
+	ip_to_str(c_id.get_ip2(), d_ip_str, sizeof(d_ip_str));
+
 
 	snprintf(str, max_str_len,
 			 "host %s and host %s",
-			 ip1_str, ip2_str);
+			 s_ip_str, d_ip_str);
 }
 
 
