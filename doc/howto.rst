@@ -72,6 +72,9 @@ Main section options
     Specify the frequency of statistical output to the logfile (log interval
     in seconds).
 
+  log_level <number>
+    Specify the level at which to log.  10=DEBUG, 20=NOTE(default), 30=WARN, 40=ERROR
+
   conn_timeout <number>
     Determine the inactivity timeout in seconds for connections before they
     are deleted from the timemachine's connection table.
@@ -239,7 +242,7 @@ Full query grammar::
 The flags can be given in order and they can be combined. 
 
 Query the indexes for the given index key. The result of a query
-can either be send to a remote bro system or to a file in the
+can either be sent to a remote Bro system or to a file in the
 local filesystem. 
 The index to query is specified by the keyword index followed
 by the name of the index. This name corresponds to the
@@ -254,13 +257,13 @@ a subsciption (see above). Currently only connection4 querys
 support the subscribe flag, other indexes will silently ignore
 the flag. 
 When mem_only is specified, only the index entries stored in RAM 
-are searched and only packets from the memomry ringbuffer are 
+are searched and only packets from the memory ringbuffer are 
 returned. 
 The timestamps enable one, to specify a timespan. Only packets
 falling in this timespan will be returned. timestamps and mem_only
 can be combined. The result will be the intersection of both 
 (i.e. only packets from memory, that fall into the specified
-timefragme).
+timeframe).
 The timespan has not been tested extensively.
 
 Examples::

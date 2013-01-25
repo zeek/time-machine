@@ -96,10 +96,11 @@ pthread_t
 
 StorageConfig storageConf;
 int conf_main_log_interval=60;
+int conf_main_log_level=20;
 const char* conf_main_workdir="./";
 const char* conf_main_indexdir="./";
 const char* conf_main_queryfiledir="./";
-const char* conf_main_logfile_name="tm.log";
+const char* conf_main_logfile_name="timemachine.log";
 const char* conf_main_bro_connect_str=NULL;
 int conf_main_console=0;
 int conf_main_daemon=0;
@@ -115,7 +116,7 @@ struct in_addr conf_main_bro_listen_addr; // defualt value is set in main!
 
 
 /***************************************************************************
- * loggins functions
+ * logging functions
  */
 #define MAX_MSG_LEN 1024
 
@@ -123,7 +124,7 @@ static void tmlog_backend(int severity, const char *ident, const char *msg) {
 	if (severity == TM_LOG_ERROR && stderr_is_open) {
 		fprintf(stderr, "tm: %s: %s\n", ident, msg);
 	}
-	if (log_file)
+	if (log_file && conf_main_log_level <= severity)
 		log_file->log(ident, msg);
 }
 

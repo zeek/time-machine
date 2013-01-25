@@ -21,6 +21,8 @@ ID      [a-zA-Z_]+[0-9]*
 INT     [0-9]+
 DBL     [0-9]*\.[0-9]*
 IP  [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+
+HEX     [0-9a-fA-F]+
+IP6 ("["({HEX}:){7}{HEX}"]")|("["0x{HEX}({HEX}|:)*"::"({HEX}|:)*"]")|("["({HEX}|:)*"::"({HEX}|:)*"]")|("["({HEX}|:)*"::"({HEX}|:)*({INT}"."){3}{INT}"]")
 WHITE   [ \t]+
 COMMENT \#.*
 NEWLINE \n
@@ -48,6 +50,7 @@ NEWLINE \n
 "dyn_timeout"	return TOK_DYN_TIMEOUT;
 "main"		 return TOK_MAIN;
 "log_interval"	 return TOK_LOG_INTERVAL;
+"log_level"  return TOK_LOG_LEVEL;
 "device"	 return TOK_DEVICE;
 "read_tracefile" return TOK_READ_TRACEFILE;
 "no"		 return TOK_NO;

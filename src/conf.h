@@ -10,6 +10,7 @@
  */
 
 extern int conf_main_log_interval;
+extern int conf_main_log_level;
 extern const char* conf_main_workdir;
 extern const char* conf_main_indexdir;
 extern const char* conf_main_logfile_name;
