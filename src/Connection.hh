@@ -5,6 +5,8 @@
 
 #include "types.h"
 #include "packet_headers.h"
+#include "IPAddr.hh"
+
 
 #include "jhash3.h"
 #include "re2/re2.h"
@@ -42,7 +44,7 @@ public:
 	virtual ~ConnectionID4() {};
 	uint32_t hash() const { 
 		//TODO: initval
-		return hash3words(v.ip1, v.ip2^v.proto, v.port1 | ((v.port2)<<16), 0);
+		return hash3words(v.ip1.Hash(), v.ip2.Hash()^v.proto, v.port1 | ((v.port2)<<16), 0);
 	}
 
 	bool operator==(const ConnectionID& other) const { 
@@ -58,11 +60,11 @@ public:
 	proto_t get_proto() const {
 		return v.proto;
 	}
-	uint32_t get_ip1() const {
-		return v.ip1;
+	const IPAddr* get_ip1() const {
+		return (const IPAddr*) &v.ip1;
 	}
-	uint32_t get_ip2() const {
-		return v.ip2;
+	const IPAddr* get_ip2() const {
+		return (const IPAddr*) &v.ip2;
 	}
 	uint16_t get_port1() const {
 		return v.port1;
@@ -84,8 +86,8 @@ public:
 	typedef struct {
 		//  time locality
 		//    uint32_t ts;
-		uint32_t ip1;
-		uint32_t ip2;
+		IPAddr ip1;
+		IPAddr ip2;
 		uint16_t port1;
 		uint16_t port2;
 		proto_t proto;
@@ -121,17 +123,17 @@ public:
 	virtual ~ConnectionID3() {};
 	uint32_t hash() const {
 		//TODO: initval
-		return hash3words(v.ip1, v.ip2, v.port2 | ((v.proto)<<16), 0);
+		return hash3words(v.ip1.Hash(), v.ip2.Hash(), v.port2 | ((v.proto)<<16), 0);
 	}
 	bool operator==(const ConnectionID& other) const;
 	proto_t get_proto() const {
 		return v.proto;
 	}
-	uint32_t get_ip1() const {
-		return v.ip1;
+	const IPAddr* get_ip1() const {
+		return (const IPAddr*) &v.ip1;
 	}
-	uint32_t get_ip2() const {
-		return v.ip2;
+	const IPAddr* get_ip2() const {
+		return (const IPAddr*) &v.ip2;
 	}
 	uint16_t get_port() const {
 		return v.port2;
@@ -146,8 +148,8 @@ public:
 	typedef struct {
 		//  time locality
 		//    uint32_t ts;
-		uint32_t ip1;
-		uint32_t ip2;
+		IPAddr ip1;
+		IPAddr ip2;
 		uint16_t port2;
 		proto_t proto;
 		//    bool is_canonified;
@@ -177,14 +179,14 @@ public:
 	virtual ~ConnectionID2() {};
 	uint32_t hash() const {
 		//TODO: initval
-		return hash2words(v.ip1, v.ip2, 0);
+		return hash2words(v.ip1.Hash(), v.ip2.Hash(), 0);
 	}
 	bool operator==(const ConnectionID& other) const;
-	uint32_t get_ip1() const {
-		return v.ip1;
+	const IPAddr* get_ip1() const {
+		return (const IPAddr*) &v.ip1;
 	}
-	uint32_t get_ip2() const {
-		return v.ip2;
+	const IPAddr* get_ip2() const {
+		return (const IPAddr*) &v.ip2;
 	}
 	/*
 	bool get_is_canonified() const { return v.is_canonified; }
@@ -196,8 +198,8 @@ public:
 	typedef struct {
 		//  time locality
 		//    uint32_t ts;
-		uint32_t ip1;
-		uint32_t ip2;
+		IPAddr ip1;
+		IPAddr ip2;
 		//    bool is_canonified;
 	}
 	__attribute__((packed)) v_t;

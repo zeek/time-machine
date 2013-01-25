@@ -4,11 +4,14 @@
 #include <pcap.h>
 #include <list>
 #include <string>
+#include <string.h>
+#include <netinet/in.h>
 #include <arpa/inet.h>
 
 #include "re2/re2.h"
 
 #include "types.h"
+#include "IPAddr.hh"
 #include "packet_headers.h"
 
 class IndexField;
@@ -63,25 +66,43 @@ class SrcIPAddress;
 class DstIPAddress;
 class IPAddress: public IndexField {
 public:
-	IPAddress(uint32_t ip): ip_address(ip) {}
-	IPAddress(const char* s): ip_address(inet_addr(s)) {}
+	IPAddress(uint32_t ip) {
+		addr = IPAddr(IPv4, &ip, IPAddr::Network);
+	}
+	IPAddress(const char* s) {
+		addr = IPAddr(s);
+	}
 	IPAddress(void *p) {
 		memcpy((void*)getConstKeyPtr(), p, getKeySize());
 	}
 	virtual ~IPAddress() {};
 	virtual uint32_t hash() const {
 		// TODO: initval
-		return hash1words(ip_address, 0);
+		const uint32_t *bytes;
+		int len = addr.GetBytes(&bytes);
+		if ( len == 1 )
+			return hash1words(bytes[0], 0);
+		else
+			// TODO: this is only hashing the latter 96bits of the address.
+			return hash3words(bytes[1], bytes[2], bytes[3], 0);
 	}
 	virtual uint32_t getInt() const {
-		return ip_address;
+		const uint32_t *bytes;
+		int len = addr.GetBytes(&bytes);
+		if ( len == 1 )
+			return bytes[3];
+		else
+			return bytes[3];
 	}
 	virtual const char* getConstKeyPtr() const {
-		return (const char*)&ip_address;
+		const uint32_t *bytes;
+		addr.GetBytes(&bytes);
+		return (const char*) bytes;
 	}
-	//  char* getKeyPtr() { return (char*)&ip_address; }
 	virtual const int getKeySize() const {
-		return sizeof(ip_address);
+		const uint32_t *bytes;
+		int len = addr.GetBytes(&bytes);
+		return len*4;
 	}
 	virtual void getStr(char* s, int maxsize) const;
 	virtual std::string getStr() const;
@@ -91,6 +112,7 @@ public:
 	static const std::string getIndexNameStatic() {
 		return "ip";
 	}
+
 	static std::list<IPAddress*> genKeys(const u_char* packet);
 	static int keysPerPacket() {
 		return 2;
@@ -102,7 +124,8 @@ public:
 	static IndexField* parseQuery(const char *query);
 	virtual void getBPFStr(char *, int) const;
 private:
-	uint32_t ip_address;
+	IPAddr addr; 
+
 	static std::string pattern;
 	static RE2 re;
 };

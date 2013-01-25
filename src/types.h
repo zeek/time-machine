@@ -23,4 +23,6 @@ typedef uint8_t proto_t;
 
 //typedef double hash_t;
 
+typedef enum { IPv4, IPv6 } IPFamily;
+
 #endif

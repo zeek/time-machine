@@ -49,6 +49,8 @@ set(timemachine_SRCS
     IndexField.hh
     IndexHash.cc
     IndexHash.hh
+    IPAddr.cc
+    IPAddr.hh
     LogFile.cc
     LogFile.hh
     Query.cc
