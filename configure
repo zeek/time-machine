@@ -21,6 +21,7 @@ Usage: $0 [OPTION]... [VAR=VALUE]...
 
   Installation Directories:
     --prefix=PREFIX        installation directory [/usr/local]
+    --conf-files-dir=DIR   config files installation directory [PREFIX/etc]
 
   Optional Features:
     --enable-debug         compile in debugging mode
@@ -53,8 +54,9 @@ append_cache_entry () {
 
 # set defaults
 builddir=build
+prefix=/usr/local
 CMakeCacheEntries=""
-append_cache_entry CMAKE_INSTALL_PREFIX PATH   /usr/local
+append_cache_entry CMAKE_INSTALL_PREFIX PATH   $prefix
 append_cache_entry ENABLE_DEBUG         BOOL   false
 
 # parse arguments
@@ -75,14 +77,15 @@ while [ $# -ne 0 ]; do
         --prefix=*)
             append_cache_entry CMAKE_INSTALL_PREFIX PATH   $optarg
             ;;
+        --conf-files-dir=*)
+            append_cache_entry BRO_ETC_INSTALL_DIR  PATH   $optarg
+            user_set_conffilesdir="true"
+            ;;
         --enable-debug)
             append_cache_entry ENABLE_DEBUG         BOOL   true
             ;;
         --with-broccoli=*)
             append_cache_entry Broccoli_ROOT_DIR PATH $optarg
-            ;;
-        --with-pcapnav=*)
-            append_cache_entry PCAPNAV_ROOT_DIR PATH $optarg
             ;;
         --with-pcap=*)
             append_cache_entry PCAP_ROOT_DIR PATH $optarg
@@ -100,6 +103,10 @@ while [ $# -ne 0 ]; do
     esac
     shift
 done
+
+if [ "$user_set_conffilesdir" != "true" ]; then
+    append_cache_entry BRO_ETC_INSTALL_DIR PATH $prefix/etc
+fi
 
 if [ -d $builddir ]; then
     # If build directory exists, check if it has a CMake cache

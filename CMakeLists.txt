@@ -4,6 +4,9 @@ include(cmake/CommonCMakeConfig.cmake)
 
 file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" VERSION LIMIT_COUNT 1)
 
+set(PREFIX "${CMAKE_INSTALL_PREFIX}")
+set(ETC "${BRO_ETC_INSTALL_DIR}")
+
 ########################################################################
 ## Dependency Configuration
 
@@ -43,6 +46,14 @@ include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 ## Recurse on sub-directories
 
 add_subdirectory(src)
+
+
+include(InstallPackageConfigFile)
+
+InstallPackageConfigFile(
+    ${CMAKE_CURRENT_SOURCE_DIR}/etc/timemachine.cfg
+    ${ETC}
+    timemachine.cfg)
 
 ########################################################################
 ## Build Summary

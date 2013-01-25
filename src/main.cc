@@ -589,7 +589,7 @@ void usage() {
 
 int
 main(int argc, char** argv) {
-	const char *conffile="timemachine.conf";
+	const char *conffile="timemachine.cfg";
 	struct sigaction exit_action;
 	int i;
 	inet_aton("127.0.0.1", &conf_main_rmtconsole_listen_addr);

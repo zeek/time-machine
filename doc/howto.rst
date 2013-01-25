@@ -18,14 +18,14 @@ a number of user configuration options.  This includes general options
 such as logfile names, capture device settings as well as the
 configuration of storage classes with the respective parameters.
 
-By default, the configuration file is called 'timemachine.conf' and is read
+By default, the configuration file is called 'timemachine.cfg' and is read
 from the current working directory.  This can be overridden by the -c
 command line option (see `Command Line Options`_ section below).
 
 The configuration file is structured in sections.  Options for a
 section are grouped by curly brackets and are separated by semicolons.
 There is exactly one main section, and a number of class configuration
-sections.  For better orientation, see the example timemachine.conf file 
+sections.  For better orientation, see the example timemachine.cfg file 
 in the timemachine package.
 
 Main section options
@@ -345,6 +345,6 @@ line options override the according configuration file settings.
 -f <filter>     Apply global BPF filter.  Cf. 'filter' configuration
                 directive in `Configuration File`_ section.
 -c <filename>   Read configuration file (see `Configuration File`_ section 
-                above) from specified file rather than from timemachine.conf
+                above) from specified file rather than from timemachine.cfg
                 in the current working directory, which is the default.
 
