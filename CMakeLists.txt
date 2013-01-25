@@ -16,6 +16,7 @@ FindRequiredPackage(FLEX)
 FindRequiredPackage(BISON)
 FindRequiredPackage(PCAP)
 FindRequiredPackage(Readline)
+FindRequiredPackage(Threads)
 
 # Optional Dependencies
 
