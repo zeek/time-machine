@@ -15,6 +15,9 @@ add_flex_bison_dependency(CONFScanner CONFParser)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/main.cc.in
+               ${CMAKE_CURRENT_BINARY_DIR}/main.cc)
+
 set(timemachine_SRCS
     ${BISON_CMDParser_INPUT}
     ${FLEX_CMDScanner_INPUT}
@@ -59,7 +62,7 @@ set(timemachine_SRCS
     Storage.hh
     conf.h
     jhash3.h
-    main.cc
+    ${CMAKE_CURRENT_BINARY_DIR}/main.cc
     packet_headers.h
     rmtconsole.cc
     tm.h

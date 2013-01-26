@@ -304,8 +304,6 @@ void *cli_console_thread(void *arg) {
 	/*  char buf[8192]; */
 	char *line, *lastline=NULL;
 	//  char *opt[2];
-
-
 	char prompt[64];
 	snprintf(prompt, 63, "tm@%s# ", hostname);
 
@@ -431,7 +429,6 @@ void *statisticslog_thread(void* arg) {
 		ru_stime = to_tm_time(&(r.ru_stime));
 		if (last_call_ts.tv_sec) {
 			dt=to_tm_time(&now) - to_tm_time(&last_call_ts);
-
 
 			utime_perc = 100.*(ru_utime-last_ru_utime)/dt;
 			stime_perc = 100.*(ru_stime-last_ru_stime)/dt;
@@ -577,7 +574,8 @@ void *statisticslog_thread(void* arg) {
  */
 
 void usage() {
-	fprintf(stderr, "usage: timemachine[-i interface] [-r file] [-f filter] [-c config file]\n");
+	fprintf(stderr, "usage: timemachine [-i interface] [-r file] [-f filter] [-c config file]\n");
+	fprintf(stderr, "       default config file: @BRO_ETC_INSTALL_DIR@/timemachine.cfg\n");
 	exit(1);
 }
 
@@ -589,7 +587,7 @@ void usage() {
 
 int
 main(int argc, char** argv) {
-	const char *conffile="timemachine.cfg";
+	const char *conffile="@BRO_ETC_INSTALL_DIR@/timemachine.cfg";
 	struct sigaction exit_action;
 	int i;
 	inet_aton("127.0.0.1", &conf_main_rmtconsole_listen_addr);

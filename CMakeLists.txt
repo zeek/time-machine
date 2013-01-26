@@ -73,6 +73,8 @@ message(
     "\n==================|  TimeMachine Build Summary  |===================="
     "\n"
     "\nInstall prefix:    ${timemachine_install_summary}"
+    "\nConfig File Dir:   ${BRO_ETC_INSTALL_DIR}"
+
     "\nDebug mode:        ${ENABLE_DEBUG}"
     "\n"
     "\nCC:                ${CMAKE_C_COMPILER}"
