@@ -71,7 +71,7 @@ void FifoDisk::addPkt(const pkt_ptr p) {
 				files.back()->getCurFileSize()
 				+ sizeof(struct pcap_file_header)
 				+ sizeof(struct pcap_pkthdr)
-				+ ((struct pcap_pkthdr*)p)->caplen > (int)file_size) {  /* Why do we have to be THAT precise?!?!? */
+				+ ((struct pcap_pkthdr*)p)->caplen > file_size) {  /* Why do we have to be THAT precise?!?!? */
 			// Do not add or delete files while a query is in progress, because 
 			// the file iterator of the query might get fucked up. 
 			// XXX: This my starve the rotation of files or generate files that

@@ -1,3 +1,6 @@
+# GCC is giving warnings about this.
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-compare")
+
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
@@ -72,6 +75,3 @@ if (UNIX)
     set_target_properties(re2Static PROPERTIES OUTPUT_NAME re2)
 endif ()
 target_link_libraries(re2Static)
-#install(TARGETS re2Static DESTINATION lib)
-
-#install(FILES ${CMAKE_CURRENT_BINARY_DIR}/broccoli.h DESTINATION include)
