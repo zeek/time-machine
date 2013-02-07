@@ -17,7 +17,7 @@ The general usage is
 If the TM is running on a port other than 47757, you can append
 ":<port>" to "<tmhost>". "<target>" is the name of the destination
 file into which query matches will be written; the files will be
-created in the TM's query directory as configured in "tm.conf". 
+created in the TM's query directory as configured in "timemachine.cfg". 
 
 Currently, tm-query supports the following query types to extract
 traffic

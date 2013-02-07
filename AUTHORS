@@ -1,22 +1,10 @@
-Timemachine 
-(c) Technische Universitaet Muenchen 
-(c) Technische Universitaet Berlin
-(c) The Regents of the University of California
-
-Contact: tm@lists.net.t-labs.tu-berlin.de
-
 Written by:
-Stefan Kornexl   <stefan@net.in.tum.de>
-Gregor Maier     <gregor@net.in.tum.de>
+	Stefan Kornexl   <stefan@net.in.tum.de>
+	Gregor Maier     <gregor@net.in.tum.de>
 
 Design and contributions:
-Holger Dreger    <hdreger@net.in.tum.de>
-Anja Feldmann
-Vern Paxson      <vern@icir.org>
-Robin Sommer     <robin@icir.org>
-Fabian Schneider
-
-
-
-Hash Function (c) by Bob Jenkins, May 2006, Public Domain.
-ptmalloc (c) by Wolfram Gloger (see ptmalloc2/COPYRIGHT for details)
+	Holger Dreger    <hdreger@net.in.tum.de>
+	Anja Feldmann
+	Vern Paxson      <vern@icir.org>
+	Robin Sommer     <robin@icir.org>
+	Fabian Schneider

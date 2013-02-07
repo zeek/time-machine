@@ -1,12 +1,13 @@
-/*
 Timemachine
-Copyright (c) 2005-2007 Technische Universitaet Muenchen,
+Copyright (c) 2005-2013 Technische Universitaet Muenchen,
                         Technische Universitaet Berlin,
-                        The Regents of the University of California
+                        The Regents of the University of California 
+                        through the Lawrence Berkeley National 
+                        Laboratory and the International Computer 
+                        Science Institute.
 All rights reserved.
 
-Contact: tm@lists.net.t-labs.tu-berlin.de
-
+Contact: time-machine@mailman.icsi.berkeley.edu
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -35,5 +36,5 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 Hash Function (c) by Bob Jenkins, May 2006, Public Domain.
-ptmalloc (c) by Wolfram Gloger (see ptmalloc2/COPYRIGHT for details)
-*/
+PCAPNav (c) by Christian Kreibich, May 2007, BSD Licensed.
+RE2 (c) by Russ Cox, 2012, New BSD Licensed

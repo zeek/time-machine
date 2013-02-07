@@ -1,0 +1,4 @@
+[submodule "cmake"]
+	path = cmake
+	url = git://git.bro-ids.org/cmake
+
