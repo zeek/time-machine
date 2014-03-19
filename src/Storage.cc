@@ -257,11 +257,11 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 		dynclasses.removeOld(); // Housekeeping
 		for (int i=0; i<2; i++) {
 			if (i==0) {
-				ip = SrcIPAddress::genKey(packet, 0);
+				ip = SrcIPAddress::genKey(idxpacket, 0);
 				curdir = TM_DYNCLASS_ORIG;
 			}
 			else {
-				ip = DstIPAddress::genKey(packet, 0);
+				ip = DstIPAddress::genKey(idxpacket, 0);
 				curdir = TM_DYNCLASS_RESP;
 			}
 
@@ -288,7 +288,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 		int max_precedence=INT_MAX;
 		for (std::list<Fifo*>::iterator i=fifos.begin(); i!=fifos.end(); i++) {
 			if (// packet matches this class' filter and
-				(*i)->matchPkt(header, packet) &&
+				(*i)->matchPkt(header, idxpacket) &&
 				// first match or higher precedence match
 				(f==NULL || (*i)->getPrecedence()>max_precedence) ) {
 				f=*i;
@@ -300,12 +300,12 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 	} // if (!f)
 	if (f) {
 		bool tcp_ctrl_flag=false;
-		if (IP(packet)->ip_p==IPPROTO_TCP)
-			if (TCP(packet)->th_flags & ( TH_FIN | TH_SYN | TH_RST ))
+		if (IP(idxpacket)->ip_p==IPPROTO_TCP)
+			if (TCP(idxpacket)->th_flags & ( TH_FIN | TH_SYN | TH_RST ))
 				tcp_ctrl_flag=true;
 		if ( (( c->getSuspendCutoff() | tcp_ctrl_flag )
-				&& f->addPkt(header, packet, NULL)) ||
-				f->addPkt(header, packet, c)) {
+				&& f->addPkt(header, idxpacket, NULL)) ||
+				f->addPkt(header, idxpacket, c)) {
 			/* packet was stored in Fifo *f */
 			uncut_bytes += header->len;
 			uncut_pkt_cnt++;
@@ -322,7 +322,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 	} // if (f)
 	if (qr) {
 		// there is a subscription for this connection
-		if (!(qr->sendPkt(header, packet)))
+		if (!(qr->sendPkt(header, idxpacket)))
 			c->deleteSubscription();
 		/* Note: delteSubscription() decrements the use counter of the subscr. and
 		 * if it reaches 0, the subscription is really deleted. 
