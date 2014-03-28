@@ -75,7 +75,8 @@ while [ $# -ne 0 ]; do
             builddir=$optarg
             ;;
         --prefix=*)
-            append_cache_entry CMAKE_INSTALL_PREFIX PATH   $optarg
+            prefix=$optarg
+            append_cache_entry CMAKE_INSTALL_PREFIX PATH   $prefix
             ;;
         --conf-files-dir=*)
             append_cache_entry BRO_ETC_INSTALL_DIR  PATH   $optarg

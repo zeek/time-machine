@@ -48,11 +48,12 @@ include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 
 add_subdirectory(src)
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/etc/timemachine.cfg.in
+               ${CMAKE_CURRENT_BINARY_DIR}/etc/timemachine.cfg)
 
 include(InstallPackageConfigFile)
-
 InstallPackageConfigFile(
-    ${CMAKE_CURRENT_SOURCE_DIR}/etc/timemachine.cfg
+    ${CMAKE_CURRENT_BINARY_DIR}/etc/timemachine.cfg
     ${ETC}
     timemachine.cfg)
 
