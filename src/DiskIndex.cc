@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <netinet/in.h>  // htonl()
 #include <errno.h>
+#include <unistd.h>
 
 #include <fstream>
 #include <vector>
