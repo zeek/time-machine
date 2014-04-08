@@ -7,8 +7,10 @@ main {
 	## Directories for packet captures, logs, and indexes. 
 	## These directories must exist when timemachine starts!
 	workdir "@CMAKE_INSTALL_PREFIX@/var/tm";
-	indexdir "@CMAKE_INSTALL_PREFIX@/indexes";
-	queryfiledir "@CMAKE_INSTALL_PREFIX@/queries";
+	## These will be relative to <workdir> if not 
+	## given as full paths.
+	indexdir "indexes";
+	queryfiledir "queries";
 
 	## Name for the log to be stored in <workdir>
 	logfile "timemachine.log";
