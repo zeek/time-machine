@@ -314,8 +314,12 @@ uint64_t FifoMem::query(QueryRequest *qreq, QueryResult *qres,
 
 	for (IntervalSet::iterator i=interval_set->begin();
 			i!=interval_set->end(); i++) {
-		int found;
 		intcnt++;
+		if ((qreq->getT1() < i->getStart()-1e-3) || (qreq->getT0() > i->getLast()+1e-3)) {
+			tmlog(TM_LOG_DEBUG, "query", "%d Skipping Interval %i 0f %i: [%lf, %lf]", intcnt, interval_set->getNumIntervals(), qres->getQueryID(), i->getStart(), i->getLast());
+			continue;
+		}
+		int found;
 		tmlog(TM_LOG_DEBUG, "query", "%d New Interval %i of %i: [%lf, %lf]", intcnt, interval_set->getNumIntervals(),
 					qres->getQueryID(), i->getStart(), i->getLast());
 		if (! (found=bin_search(&p, i->getStart(), true)))
