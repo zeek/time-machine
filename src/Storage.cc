@@ -103,6 +103,12 @@ tot_num_queries(0) {
 		exit(1);
 	}
 
+	linktype = pcap_datalink(ph);
+	if (linktype != 1 /* DLT_EN1010MB */ && linktype != 113 /* DLT_LINUX_SLL */ ) {
+		tmlog(TM_LOG_ERROR, "storage", "Link layer type not supported: %s (0x%.4X)", pcap_datalink_val_to_name(linktype), linktype);
+		exit(1);
+	}
+
 	//TODO: If strlen(errbuf)>0, then errbuf contains a WARNING!
 	//
 	
@@ -223,14 +229,40 @@ void Storage::cancelThread() {
 
 void Storage::addPkt(const struct pcap_pkthdr *header,
 					 const unsigned char *packet) {
-	uint16_t ether_type=ntohs(ETHERNET(packet)->ether_type);
-	if ( ! (ether_type==ETHERTYPE_IP || ether_type==0x8100) ) {
-		//    fprintf(stderr,"unknown ether_type 0x%.4X\n", ether_type);
-		return;
+
+	const unsigned char* payload = packet;
+	uint16_t protocol;
+	switch (linktype) {
+		case 1 /* DLT_EN1010MB */: {
+			protocol = ntohs(ETHERNET(packet)->ether_type);
+			payload += ETHER_HDR_LEN;
+			break;
+		}
+		case 113 /* DLT_LINUX_SLL */: {
+			protocol = ntohs(LINUX_SLL(packet)->sll_protocol);
+			payload += LINUX_SLL_HDR_LEN;
+			break;
+		}
+		default: {
+			tmlog(TM_LOG_ERROR, "storage", "Link layer type not supported: %s (0x%.4X)", pcap_datalink_val_to_name(linktype), linktype);
+			exit(1);
+		}
 	}
-	const unsigned char* idxpacket=packet;
-	// skip VLAN header for indexing
-	if (ether_type==0x8100) idxpacket+=4;
+	while (protocol != ETHERTYPE_IP) {
+		// Skip all VLAN headers (there MAY be more of them, encapsulated one in another).
+		if (protocol == 0x8100) {
+			protocol = ntohs(*(payload + 2));
+			payload += 4;
+			tmlog(TM_LOG_DEBUG, "storage", "Skipping VLAN header, encapsulated protocol: 0x%.4X", protocol);
+		}
+		// Currently, only ETHERTYPE_IP/VLAN is supported.
+		else {
+			tmlog(TM_LOG_WARN, "storage", "Protocol not supported, skipping packet: 0x%.4X", protocol);
+			return;
+		}
+	}
+
+	const unsigned char* idxpacket = payload - ETHER_HDR_LEN; 
 
 	tm_time_t now = to_tm_time(&header->ts);
 

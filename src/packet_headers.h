@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
+#include <pcap/sll.h>
 #ifdef linux
 #define __FAVOR_BSD
 #endif
@@ -41,6 +42,17 @@ struct icmphdr {
 /* #define ETHER_HDR_LEN		sizeof(struct ether_header) */
 
 #define ETHERNET(packet)    ((struct ether_header *)packet)
+// XXX: This is exceptionally ugly hack:
+//   Ethernet is by far not the only one link layer protocol and
+//   therefore it MUST NOT be assumed! In case e.g. VLAN header
+//   is present, packet pointer has to be set 4 bytes (length of
+//   VLAN header) into the Ethernet header in order to accomodate
+//   for this hack. Even more problems will occur in case we are
+//   not on Ethernet at all (what if there is some other link layer
+//   header which is actually shorter than Ethernet one? It will require
+//   'packet' to point to memory which actually is not ours (delta
+//   bytes before it)!!!
+//   All of these hacks MUST to be found and corrected.
 #define IP(packet)          ((struct ip *)(packet+ETHER_HDR_LEN))
 
 
@@ -48,5 +60,10 @@ struct icmphdr {
 
 #define TCP(packet)         ((struct tcphdr *)((char*)IP(packet)+IP_HDR_LEN(packet)))
 #define UDP(packet)         ((struct udphdr *)((char*)IP(packet)+IP_HDR_LEN(packet)))
+
+/* this is in pcap/sll.h */
+
+#define LINUX_SLL_HDR_LEN   sizeof(struct sll_header)
+#define LINUX_SLL(packet)   ((struct sll_header *)packet)
 
 #endif

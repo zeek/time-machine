@@ -102,6 +102,7 @@ public:
 	friend void *capture_thread(void *arg);
 private:
 	pcap_t *ph;
+	int linktype;
 	int snaplen;
 	pthread_t capture_thread_tid;
 	pthread_attr_t capture_thread_attr;
