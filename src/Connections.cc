@@ -19,6 +19,14 @@ Connections::Connections(uint32_t hash_size):
 }
 
 Connections::~Connections() {
+	for(size_t i = 0; i < size; ++i) {
+		Connection *c = htable[i];
+		while(c) {
+			Connection *c_del = c;
+			c = c->col_next;
+			delete c_del;
+		}
+	}
 	delete[] htable;
 	pthread_mutex_destroy(&lock_mutex);
 }
