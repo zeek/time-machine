@@ -53,6 +53,13 @@ void *capture_thread(void *arg) {
 	//  sleep(15);
 	pcap_loop(storage->ph, -1, (pcap_handler)callback, (u_char*)storage);
 	tmlog(TM_LOG_NOTE, "storage", "pcap input exhausted");
+	for (std::list<Fifo*>::iterator i=storage->fifos.begin(); i!=storage->fifos.end(); i++) {
+		(*i)->EvictAll();
+		for (std::list<FifoDiskFile*>::iterator j=(*i)->fd->filesBeginIt(); j!=(*i)->fd->filesEndIt(); j++) {
+			(*j)->flush();
+		}
+	}
+	exit(0);
 	return NULL;
 }
 

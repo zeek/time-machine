@@ -41,6 +41,7 @@ public:
 	void start();
 	virtual ~Fifo();
 	uint64_t pktEviction();
+	void EvictAll();
 	bool addPkt(const struct pcap_pkthdr* header, const unsigned char* packet,
 				Connection*);
 	const FifoMem* getFm();
@@ -112,6 +113,7 @@ public:
 	std::string getStatsStr();
 	static std::string getStatsStrHeader();
 	uint64_t query(QueryRequest*, QueryResult*, IntervalSet*);
+	FifoDisk* fd;
 protected:
 	bool do_cutoff;
 	uint64_t cutoff;
@@ -135,7 +137,6 @@ protected:
 	uint64_t cutoff_pkts;
 
 	FifoMem* fm;
-	FifoDisk* fd;
 	//   pthread_t m2d_thread_id;
 	//   volatile int m2d_thread_stop;
 	//  int i;

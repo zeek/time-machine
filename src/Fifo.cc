@@ -87,6 +87,13 @@ bool Fifo::matchPkt(const struct pcap_pkthdr* header,
 }
 
 
+void Fifo::EvictAll() {
+	while (fm->getHeldPkts()>0) {
+		fd->addPkt(fm->getS());
+		fm->popPkt();
+	}
+}
+
 uint64_t Fifo::pktEviction() {
 	uint64_t n=0;
 	uint64_t i;
