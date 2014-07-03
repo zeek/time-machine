@@ -434,7 +434,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 
                 //tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 348", "testing to see whether connection 4 is called after this");
 
-                //tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 350", "adding packet %lu to indices", header->ts.tv_usec);
+                tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 350", "adding packet %lu to indices", header->ts.tv_usec);
 			}
 		} // if (f->addPkt) ... else it was "cut off"
 

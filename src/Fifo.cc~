@@ -129,8 +129,6 @@ uint64_t Fifo::pktEviction() {
 
 // When the connection is subscribed or when a tcp control flag
 // is set, then addPkt is called with a connection NULL pointer
-// This function returns true if we are able to add the packet and returns
-// false otherwise
 bool Fifo::addPkt(const struct pcap_pkthdr* header,
 				  const unsigned char* packet, Connection* c) {
     // started is true when we call Fifo::start() (above member function definition)

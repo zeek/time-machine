@@ -1,0 +1,9 @@
+/* Define if you have the Bro's Broccoli library. */
+#cmakedefine USE_BROCCOLI
+
+/* Version number of package */
+#define VERSION "@VERSION@"
+
+/* Define if `lex' declares `yytext' as a `char *' by default, not a
+   `char[]'. */
+#cmakedefine YYTEXT_POINTER

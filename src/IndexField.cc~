@@ -11,7 +11,7 @@
 #include "IndexField.hh"
 #include "tm.h"
 
-static std::string pattern_ip ("(\\d+\\.\\d+\\.\\d+\\.\\d+)"); // TODO: figure out the structure
+static std::string pattern_ip ("(\\d+\\.\\d+\\.\\d+\\.\\d+)");
 static std::string pattern_ipport ("(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+)");
 
 

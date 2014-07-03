@@ -79,7 +79,7 @@ void ConnectionID3::init(proto_t proto,
 void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
 
     // DEBUG DEBUG DEBUG
-	tmlog(TM_LOG_DEBUG, "connection 2: Connection.cc, ~line 82", "connection 2 initialized");
+	tmlog(TM_LOG_DEBUG, "connection 2: Connection.cc, ~lilne 82", "connection 2 initialized");
 
 	if (addr_port_canon_lt(s_ip,d_ip,0,0)) {
 		//    v.is_canonified=true;

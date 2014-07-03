@@ -292,7 +292,7 @@ void Index<T>::addEntry(IndexField *iqe) {
 	last_updated = iqe->ts;
 
     // Note that old hash table is now the formerly current hash table. So, it is in the memory, and we can do look up on it
-    // This must be the table that Aashish says that indexes do not persist
+    // This must be the table that Aashish says does not persist
 }
 
 template <class T>

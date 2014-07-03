@@ -61,7 +61,6 @@ static char pcap_errbuf[PCAP_ERRBUF_SIZE];
 // according to netdude online,
 // debug: enables debugging output when set to a value >= 1, and disables it when set to 0. Initialially, it is disabled.
 // calldepth_limit: you can limit the calldepth up to which debugging output is displayed, to avoid excessive logging. By default, everything is logged (loglevel 0) O.o
-// The function initializes the static options of the library, such as debugging switches etc.
 void
 pcapnav_init(void)
 {

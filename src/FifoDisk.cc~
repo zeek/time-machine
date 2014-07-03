@@ -170,7 +170,7 @@ uint64_t FifoDisk::query(QueryRequest *qreq, QueryResult *qres,
 
 
 /***************************************************************************
- * FifoDiskFile - seems to be for querying
+ * FifoDiskFile
  */
 
 FifoDiskFile::FifoDiskFile(const std::string& filename, pcap_t* pcap_handle):

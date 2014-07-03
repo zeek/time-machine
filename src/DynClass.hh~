@@ -26,7 +26,7 @@ public:
 
 	IPAddress *key;
 	Fifo *target;
-    // direction, probably means direction of the packet (source, destination, maybe both (see Storage.cc))
+    // direction, probably means direction of the packet (source, destination, maybe both)
 	int dir;
 	tm_time_t timeout;
 

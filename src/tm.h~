@@ -13,7 +13,7 @@
  * sanity-checks etc. is run. Only define it, if you need it, since it
  * may slow down the TM considerable. 
  * That's why we don't allow it to be set via configure */
-#define TM_HEAVY_DEBUG 1
+#define TM_HEAVY_DEBUG
 
 class Storage;
 extern Storage *storage;

@@ -69,8 +69,6 @@ set(timemachine_SRCS
     types.h
 )
 
-set(CMAKE_CXX_FLAGS "-g -Wall")
-
 set(tm_query_benchmark_SRCS
     tm_query_benchmark.cc
 )

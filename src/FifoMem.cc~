@@ -209,7 +209,6 @@ uint64_t FifoMem::popPkt() {
 	return n;
 }
 
-// This goes to FifoMemEvictionHandler::pktEviction() in FifoMem.hh
 uint64_t FifoMem::pktEviction() {
 	if (eviction_handler)
 		return eviction_handler->pktEviction();

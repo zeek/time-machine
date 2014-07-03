@@ -4,6 +4,9 @@ main {
 	## The device to sniff.
 	device "eth0";
 
+	# tracefile to read
+	read_tracefile "/home/lakers/randompackets.pcap";
+
 	## Directories for packet captures, logs, and indexes. 
 	## These directories must exist when timemachine starts!
 	workdir "/home/lakers/timemachine_results";
@@ -26,6 +29,8 @@ main {
 	## information.
 	log_interval 60;
 
+    log_level 20;
+
 	## A BPF filter to apply before sniffing any traffic.
 	#filter "not port 80";
 
@@ -35,7 +40,7 @@ main {
 	conn_timeout 180;
 
 	## Set this to '0' to disable the remote console.
-	rmtconsole  1;
+	rmtconsole  0;
 	rmtconsole_listen_addr 128.3.11.244;
 	rmtconsole_port 42042;
 
@@ -54,38 +59,11 @@ main {
 	index "ip" disk;
 }
 
-class "UDP_DNS" {
-	filter "port 53";
-	precedence 5;
-	cutoff 10k;
-	disk 1g;
-	filesize 1m;
-	mem 10k;
-}
-
-class "HTTP" {
-	filter "port 80";
-	precedence 5;
-	cutoff 10k;
-	disk 1g;
-	filesize 1m;
-	mem 10k;
-}
-
-class "ICMP_ping" {
-	filter "icmp";
-	precedence 2;
-	cutoff 10k;
-	disk 1g;
-	filesize 200k;
-	mem 10k;
-}
-
-class "rest" {
+class "all" {
 	filter "";
-	precedence 1;
+	precedence 10;
 	cutoff 10k;
-	disk 1g;
+	disk 5g;
 	filesize 1m;
-	mem 10k;
+	mem 20k;
 }

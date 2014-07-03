@@ -177,7 +177,6 @@ void IndexHash::rebalance(IndexEntry *cur) {
 	
 }
 
-// initial walk/path for avl tree transversal
 void IndexHash::initWalk (void) {
 	tnext = troot;
 	tcur = tprev = NULL;

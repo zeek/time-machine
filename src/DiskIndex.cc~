@@ -235,9 +235,6 @@ void IndexFiles<T>::lookup(IntervalSet *iset, IndexField *key, tm_time_t t0, tm_
 
 #define EPS 1e-3
 template <class T>
-
-// This function writes the key, the time interval of the IndexEntry, the overall time interval of the index,
-// and the keysize in network byte order
 void IndexFiles<T>::writeIndex( IndexHash *ih) {
 	tmlog(TM_LOG_DEBUG, "writeIndex", "beginning to write index");
     // Object type that identifies a stream and contains the information needed to control 

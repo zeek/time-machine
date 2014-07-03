@@ -334,7 +334,6 @@ public:
 			had_to_wait++;
 			return EBUSY;
 		}
-        // returns 0 if lock was successfully achieved
 		return pthread_mutex_trylock(&disk_write_mutex);
 	}
 	void unlockDiskWrite() {

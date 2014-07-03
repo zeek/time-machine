@@ -110,7 +110,3 @@ the infamous hash table with IndexEntry that doubles as an AVL tree
 the writing to files on disk (not really a data structure, but meh, sort of counts)
 
 
-seems liek the difference between held_bytes and tot_bytes (and simialr with packets) is that held_bytes only counts the bytes that are currently in the
-buffer while tot_bytes counts all the bytes, including the ones that were popped from the buffer
-
-

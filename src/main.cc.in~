@@ -340,7 +340,7 @@ void *index_aggregation_thread(void *arg) {
 	while (1) {
 		sleep(2);
         // NOTE NOTE NOTE
-    	//tmlog(TM_LOG_NOTE, "index aggregation thread", "Index aggregation thread active");
+    	tmlog(TM_LOG_NOTE, "index aggregation thread", "Index aggregation thread active");
 		storage->aggregateIndexFiles();
 	}
 	return NULL;
