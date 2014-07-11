@@ -13,7 +13,11 @@
 
 class IndexField;
 
+//typedef enum { IPv4, IPv6 } IPFamily;
+
+
 #include "Connection.hh"
+#include "IPAddr.h"
 
 /** IndexField: Base class for all index "keys".
  *
@@ -63,12 +67,73 @@ class SrcIPAddress;
 class DstIPAddress;
 class IPAddress: public IndexField {
 public:
-	IPAddress(uint32_t ip): ip_address(ip) {}
-	IPAddress(const char* s): ip_address(inet_addr(s)) {}
+
+    typedef IPFamily Family;
+
+/*
+	IPAddress(uint32_t ip): ip_address(ip), AFtype(AF_INET), AFtypelength(INET_ADDRSTRLEN), strIP(new char[INET_ADDRSTRLEN]) {
+    }
+*/
+
+    IPAddress(uint32_t ip)
+    {
+        ipv4_address.s_addr = ip;        
+        IPAddr(ipv4_address);
+    }
+/*
+    IPAddress(unsigned char ip6[])
+    {
+        std::copy(ip6, ip6 + 16, ip6_address);
+        AFtype = AF_INET6;
+        AFtypelength = INET6_ADDRSTRLEN;
+        strIP = new char[INET6_ADDRSTRLEN];
+    }
+*/
+
+    IPAddress(unsigned char ip6[])
+    {
+        memcpy(ipv6_address.s6_addr, ip6, 16);
+        IPAddr(ipv6_address);
+    }
+/*
+    // The inet_addr() function converts the Internet host address cp from IPv4 
+    // numbers-and-dots notation into binary data in network byte order.
+    // inet_pton() function does it for either IPv4 or IPv6 addresses
+	IPAddress(const char* s, char strIP[]) 
+    {
+        if (AFtype == AF_INET)
+            ip_address = inet_pton(AFtype, s, strIP);
+        else
+            //memcpy(ip6_address, (char)((unsigned int) inet_pton(AFtype, s, strIP)), 16);
+            sprintf(ip6_address, "%d", inet_pton(AFtype, s, strIP));
+            //ip6_address = inet_pton(AFtype, s, strIP);
+    }
+*/
+
+    IPAddress(const char* str_arg)
+    {
+        Init(str_arg);
+    }
 	IPAddress(void *p) {
 		memcpy((void*)getConstKeyPtr(), p, getKeySize());
 	}
-	virtual ~IPAddress() {};
+	virtual ~IPAddress() {
+        delete [] strIP;
+    };
+
+
+	/**
+	 * Returns the address' family.
+	 */
+    
+	Family GetFamily() const
+		{
+		if ( memcmp(in6.s6_addr, v4_mapped_prefix, 12) == 0 )
+			return IPv4;
+		else
+			return IPv6;
+		}
+    
 	virtual uint32_t hash() const {
 		// TODO: initval
 		return hash1words(ip_address, 0);
@@ -102,19 +167,40 @@ public:
 	static IndexField* parseQuery(const char *query);
 	virtual void getBPFStr(char *, int) const;
 private:
+
+	/**
+	 * Initializes an address instance from a string representation.
+	 *
+	 * @param s String containing an IP address as either a dotted IPv4
+	 * address or a hex IPv6 address.
+	 */
+	void Init(const std::string& s);
+
+	in6_addr in6; // IPv6 or v4-to-v6-mapped address
+
+	static const uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
+
 	uint32_t ip_address;
-	static std::string pattern;
+    unsigned char ip6_address[16]; // unsigned char ip6_address[16]
+ 	static std::string pattern;
+    static std::string pattern6;
 	static RE2 re;
+    static RE2 re6;
+    int AFtype;
+    int AFtypelength;
+    unsigned char *strIP;
+    in4_addr ipv4_address;
+    in6_addr ipv6_address;
 };
 
 class SrcIPAddress: public IPAddress {
 public:
-	SrcIPAddress(uint32_t ip): IPAddress(ip) {
-    tmlog(TM_LOG_DEBUG, "SrcIPAddress", "the source ip address is: %lu", ip);
-    }
-	SrcIPAddress(const char* ip): IPAddress(ip) {
-    tmlog(TM_LOG_DEBUG, "SrcIPAddress", "the source ip address is: %s", ip);
-    }
+	SrcIPAddress(uint32_t ip): IPAddress(ip) {}
+    SrcIPAddress(unsigned char ip6[]): IPAddress(ip6) {}
+	//SrcIPAddress(const char* ip, char strIP[]): IPAddress(ip, strIP) {}
+
+    SrcIPAddress(const char* ip): IPAddress(ip) {}
+
 	SrcIPAddress(const u_char* packet);
 	static std::list<SrcIPAddress*> genKeys(const u_char* packet);
 	static int keysPerPacket() {
@@ -138,7 +224,11 @@ public:
 class DstIPAddress: public IPAddress {
 public:
 	DstIPAddress(uint32_t ip): IPAddress(ip) {}
-	DstIPAddress(const char* ip): IPAddress(ip) {}
+    DstIPAddress(unsigned char ip6[]): IPAddress(ip6) {}
+	//DstIPAddress(const char* ip, char strIP[]): IPAddress(ip, strIP) {}
+
+    DstIPAddress(const char* ip): IPAddress(ip) {}
+
 	DstIPAddress(const u_char* packet);
 	static std::list<DstIPAddress*> genKeys(const u_char* packet);
 	static int keysPerPacket() {
@@ -255,6 +345,11 @@ public:
 	ConnectionIF4(proto_t proto, uint32_t ip1, uint16_t port1,
 				  uint32_t ip2, uint16_t port2):
 	c_id(proto, ip1, ip2, port1, port2) {} 
+
+    ConnectionIF4(proto_t proto, unsigned char ip6_1[], uint16_t port1,
+                  unsigned char ip6_2[], uint16_t port2):
+    c_id(proto, ip6_1, ip6_2, port1, port2) {}
+
 	ConnectionIF4(const u_char* packet):
 	c_id(packet) {} 
 	ConnectionIF4(ConnectionID4 c):
@@ -313,7 +408,9 @@ public:
 private:
 	ConnectionID4 c_id;
 	static std::string pattern_connection4;
+    static std::string pattern6_connection4;
 	static RE2 re;
+    static RE2 re6;
 };
 
 
@@ -322,6 +419,11 @@ public:
 	ConnectionIF3(proto_t proto, uint32_t ip1, 
 				  uint32_t ip2, uint16_t port2):
 	c_id(proto, ip1, ip2, port2) {}
+
+	ConnectionIF3(proto_t proto, unsigned char ip6_1[], 
+				  unsigned char ip6_2[], uint16_t port2):
+	c_id(proto, ip6_1, ip6_2, port2) {}
+
 	ConnectionIF3(const u_char* packet, int wildcard_port):
 	c_id(packet, wildcard_port) {}
 	ConnectionIF3(ConnectionID3 c_id):
@@ -381,7 +483,9 @@ public:
 private:
 	ConnectionID3 c_id;
 	static std::string pattern_connection3;
+    static std::string pattern6_connection3;
 	static RE2 re;
+    static RE2 re6;
 };
 
 
@@ -389,6 +493,10 @@ class ConnectionIF2: public IndexField {
 public:
 	ConnectionIF2(uint32_t ip1, uint32_t ip2):
 	c_id(ip1, ip2) {}
+
+	ConnectionIF2(unsigned char ip6_1[], unsigned char ip6_2[]):
+	c_id(ip1, ip2) {}
+
 	ConnectionIF2(const u_char* packet):
 	c_id(packet) {}
 	ConnectionIF2(ConnectionID2 c_id):
@@ -446,7 +554,9 @@ public:
 private:
 	ConnectionID2 c_id;
 	static std::string pattern_connection2;
+    static std::string pattern6_connection2;
 	static RE2 re;
+    static RE2 re6;
 };
 
 inline IPAddress* IPAddress::genKey (const u_char* packet, int keynum)

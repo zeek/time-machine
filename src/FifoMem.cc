@@ -275,6 +275,12 @@ inline tm_time_t pkt_t (pkt_ptr p) {
 	return to_tm_time(&((struct pcap_pkthdr*)p)->ts);
 }
 
+// note that pkt_ptr is u_char* (typedef in types.h)
+// makes sure that the packet pointer is before end + size
+// if packet pointer is before end, return the pointer,
+// else return the pointer - size (which will be before end)
+// recall that end is position after last byte of block (start+size)
+// recall that size is size of block in bytes
 inline pkt_ptr FifoMem::block (pkt_ptr p) {
 	assert (p<end+size);
 	return p<end ? p : p-size;

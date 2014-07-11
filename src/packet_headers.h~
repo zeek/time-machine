@@ -57,7 +57,7 @@ struct icmphdr {
 #define TCP(packet)         ((struct tcphdr *)((char*)IP(packet)+IP_HDR_LEN(packet)))
 #define UDP(packet)         ((struct udphdr *)((char*)IP(packet)+IP_HDR_LEN(packet)))
 
-#define TCP6(packet)         ((struct tcphdr *)((char*)IP6(packet)+IP6_HDR_LEN))
-#define UDP6(packet)         ((struct udphdr *)((char*)IP6(packet)+IP6_HDR_LEN))
+#define TCP6(packet)         ((struct tcphdr *)((char*)IP6(packet)+IP_HDR_LEN(packet)))
+#define UDP6(packet)         ((struct udphdr *)((char*)IP6(packet)+IP_HDR_LEN(packet)))
 
 #endif

@@ -25,9 +25,6 @@
 void callback(u_char *args, const struct pcap_pkthdr *header,
 			  const u_char *packet) {
 
-    // DEBUG DEBUG DEBUG
-	//tmlog(TM_LOG_DEBUG, "storage callback: Storage.cc, ~line 29", "Callback function for pcap_loop%lu", header->ts.tv_usec);
-
 	Storage *storage = (Storage *)args;
 
 	//FIXME: put these counters somewhere else
@@ -42,6 +39,9 @@ void callback(u_char *args, const struct pcap_pkthdr *header,
 	}
 	network_time=header->ts;
 	*/ 
+
+    // DEBUG DEBUG DEBUG
+	tmlog(TM_LOG_DEBUG, "storage callback: Storage.cc, ~line 29", "Callback function for pcap_loop%lu", header->ts.tv_usec);
 
 	storage->addPkt(header, packet);
 
@@ -269,19 +269,28 @@ void Storage::cancelThread() {
 void Storage::addPkt(const struct pcap_pkthdr *header,
 					 const unsigned char *packet) {
 	uint16_t ether_type=ntohs(ETHERNET(packet)->ether_type);
-	if ( ! (ether_type==ETHERTYPE_IP || ether_type==0x8100) ) {
+    // ETHERTYPE_IP is EtherType 0x800, for IPv4 addresses
+    // EtherType 0x8100 is for VLAN header
+    // EtherType 0x86DD is for IPv6 addresses
+    // EtherType is a field in the ethernet header frame
+	if ( ! (ether_type==ETHERTYPE_IP || ether_type==0x8100 || ether_type==0x86DD) ) {
+
+        tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 240", "unknown ether_type 0x%.4X", ether_type);
+
 		//    fprintf(stderr,"unknown ether_type 0x%.4X\n", ether_type);
 		return;
 	}
 
     // DEBUG DEBUG DEBUG
-	tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 240", "adding packet %lu !", header->ts.tv_usec);
+	tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 240", "adding packet %lu !", header->ts.tv_usec);
 
 	const unsigned char* idxpacket=packet;
 	// skip VLAN header (related to ethernet frame header) for indexing TODO: look at VLAN header more closely
+    // Virtual Bridged Local Area Network for logically group network devices together, which share the same 
+    // physical network. VLAN tag is 4 bytes and so a VLAN header is 4 bytes longer than a regular ethernet header
 	if (ether_type==0x8100) idxpacket+=4;
     // DEBUG DEBUG DEBUG
-    tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 246", "ethernet phase/physical layer complete for packet %lu", header->ts.tv_usec);
+    tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 246", "ethernet phase/physical layer complete for packet %lu", header->ts.tv_usec);
 
     // set now to be the time stamp field of the pcap packet header
 	tm_time_t now = to_tm_time(&header->ts);
@@ -295,7 +304,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 
     // a flow of packets characterized by the 5-tuple of (layer 4 protocol, source ip, source port, destination ip, destination port)
     // note that for protocols other than tcp/udp, may not include source/dest ports
-    tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 255", "updating connection state to have the packet %lu", header->ts.tv_usec);
+    tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 255", "updating connection state to have the packet %lu", header->ts.tv_usec);
     // get class for connection
 	Fifo *f=c->getFifo();
 	QueryResult *qr=c->getSubscription();
@@ -397,7 +406,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 
 		bool tcp_ctrl_flag=false;
         // making sure that the transport protocol is of TCP - packet_header
-		if (IP(packet)->ip_p==IPPROTO_TCP)
+		if (IP(packet)->ip_p==IPPROTO_TCP || )
             // tcp control flags, if true, set the tcp control flag to true
             // 
 			if (TCP(packet)->th_flags & ( TH_FIN | TH_SYN | TH_RST ))
@@ -424,7 +433,12 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 			uncut_pkt_cnt++;
 
 			/* update indexes, creates an input queue of IndexFields TODO: think about this for loop more - does it do this for all the packets? */
-            /* It seems like it does it for all the packets that fulfill the if statement, goes through all the indexes, ip, connection2, connection3, connection4*/
+            /* It seems like it does it for all the packets that fulfill the if statement, goes through all the applicable indexes (ip, connection2, connection3,
+               connection4). look at conf_parser.yy, at the conf_add_index method which seems to addIndex (method of Indexes) if applicable
+               note that indexes is of type Indexes, which is in index.hh. An Index Object that is added to Indexes is owned by Indexes 
+               I.e. Indexes will take care of deallocation the storage for
+               Index.
+            */
 			for (std::list<IndexType*>::iterator i=indexes->begin();
 					i!=indexes->end();
 					i++) {
@@ -434,7 +448,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 
                 //tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 348", "testing to see whether connection 4 is called after this");
 
-                tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 350", "adding packet %lu to indices", header->ts.tv_usec);
+                //tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 350", "adding packet %lu to indices", header->ts.tv_usec);
 			}
 		} // if (f->addPkt) ... else it was "cut off"
 

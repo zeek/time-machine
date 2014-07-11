@@ -139,9 +139,7 @@ protected:
     v6_t v6;
 private:
 	static std::string pattern_connection4;
-    static std::string pattern6_connection4;
 	static RE2 re;
-    static RE2 re6;
 };
 
 class ConnectionID3: public ConnectionID {

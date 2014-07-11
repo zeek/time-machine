@@ -292,7 +292,8 @@ void Index<T>::addEntry(IndexField *iqe) {
 	last_updated = iqe->ts;
 
     // Note that old hash table is now the formerly current hash table. So, it is in the memory, and we can do look up on it
-    // This must be the table that Aashish says does not persist
+    // This must be the table that Aashish says that indexes do not persist, part of of index persistence (other part is
+    // the querying cannot query the stuff in disk, which will be looked into later
 }
 
 template <class T>
@@ -331,7 +332,7 @@ void Index<T>::lookupMem(IntervalSet *set, IndexField* key) {
 	ie = old->lookup(key);
 	if (ie!=NULL) {
 		set->add(ie);
-		tmlog(TM_LOG_DEBUG, "query", "Index::lookupMem adding index entry to intset");
+		tmlog(TM_LOG_DEBUG, "query", "Index::lookupMem adding index entry to intset using old");
 	}
 	/* Add a dummy interval, ranging from "now" FAR into the
 	 * future.

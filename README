@@ -97,7 +97,7 @@ then eventually write the hash table term into the disk.
 
 start at definition of capture thread in storage.cc
 
-there are 5 known data structures into play
+there are 5+ known data structures into play
 
 FIFO memory ring buffer
 

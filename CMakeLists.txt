@@ -37,6 +37,18 @@ endif ()
 
 set(CMAKE_CXX_FLAGS "-g -Wall")
 
+#detect 32 or 64 bit compiler
+# Also in config.h.in
+IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86|x86_64)$")
+    include(CheckTypeSize)
+    check_type_size("void*" SIZEOF_VOID_P BUILTIN_TYPES_ONLY)
+    if (${SIZEOF_VOID_P} EQUAL 8)
+        set(CMAKE_SYSTEM_PROCESSOR_x86 64)
+    else()
+        set(CMAKE_SYSTEM_PROCESSOR_x86 32)
+    endif()
+ENDIF()
+
 ########################################################################
 ## System Introspection
 
