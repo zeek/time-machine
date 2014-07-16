@@ -188,6 +188,8 @@ public:
 
     hash_t hash() const;
 
+    hash_t hash_key;
+
 protected:
 	void init(proto_t proto, uint32_t s_ip, uint32_t d_ip,
 			  uint16_t s_port, uint16_t d_port);
@@ -195,6 +197,7 @@ protected:
                uint16_t s_port, uint16_t d_port);
 	//v_t v;
     v6_t v6;
+
 private:
 	static std::string pattern_connection4;
     static std::string pattern6_connection4;
@@ -202,10 +205,6 @@ private:
     static RE2 re6;
 
 	//in6_addr in6; // IPv6 or v4-to-v6-mapped address
-
-
-    in4_addr ipv4_d_address;
-    in4_addr ipv4_s_address;
 };
 
 class ConnectionID3: public ConnectionID {
@@ -340,7 +339,8 @@ public:
 */
 
     hash_t hash() const;
-  
+
+    hash_t hash_key;  
 protected:
 	void init(proto_t proto, uint32_t s_ip, uint32_t d_ip, uint16_t port);
     void init6(proto_t proto, unsigned char s_ip[], unsigned char d_ip[], 
@@ -348,13 +348,11 @@ protected:
 	//v_t v;
     v6_t v6;
 
-private:
+
+//private:
 	//in6_addr in6; // IPv6 or v4-to-v6-mapped address
 
 	//static const uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
-
-    in4_addr ipv4_d_address;
-    in4_addr ipv4_s_address;
 };
 
 
@@ -468,20 +466,19 @@ public:
 */
 
     hash_t hash() const;
+
+    hash_t hash_key;
+
 protected:
 	void init(uint32_t s_ip, uint32_t d_ip);
     void init6( unsigned char s_ip[], unsigned char d_ip[]);
 	//v_t v;
     v6_t v6;
 
-private:
+//private:
 	//in6_addr in6; // IPv6 or v4-to-v6-mapped address
 
 	//static const uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
-
-    in4_addr ipv4_d_address;
-    in4_addr ipv4_s_address;
-
 };
 
 

@@ -20,6 +20,8 @@
 #include "Hash.h"
 
 #include "H3.h"
+
+#include "tm.h"
 const H3<hash_t, UHASH_KEY_SIZE>* h3;
 
 void init_hash_function()
@@ -142,11 +144,14 @@ HashKey::HashKey(const void* arg_key, int arg_size, hash_t arg_hash,
 HashKey::HashKey(const void* bytes, int arg_size)
 	{
 	size = arg_size;
+    tmlog(TM_LOG_NOTE, "HashKey", "Copying Key...");
     //printf("Copying key...\n");
 	key = CopyKey(bytes, size);
     //printf("Creating Hash...");
+    tmlog(TM_LOG_NOTE, "HashKey", "Creating Hash...");
 	hash = HashBytes(key, size);
 	is_our_dynamic = 1;
+    tmlog(TM_LOG_NOTE, "HashKey", "Done creating hash");
 	}
 
 void* HashKey::TakeKey()
@@ -175,8 +180,8 @@ hash_t HashKey::HashBytes(const void* bytes, int size)
 		// H3 doesn't check if size is zero
         //printf("Doing H3...\n");
 
-        //if (size != 0)
-        //    printf("The resulting hash is %lu\n", (*h3)(bytes, size));
+        if (size != 0)
+            tmlog(TM_LOG_NOTE, "HashBytes", "The resulting hash is %lu\n", (*h3)(bytes, size));
 
 		return ( size == 0 ) ? 0 : (*h3)(bytes, size);
 		}

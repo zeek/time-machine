@@ -251,7 +251,7 @@ void IndexFiles<T>::writeIndex( IndexHash *ih) {
                         // a single IndexEntry entry
 	tm_time_t interval[2];  // the current interval
 	tm_time_t range[2] = {0, 0};  // First TS in index and last TS in index
-	uint64_t keysize = 0; // size of key (can be taken from IndexEntry->getKey()->getKeySize() )
+	int keysize = 0; // size of key (can be taken from IndexEntry->getKey()->getKeySize() )
 
 	lock_file_numbers();
     // gets the file name from aggregation level and file number, puts it in a char array
@@ -333,6 +333,7 @@ void IndexFiles<T>::writeIndex( IndexHash *ih) {
     
         // set the indexentry to be written to be disk to be the next visited and deleted entry from the hash table
 		ie=ih->getNextDelete();
+        tmlog(TM_LOG_NOTE, "DiskIndex:wrting", "Deleting the IndexEntry type from the hash table");
 	}
 	tmlog(TM_LOG_DEBUG, T::getIndexNameStatic().c_str(), 
 			"Heigth of tree was: %d. level=%d. we wrote %d entries.", ih->height, ih->level, count);

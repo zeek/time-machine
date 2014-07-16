@@ -193,7 +193,7 @@ protected:
 	 * YOU MUST HOLD THE queue_lock WHEN CALLING THIS */
 	void cond_broadcast_queue() {
 		pthread_cond_broadcast(&queue_cond);
-        tmlog(TM_LOG_DEBUG, "Mantainer IndexThread", "signaling to Maintainer IndexThread that we added something to the queue");
+	    tmlog(TM_LOG_DEBUG, "Mantainer IndexThread", "signaling to Maintainer IndexThread that we added something to the queue");
 	}
 	/** 
 	 * Wait for signal, that data is availabe in the queue 

@@ -11,24 +11,31 @@ IndexHash::IndexHash(size_t size) {
 }
 
 IndexHash::~IndexHash() {
-	clear();
+	clear(); // removing this clear feels dangerous, not sure why it is failing
 	delete []htable;
 }
 
 int IndexHash::clear() {
-	IndexEntry *col_cur, *col_next;
+	IndexEntry *col_cur, *col_nextt;
 	unsigned count = 0;
 	
 	troot = tnext = tprev = tcur = NULL;
 	for (unsigned i=0; i<numBuckets; i++) {
-		col_next = htable[i];
-		while (col_next) {
-			col_cur = col_next;
-			col_next = col_cur->col_next;
+		col_nextt = htable[i];
+		while (col_nextt) {
+            tmlog(TM_LOG_NOTE, "idxhash: clear()", "entering the while loop for deletion for bucket number %d", i);
+			col_cur = col_nextt;
+            IndexField *key_curr;
+            key_curr = col_nextt->getKey();
+            if (key_curr != NULL)
+                //tmlog(TM_LOG_NOTE, "idxhash: clear()", "the entry to delete has key with form %s", key_curr->getIndexName().c_str());
+			col_nextt = col_cur->col_next;
+            tmlog(TM_LOG_NOTE, "idxhash: clear()", "about to delete a collision list entry");
 			delete col_cur;
 			count++;
 		}
 		htable[i]=NULL;
+        //tmlog(TM_LOG_NOTE, "idxhash: clear()", "we make the bucket number %d NULL", i);
 	}
 	assert(count == numEntries);
 	numEntries = 0;
@@ -58,7 +65,6 @@ IndexEntry* IndexHash::lookup( IndexField* key) {
 	curalt = troot;
 	cmp = 0;
 #ifdef TM_HEAVY_DEBUG
-	assert(!lookup(key));
 	if (troot)
 		assert(troot->parent == NULL);
 #endif
@@ -182,6 +188,10 @@ void IndexHash::add(IndexField *key, IndexEntry *ie) {
 	ie->col_next = htable[hval];
 	ie->col_prev = NULL;
 	htable[hval] = ie;
+
+    ie->key->hash_key = hval;
+
+    tmlog(TM_LOG_NOTE, "idxhash", "this entry for which we have foudn the bucket value %d for has this timestamp %f and form %s", hval, key->ts, key->getStr().c_str());
 
     tmlog(TM_LOG_NOTE, "idx_hash", "setting an entry in the hash table at %d", hval);
 	
@@ -329,6 +339,8 @@ void IndexHash::eraseEntry(IndexEntry *ie) {
 		 */
 		htable[ie->key->hash()%numBuckets] = ie->col_next;
 	}
+    tmlog(TM_LOG_NOTE, "IndexHash: eraseEntry", "we are trying to delete the entry at bucket number %d", ie->key->hash_key);
+    htable[ie->key->hash_key] = NULL;
 	delete ie;
 	numEntries--;
 }

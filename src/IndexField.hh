@@ -29,7 +29,7 @@ public:
 	virtual ~IndexField() {};
 	virtual const std::string getIndexName() const = 0;
 	static const std::string getIndexNameStatic();
-	virtual const char* getConstKeyPtr() const=0;
+	virtual const unsigned char* getConstKeyPtr() const=0;
 	//  virtual char* getKeyPtr() { return NULL; }
 	virtual const int getKeySize() const=0;
 	virtual void getStr(char* s, int maxsize) const=0;
@@ -52,7 +52,7 @@ public:
 
     virtual hash_t hash() const = 0;
 
-	virtual hash_t getInt() const=0;
+	virtual const unsigned char* getInt() const= 0;
 	// The Timestamp field is only used, when the IndexField is put into
 	// the input_q of an index? Why? We need a timestamp for every entry
 	// in the input_q. If we take the TS out and use a seperate IndexQueueEntry
@@ -63,6 +63,8 @@ public:
 	tm_time_t ts;
 	
 	virtual void getBPFStr(char *, int) const = 0;
+
+    hash_t hash_key;
 
 	//  IndexField(void *);
 	
@@ -125,6 +127,7 @@ public:
 		memcpy((void*)getConstKeyPtr(), p, getKeySize());
 	}
 	virtual ~IPAddress() {
+        tmlog(TM_LOG_NOTE, "IPAddress", "deleting an ipaddress type");
         //delete [] strIP;
     };
 
@@ -168,15 +171,15 @@ public:
 
 	    return newHashKey->Hash();
 	}
-	virtual hash_t getInt() const {
-		return ip_address;
+	virtual const unsigned char* getInt() const {
+		return ipv6_address.s6_addr;
 	}
-	virtual const char* getConstKeyPtr() const {
-		return (const char*)&ip_address;
+	virtual const unsigned char* getConstKeyPtr() const {
+		return ipv6_address.s6_addr;
 	}
 	//  char* getKeyPtr() { return (char*)&ip_address; }
 	virtual const int getKeySize() const {
-		return sizeof(ip_address);
+		return sizeof(ipv6_address.s6_addr);
 	}
 	virtual void getStr(char* s, int maxsize) const;
 	virtual std::string getStr() const;
@@ -199,6 +202,8 @@ public:
 
 	static IndexField* parseQuery(const char *query);
 	virtual void getBPFStr(char *, int) const;
+
+    hash_t hash_key;
 private:
 
 	/**
@@ -213,7 +218,7 @@ private:
 
 	static const uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
 
-	uint32_t ip_address;
+	//uint32_t ip_address;
     unsigned char ip6_address[16]; // unsigned char ip6_address[16]
  	static std::string pattern;
     static std::string pattern6;
@@ -328,11 +333,17 @@ public:
 	Port(uint16_t port): port(port) {  /* printf("Port(%u)\n", port); */
 	}
 	virtual ~Port() {}
-	virtual hash_t getInt() const {
-		return port;
+
+    // I don't think this is ever used, so returning 0 should be ok
+	virtual const unsigned char* getInt() const {
+        //unsigned char portInt[16];
+
+        //memcpy(portInt, (unsigned char*) &port, sizeof(uint16_t));
+
+		return 0;
 	}
-	virtual const char* getConstKeyPtr() const {
-		return (const char*)&port;
+	virtual const unsigned char* getConstKeyPtr() const {
+		return (const unsigned char*)&port;
 	};
 	//  char* getKeyPtr() { return (char*)&port; };
 	virtual const int getKeySize() const {
@@ -389,6 +400,8 @@ protected:
 
 private:
 	in6_addr ipv6_address; // IPv6 or v4-to-v6-mapped address
+
+    //const unsigned char portInt[16];
 
 	static const uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
 };
@@ -470,11 +483,11 @@ public:
 		return c_id.hash();
 	}
 
-	hash_t getInt() const {
+	const unsigned char* getInt() const {
 		return 0;
 	}
-	virtual const char* getConstKeyPtr() const {
-		return (const char*)c_id.getConstV();
+	virtual const unsigned char* getConstKeyPtr() const {
+		return (const unsigned char*)c_id.getConstV();
 	}
 	//  char* getKeyPtr() { return (char*)c_id.getV(); }
 	virtual const int getKeySize() const {
@@ -520,6 +533,8 @@ public:
 	bool operator==(const char* other_key) const {
 		return c_id==*(ConnectionID4 *)other_key;
 	}
+
+    hash_t hash_key;
 private:
 	ConnectionID4 c_id;
 	static std::string pattern_connection4;
@@ -550,11 +565,11 @@ public:
 	virtual hash_t hash() const {
 		return c_id.hash();
 	}
-	hash_t getInt() const {
+	const unsigned char* getInt() const {
 		return 0;
 	}
-	virtual const char* getConstKeyPtr() const {
-		return (const char*)c_id.getConstV();
+	virtual const unsigned char* getConstKeyPtr() const {
+		return (const unsigned char*)c_id.getConstV();
 	}
 	virtual const int getKeySize() const {
 		return sizeof(*c_id.getConstV());
@@ -602,6 +617,8 @@ public:
 		//printf("ConnectionIF::operator==(const char* other_key)\n");
 		return c_id==*(ConnectionID3 *)other_key;
 	}
+
+    hash_t hash_key;
 private:
 	ConnectionID3 c_id;
 	static std::string pattern_connection3;
@@ -630,13 +647,13 @@ public:
 	virtual hash_t hash() const {
 		return c_id.hash();
 	}
-	hash_t getInt() const {
+	const unsigned char* getInt() const {
 		return 0;
 	}
 	static IndexField* parseQuery(const char *query);
 
-	virtual const char* getConstKeyPtr() const {
-		return (const char*)c_id.getConstV();
+	virtual const unsigned char* getConstKeyPtr() const {
+		return (const unsigned char*)c_id.getConstV();
 	}
 	virtual const int getKeySize() const {
 		return sizeof(*c_id.getConstV());
@@ -680,6 +697,8 @@ public:
 	bool operator==(const char* other_key) const {
 		return c_id==*(ConnectionID2 *)other_key;
 	}
+
+    hash_t hash_key;
 private:
 	ConnectionID2 c_id;
 	static std::string pattern_connection2;

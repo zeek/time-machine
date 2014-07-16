@@ -63,6 +63,9 @@ void ConnectionID4::init(proto_t proto,
     // DEBUG DEBUG DEBUG
 	tmlog(TM_LOG_NOTE, "connection 4: Connection.cc, ~line 48", "connection 4 for ipv4 initialized");
 
+    in4_addr ipv4_d_address;
+    in4_addr ipv4_s_address;
+
     v6.version = 4;
 	v6.proto=proto;
 
@@ -149,6 +152,9 @@ void ConnectionID3::init(proto_t proto,
 
     // DEBUG DEBUG DEBUG
 	tmlog(TM_LOG_DEBUG, "connection 3: Connection.cc, ~line 71", "connection 3 initialized");
+
+    in4_addr ipv4_d_address;
+    in4_addr ipv4_s_address;
 
     v6.version = 4;
 
@@ -446,14 +452,16 @@ bool ConnectionID3::operator==(const ConnectionID& other) const {
 	return (v6.proto == ((ConnectionID3*)&other)->v6.proto)
 		   && (v6.ip1 == ((ConnectionID3*)&other)->v6.ip1)
 		   && (v6.ip2 == ((ConnectionID3*)&other)->v6.ip2)
-		   && (v6.port2 == ((ConnectionID3*)&other)->v6.port2);
+		   && (v6.port2 == ((ConnectionID3*)&other)->v6.port2)
+           && (v6.version == ((ConnectionID3*)&other)->v6.version);
 }
 
 //TODO: MAke this inline (i.e. move to Connection.hh so that it is
 //consistent with ConnectionID4
 bool ConnectionID2::operator==(const ConnectionID& other) const {
 	return (v6.ip1 == ((ConnectionID2*)&other)->v6.ip1)
-		   && (v6.ip2 == ((ConnectionID2*)&other)->v6.ip2);
+		   && (v6.ip2 == ((ConnectionID2*)&other)->v6.ip2)
+           && (v6.version == ((ConnectionID2*)&other)->v6.version);
 }
 
 void ConnectionID4::getStr(char* s, int maxsize) const {
@@ -798,6 +806,10 @@ hash_t ConnectionID4::hash() const
 
     HashKey* newHashKey = new HashKey(&key, sizeof(key));
 
+    //memcpy(&hash_key, newHashKey->Hash(), 8);
+
+    //hash_key = newHashKey->Hash();
+
 	return newHashKey->Hash();
 	}
 
@@ -844,6 +856,8 @@ hash_t ConnectionID3::hash() const
 
     HashKey* newHashKey = new HashKey(&key, sizeof(key));
 
+    //hash_key = newHashKey->Hash();
+
 	return newHashKey->Hash();
 	}
 
@@ -889,6 +903,8 @@ hash_t ConnectionID2::hash() const
     init_hash_function();
 
     HashKey* newHashKey = new HashKey(&key, sizeof(key));
+
+    //hash_key = newHashKey->Hash();
 
 	return newHashKey->Hash();
 	}

@@ -213,6 +213,7 @@ void Index<T>::addEntry(IndexField *iqe) {
 					disk_index->writeIndex(old);
 				} else {
 					// not disk writer, clear the old hash table, though not deleted
+                    tmlog(TM_LOG_NOTE, "Index.cc", "we are clearing the old hash table");
 					old->clear();
 				}
 #ifdef TM_HEAVY_DEBUG
@@ -249,6 +250,7 @@ void Index<T>::addEntry(IndexField *iqe) {
             // 
 			if (hash_size > 2*old->getNumEntries()) { 
                 // Note that we delete cur - this means we delete the formerly old hash table, which has been written to disk
+                tmlog(TM_LOG_NOTE, "Index.cc", "we are about to delete the current (formerly old) hash table");
 				delete cur;
 				cur = new IndexHash(hash_size/2);
 			}
@@ -387,6 +389,7 @@ void Index<T>::run() {
 	int myqlen; 
     // IndexField pointer to last element in the queue
 	IndexField *iqe;
+    tmlog(TM_LOG_NOTE, "addEntry, run", "the size of the input_q is %d before the lock_queue", input_q.size());
 	lock_queue(); // Must have the lock when calling cond_wait
     // run forever
 	while(1) {
@@ -396,9 +399,10 @@ void Index<T>::run() {
 
         tmlog(TM_LOG_NOTE, "addEntry, run", "the size of the input_q is %d before the cond_wait_queue", input_q.size());
 
+        // called from the cond_broadcast_queue
 		cond_wait_queue();
 
-        tmlog(TM_LOG_NOTE, "addEntry, run", "the size of the input_q is %d", input_q.size());
+        tmlog(TM_LOG_NOTE, "addEntry, run", "the size of the input_q is after the cond_wait_queue %d", input_q.size());
 
 		// XXX: Maybe we should read from the queue in burst of, say 10, 
 		// entries, so that we don't have that many lock(), unlock() calls
