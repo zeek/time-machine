@@ -3,7 +3,7 @@
 
 #include <list>
 
-#include "Hash.hh"
+#include "HashIterator.hh"
 
 /*
 template <class T> class Queue {
@@ -48,7 +48,7 @@ template <class K, class V> class Hash;
 
 template <class K, class V> class HashQueue {
 public:
-	HashQueue(uint32_t hash_size);
+	HashQueue(uint64_t hash_size);
 	~HashQueue();
 
 	// Queue

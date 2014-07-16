@@ -330,12 +330,14 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
         // go through the source and destination addresses
 		for (int i=0; i<2; i++) {
 			if (i==0) {
+                tmlog(TM_LOG_NOTE, "Storage:addPkt", "source ip address get key");
                 // get the ip address of source - in the definition in IndexField.hh, the 0 is an option in a 
                 // case statement that is for the ip address of the source
 				ip = SrcIPAddress::genKey(packet, 0);
 				curdir = TM_DYNCLASS_ORIG;
 			}
 			else {
+                tmlog(TM_LOG_NOTE, "Storage:addPkt", "destination ip address get key");
                 // get the ip address of destination - in the definition, the 0 is an option in a case statement
                 // that is for the ip address of destination
 				ip = DstIPAddress::genKey(packet, 0);
@@ -448,7 +450,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 
                 //tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 348", "testing to see whether connection 4 is called after this");
 
-                //tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 350", "adding packet %lu to indices", header->ts.tv_usec);
+                tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 350", "adding packet %lu to indices for this index type %s", header->ts.tv_usec, (*i)->getIndexName().c_str());
 			}
 		} // if (f->addPkt) ... else it was "cut off"
 

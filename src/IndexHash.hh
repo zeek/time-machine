@@ -6,7 +6,7 @@
 #include "tm.h"
 #include "IndexField.hh"
 #include "IndexEntry.hh"
-#include "Hash.hh"
+#include "Hash.h"
 
 
 /* The hash used for the Indexes. 

@@ -93,14 +93,14 @@ public:
 			}
 		private: 
 			const Hash<K,V> *h;
-			uint32_t bucket;
+			uint64_t bucket;
 			typename table_cell_t::iterator it;
 	};
 
 	iterator begin() { return iterator(this); };
 	iterator end() { return iterator(this, true); };
 	table_cell_t* table;
-	uint32_t size;
+	uint64_t size;
 
 	int clear(); 
 	iterator_t add_or_update(K, V);
@@ -119,6 +119,6 @@ protected:
 	inline typename table_cell_t::iterator find_iterator(table_cell_t* entry, const K k);
 };
 
-#include "Hash.cc"
+//#include "Hash.cc"
 
 #endif

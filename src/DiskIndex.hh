@@ -93,10 +93,10 @@ class IndexFileReader {
 		tm_time_t getLast() {
 			return last;
 		}
-		uint32_t getKeySize() {
+		uint64_t getKeySize() {
 			return keysize;
 		}
-		uint32_t getEntrySize() {
+		uint64_t getEntrySize() {
 			return entrysize;
 		}
 		const void *getCurEntry();
@@ -106,7 +106,7 @@ class IndexFileReader {
 		FILE *fp;
 		char *fname;
 		tm_time_t first, last;
-		uint32_t keysize;
+		uint64_t keysize;
 		size_t entrysize;
 		void *buffer;
 		bool eof;
@@ -142,12 +142,12 @@ protected:
 	void aggregate_internal(int level);
 	// Returns a malloc'ed buffer containing the filename for this index.
 	// You must free() the filename after use
-	char *getFilename(int aggregation_level, uint32_t file_number); 
+	char *getFilename(int aggregation_level, uint64_t file_number); 
 	std::string indexname;
 	std::string pathname;
 	int num_aggregate_levels;
-	uint32_t *file_number;
-	uint32_t *file_number_oldest;
+	uint64_t *file_number;
+	uint64_t *file_number_oldest;
 	pthread_mutex_t file_number_mutex;
 };
 

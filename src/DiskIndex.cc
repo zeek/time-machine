@@ -171,8 +171,8 @@ IndexFiles<T>::IndexFiles(const std::string& pathname, const std::string& indexn
 		pathname(pathname),
 		num_aggregate_levels(3)
 		{
-			file_number = new uint32_t[num_aggregate_levels];
-			file_number_oldest = new uint32_t[num_aggregate_levels];
+			file_number = new uint64_t[num_aggregate_levels];
+			file_number_oldest = new uint64_t[num_aggregate_levels];
 			for (int i=0; i<num_aggregate_levels; i++) {
 				file_number[i] = file_number_oldest[i] = 0;
 			}
@@ -187,7 +187,7 @@ IndexFiles<T>::~IndexFiles() {
 }
 
 template <class T>
-char *IndexFiles<T>::getFilename(int aggregation_level, uint32_t file_number) {
+char *IndexFiles<T>::getFilename(int aggregation_level, uint64_t file_number) {
 	int fn_size;
 	char *fn;
 
@@ -203,14 +203,14 @@ char *IndexFiles<T>::getFilename(int aggregation_level, uint32_t file_number) {
 	//                     Sum: 14
 	fn_size = pathname.length() + indexname.length() + 14;
 	fn = (char *)malloc(fn_size);
-	snprintf(fn, fn_size, "%s/%s_%02x_%08x", pathname.c_str(), indexname.c_str(), aggregation_level, file_number);
+	snprintf(fn, fn_size, "%s/%s_%02x_%08lu", pathname.c_str(), indexname.c_str(), aggregation_level, file_number);
 	return fn;
 }
 
 template <class T>
 void IndexFiles<T>::lookup(IntervalSet *iset, IndexField *key, tm_time_t t0, tm_time_t t1) {
 	int level;
-	uint32_t curfile;
+	uint64_t curfile;
 	IndexFileReader *ifr;
 	char *fname;
 
@@ -251,7 +251,7 @@ void IndexFiles<T>::writeIndex( IndexHash *ih) {
                         // a single IndexEntry entry
 	tm_time_t interval[2];  // the current interval
 	tm_time_t range[2] = {0, 0};  // First TS in index and last TS in index
-	uint32_t keysize = 0; // size of key (can be taken from IndexEntry->getKey()->getKeySize() )
+	uint64_t keysize = 0; // size of key (can be taken from IndexEntry->getKey()->getKeySize() )
 
 	lock_file_numbers();
     // gets the file name from aggregation level and file number, puts it in a char array

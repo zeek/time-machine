@@ -11,7 +11,7 @@ template <class T> Queue<T>::~Queue(){
 }
 */
 
-template <class K, class V> HashQueue<K, V>::HashQueue(uint32_t hash_size):
+template <class K, class V> HashQueue<K, V>::HashQueue(uint64_t hash_size):
 hash(hash_size) {}
 
 template <class K, class V> HashQueue<K, V>::~HashQueue() {}

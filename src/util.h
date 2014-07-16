@@ -148,11 +148,9 @@ extern const char* strrchr_n(const char* s, const char* end_of_s, char ch);
 extern int decode_hex(char ch);
 extern unsigned char encode_hex(int h);
 extern int strcasecmp_n(int s_len, const char* s, const char* t);
-/*
 #ifndef HAVE_STRCASESTR
-extern char* strcasestr(const char* s, const char* find);
+//extern char* strcasestr(const char* s, const char* find);
 #endif
-*/
 extern const char* strpbrk_n(size_t len, const char* s, const char* charset);
 template<class T> int atoi_n(int len, const char* s, const char** end, int base, T& result);
 extern char* uitoa_n(uint64 value, char* str, int n, int base, const char* prefix=0);

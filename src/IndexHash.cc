@@ -1,4 +1,6 @@
 #include "IndexHash.hh"
+#include <iostream>
+
 IndexHash::IndexHash(size_t size) {
 	htable = new hash_t[size];
 	numEntries = 0;
@@ -35,16 +37,74 @@ int IndexHash::clear() {
 
 
 IndexEntry* IndexHash::lookup( IndexField* key) {
-	IndexEntry *cur;
+	//IndexEntry *cur;
 
-	cur = htable[key->hash()%numBuckets];
+    tmlog(TM_LOG_NOTE, "idxhash", "checking that there is not a similar key for this timestamp: %f and info: %s", key->ts, key->getStr().c_str());
+    //printf("This key has the following form: " + key->getStr() + "\n");
+
+    //std::cout << "This key has the following form: " << key->getStr() << std::endl;
+
+	//cur = htable[key->hash()%numBuckets];
+
+	//cur = htable[key->getInt()%numBuckets];
+
+    tmlog(TM_LOG_NOTE, "idxhash", "the hash is: %u for this timestamp %f and form %s", key->hash(), key->ts, key->getStr().c_str());
+    tmlog(TM_LOG_NOTE, "idxhash", "the index is: %u for this timestamp %f and form %s", key->hash()%numBuckets, key->ts, key->getStr().c_str());
+    tmlog(TM_LOG_NOTE, "idxhash", "the number of buckets is %d for this timestampe %f and form %s", numBuckets, key->ts, key->getStr().c_str());
+
+    // testing out the other method in add method to determine if this would help
+	IndexEntry *curalt;
+	int cmp;
+	curalt = troot;
+	cmp = 0;
+#ifdef TM_HEAVY_DEBUG
+	assert(!lookup(key));
+	if (troot)
+		assert(troot->parent == NULL);
+#endif
+	
+    tmlog(TM_LOG_NOTE, "idx_hash: lookup", "the entry to add 'lookup' has key: %d", *(key->getConstKeyPtr()));
+
+    tmlog(TM_LOG_NOTE, "idx_hash: lookup", "the entry to add 'lookup' has timestamp: %f", key->ts);
+
+	while (curalt) {
+#ifdef TM_HEAVY_DEBUG
+		assert(curalt->avlbal>=-1 && curalt->avlbal<=1);
+#endif
+		cmp = memcmp(key->getConstKeyPtr(), curalt->getKey()->getConstKeyPtr(), key->getKeySize());
+		if (cmp > 0)
+			curalt = curalt->left;
+		else if (cmp < 0)
+			curalt = curalt->right;
+		else {
+            tmlog(TM_LOG_NOTE, "idx_hash: lookup", "this is in lookup using the add method checker. the already existing entry is: %d\n", *(curalt->getKey()->getConstKeyPtr()));
+			tmlog(TM_LOG_NOTE, "idx_hash: lookup",  "this is in lookup using the add method checker. tried to insert an already existing entry into the tree. numEntries=%d\n",
+					getNumEntries());
+            break;
+			//h->add_or_update(key, ie);			
+		}
+	}
+
+    if (curalt == NULL)
+        tmlog(TM_LOG_NOTE, "idxhash", "cur is NULL, which means that this entry is allegedly unique");
+
+    return curalt;
+
+/*
 	while (cur != NULL) {
+        tmlog(TM_LOG_NOTE, "idxhash", "going through the keys: %d", *cur->getKey()->getConstKeyPtr());
 		if (*key == *cur->getKey()) {
+        //if (*(key->getConstKeyPtr()) == *(cur->getKey()->getConstKeyPtr())) {
+            tmlog(TM_LOG_NOTE, "idxhash", "the same key was found. the key is %d", *(key->getConstKeyPtr()));
 			break;
 		}
 		cur = cur->col_next;
 	}
+    tmlog(TM_LOG_NOTE, "idx_hash", "this entry has key: %d", *(key->getConstKeyPtr()));
+    if (cur == NULL)
+        tmlog(TM_LOG_NOTE, "idxhash", "cur is NULL, which means that this entry is allegedly unique");
 	return cur;
+*/
 }
 
 void IndexHash::add(IndexField *key, IndexEntry *ie) {
@@ -63,6 +123,10 @@ void IndexHash::add(IndexField *key, IndexEntry *ie) {
 	assert(ie->avlbal == 0);
 #endif
 	
+    tmlog(TM_LOG_NOTE, "idx_hash", "the entry to add has key: %d", *(key->getConstKeyPtr()));
+
+    tmlog(TM_LOG_NOTE, "idx_hash", "the entry to add has timestampe: %f", key->ts);
+
 	while (cur) {
 #ifdef TM_HEAVY_DEBUG
 		assert(cur->avlbal>=-1 && cur->avlbal<=1);
@@ -74,6 +138,7 @@ void IndexHash::add(IndexField *key, IndexEntry *ie) {
 		else if (cmp < 0)
 			cur = cur->right;
 		else {
+            tmlog(TM_LOG_ERROR, "idx_hash", "the already existing entry is: %d\n", *(cur->getKey()->getConstKeyPtr()));
 			tmlog(TM_LOG_ERROR, "idx_hash",  "tried to insert an already existing entry into the tree. numEntries=%d\n",
 					getNumEntries());
 			//h->add_or_update(key, ie);
@@ -117,6 +182,8 @@ void IndexHash::add(IndexField *key, IndexEntry *ie) {
 	ie->col_next = htable[hval];
 	ie->col_prev = NULL;
 	htable[hval] = ie;
+
+    tmlog(TM_LOG_NOTE, "idx_hash", "setting an entry in the hash table at %d", hval);
 	
 	if (ie->col_next != NULL) 
 		ie->col_next->col_prev = ie;

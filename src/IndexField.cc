@@ -9,6 +9,7 @@
 #include <sstream>
 
 #include "IndexField.hh"
+#include "bro_inet_ntop.h"
 #include "tm.h"
 
 const uint8_t IPAddress::v4_mapped_prefix[12] = { 0, 0, 0, 0,
@@ -39,15 +40,22 @@ static std::string pattern_ip6port ("\\[(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4
 /* size of an ip addr in dottet decimal as string: 4x3digits, 
   3 dots, terminating nul byte */
 #define TM_IP_STR_SIZE 16
-static void ip_to_str(uint32_t ip, char *str, int len) {
-#define UCP(x) ((unsigned char *)&(x))
+/*
+static void ip_to_str(const unsigned char* ip, char *str, int len) {
+//#define UCP(x) ((unsigned char *)&(x))
 	str[0] = '\0';
+*/
+    /*
 	snprintf(str, len, "%d.%d.%d.%d",
 			 UCP(ip)[0] & 0xff,
 			 UCP(ip)[1] & 0xff,
 			 UCP(ip)[2] & 0xff,
 			 UCP(ip)[3] & 0xff);
+    */
+/*
+    snprintf(str, len, "%s", ip);
 }
+*/
 /*
 IndexField::IndexField(void *p) {
   memcpy(getConstKeyPtr(), p, getKeySize());
@@ -92,28 +100,38 @@ IndexField* IPAddress::parseQuery(const char *query) {
 
 std::list<IPAddress*> IPAddress::genKeys(const u_char* packet) {
 	std::list<IPAddress*> li;
-	li.push_back(new SrcIPAddress(packet));
-	li.push_back(new DstIPAddress(packet));
+    if (IP(packet)->ip_v == 4)
+    {
+    	li.push_back(new SrcIPAddress(IP(packet)->ip_src.s_addr));
+    	li.push_back(new DstIPAddress(IP(packet)->ip_dst.s_addr));
+    }
+    else
+    {
+    	li.push_back(new SrcIPAddress(IP6(packet)->ip6_src.s6_addr));
+    	li.push_back(new DstIPAddress(IP6(packet)->ip6_dst.s6_addr));
+    }
 	return li;
 }
 
 void IPAddress::getStr(char* s, int maxsize) const {
 	//unsigned char *ucp = (unsigned char *)&ip6_address;
 
-	if ( this->GetFamily() == IPv4 )
+	if ( GetFamily() == IPv4 )
 		{
+        tmlog(TM_LOG_NOTE, "IPAddress", "IPAddress, IPv4");
 		char ucp[INET_ADDRSTRLEN];
 
-		if ( ! inet_ntop(AF_INET, &in6.s6_addr[12], ucp, INET_ADDRSTRLEN) )
+		if ( ! inet_ntop(AF_INET, &ipv6_address.s6_addr[12], ucp, INET_ADDRSTRLEN) )
 			tmlog(TM_LOG_ERROR, "IPAddress", "<bad IPv4 address conversion");
 		else
 			snprintf(s, maxsize, "%s", ucp);
 		}
 	else
 		{
+        tmlog(TM_LOG_NOTE, "IPAddress", "IPAddress, IPv6");
 		char ucp[INET6_ADDRSTRLEN];
 
-		if ( ! inet_ntop(AF_INET6, in6.s6_addr, ucp, INET6_ADDRSTRLEN) )
+		if ( ! inet_ntop(AF_INET6, ipv6_address.s6_addr, ucp, INET6_ADDRSTRLEN) )
 			tmlog(TM_LOG_ERROR, "IPAddress", "<bad IPv6 address conversion");
 		else
 			snprintf(s, maxsize, "%s", ucp);
@@ -143,41 +161,13 @@ std::string IPAddress::getStr() const {
 }
 */
 
-std::string IPAddress::getStr() const
-{
-	if ( this->GetFamily() == IPv4 )
-		{
-		char s[INET_ADDRSTRLEN];
-
-		if ( ! inet_ntop(AF_INET, &in6.s6_addr[12], s, INET_ADDRSTRLEN) )
-			return "<bad IPv4 address conversion";
-		else
-			return s;
-		}
-	else
-		{
-		char s[INET6_ADDRSTRLEN];
-
-		if ( ! inet_ntop(AF_INET6, in6.s6_addr, s, INET6_ADDRSTRLEN) )
-			return "<bad IPv6 address conversion";
-		else
-			return s;
-		}
-}
-
-void IPAddress::getBPFStr(char *str, int max_str_len) const {
-	int rc = snprintf(str, max_str_len, "host %s", getStr().c_str());
-	if ( rc >= max_str_len )
-		tmlog(TM_LOG_ERROR, "query",  "IPAddress::getBPFStr: %s truncated by %d characters",
-				str, rc-max_str_len);
-}
-
 void IPAddress::Init(const std::string& s)
 	{
     // if it could not find :, then it is equal to npos and so IPv4
 	if ( s.find(':') == std::string::npos ) // IPv4.
 		{
-		memcpy(in6.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        tmlog(TM_LOG_NOTE, "IPAddress:Init", "initializing IPAddress, IPv4");
+		memcpy(ipv6_address.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
 
 		// Parse the address directly instead of using inet_pton since
 		// some platforms have more sensitive implementations than others
@@ -190,34 +180,162 @@ void IPAddress::Init(const std::string& s)
 			{
             tmlog(TM_LOG_ERROR, "Bad IP address: %s", s.c_str());
 			//reporter->Error("Bad IP address: %s", s.c_str());
-			memset(in6.s6_addr, 0, sizeof(in6.s6_addr));
+			memset(ipv6_address.s6_addr, 0, sizeof(ipv6_address.s6_addr));
 			return;
 			}
 
 		uint32_t addr = (a[0] << 24) | (a[1] << 16) | (a[2] << 8) | a[3];
 		addr = htonl(addr);
-		memcpy(&in6.s6_addr[12], &addr, sizeof(uint32_t));
+		memcpy(&ipv6_address.s6_addr[12], &addr, sizeof(uint32_t));
 		}
 
 	else
 		{
-		if ( inet_pton(AF_INET6, s.c_str(), in6.s6_addr) <=0 )
+        tmlog(TM_LOG_NOTE, "IPAddress:Init", "initializing IPAddress, IPv6");
+		if ( inet_pton(AF_INET6, s.c_str(), ipv6_address.s6_addr) <=0 )
 			{
             tmlog(TM_LOG_ERROR, "Bad IP address: %s", s.c_str());
 			//reporter->Error("Bad IP address: %s", s.c_str());
-			memset(in6.s6_addr, 0, sizeof(in6.s6_addr));
+			memset(ipv6_address.s6_addr, 0, sizeof(ipv6_address.s6_addr));
 			}
 		}
 	}
 
+std::string IPAddress::getStr() const
+{
+    
+	if ( GetFamily() == IPv4 )
+		{
+        tmlog(TM_LOG_NOTE, "IPAddress: getStr()", "IPAddress, IPv4");
+		char s[INET_ADDRSTRLEN];
 
-SrcIPAddress::SrcIPAddress(const u_char* packet):
-IPAddress(IP(packet)->ip_src.s_addr) {}
+		if ( ! bro_inet_ntop(AF_INET, &ipv6_address.s6_addr[12], s, INET_ADDRSTRLEN) )
+			return "<bad IPv4 address conversion";
+		else
+			return s;
+		}
+	else
+		{
+        
+        tmlog(TM_LOG_NOTE, "IPAddress: getStr()", "IPAddress, IPv6");
+		char s[INET6_ADDRSTRLEN];
+
+		if ( ! bro_inet_ntop(AF_INET6, ipv6_address.s6_addr, s, INET6_ADDRSTRLEN) )
+			return "<bad IPv6 address conversion";
+		else
+			return s;
+		}
+}
+
+std::string IPAddress::getStrPkt(const u_char* packet) const
+{
+    #define UCP(x) ((unsigned char *)&x)
+
+	std::stringstream ss;
+    
+	if (IP(packet)->ip_v == 4)
+		{
+
+        unsigned char ip4[16];      
+
+        memcpy(ip4, ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
+
+	    ss << " ip "
+	    << (UCP(ip4)[0] & 0xff) << "."
+	    << (UCP(ip4)[1] & 0xff) << "."
+	    << (UCP(ip4)[2] & 0xff) << "."
+	    << (UCP(ip4)[3] & 0xff);
+	    return ss.str();
+		}
+	else
+		{   
+
+        tmlog(TM_LOG_NOTE, "IPAddress: getStr(u_char*)", "IPAddress, IPv6");
+		char str[INET6_ADDRSTRLEN];
+
+		if ( ! inet_ntop(AF_INET6, ipv6_address.s6_addr, str, INET6_ADDRSTRLEN) )
+			return "<bad IPv6 address conversion";
+		else
+        {
+            ss << " ip for IPv6"
+
+            << "[" << str << "]";
+			return ss.str();
+        }
+	}
+}
+
+
+void IPAddress::getBPFStr(char *str, int max_str_len) const {
+	int rc = snprintf(str, max_str_len, "host %s", getStr().c_str());
+	if ( rc >= max_str_len )
+		tmlog(TM_LOG_ERROR, "query",  "IPAddress::getBPFStr: %s truncated by %d characters",
+				str, rc-max_str_len);
+}
+
+/*
+SrcIPAddress::SrcIPAddress(const u_char* packet)
+{
+    if (IP(packet)->ip_v == 4)
+    {
+        tmlog(TM_LOG_NOTE, "IndexField.cc: SrcIPAddress", "IPv4 initialization");
+	    new IPAddress(IP(packet)->ip_src.s_addr);
+
+    }
+
+    else
+    {
+        tmlog(TM_LOG_NOTE, "IndexField.cc: SrcIPAddress", "IPv6 initialization");
+        new IPAddress(IP6(packet)->ip6_src.s6_addr);  
+    } 
+}
+*/
+// it might be ok to leave it as it is since Init takes care of the IPv6 part
+//SrcIPAddress::SrcIPAddress(const char* s): IPAddress(s) {}
+
+//SrcIPAddress::SrcIPAddress(const u_char* packet): IPAddress(IP6(packet)->ip6_src.s6_addr) {}
 
 std::list<SrcIPAddress*> SrcIPAddress::genKeys(const u_char* packet) {
 	std::list<SrcIPAddress*> li;
-	li.push_back(new SrcIPAddress(packet));
+    if (IP(packet)->ip_v == 4)
+    	li.push_back(new SrcIPAddress(IP(packet)->ip_src.s_addr));
+    else
+    	li.push_back(new SrcIPAddress(IP6(packet)->ip6_src.s6_addr));
 	return li;
+}
+
+std::string SrcIPAddress::getStrPkt(const u_char* packet) const
+{
+	std::stringstream ss;
+    
+	if (IP(packet)->ip_v == 4)
+		{
+
+        unsigned char *ip4 = (unsigned char *)&(IP(packet)->ip_src.s_addr);      
+
+	    ss << " ip "
+	    << (ip4[0] & 0xff) << "."
+	    << (ip4[1] & 0xff) << "."
+	    << (ip4[2] & 0xff) << "."
+	    << (ip4[3] & 0xff);
+	    return ss.str();
+		}
+	else
+		{   
+
+        tmlog(TM_LOG_NOTE, "SrcIPAddress: getStr(u_char*)", "IPAddress, IPv6");
+		char str[INET6_ADDRSTRLEN];
+
+		if ( ! inet_ntop(AF_INET6, IP6(packet)->ip6_src.s6_addr, str, INET6_ADDRSTRLEN) )
+			return "<bad IPv6 address conversion";
+		else
+        {
+            ss << " ip for IPv6"
+
+            << "[" << str << "]";
+			return ss.str();
+        }
+	}
 }
 
 void SrcIPAddress::getBPFStr(char *str, int max_str_len) const {
@@ -228,14 +346,51 @@ void SrcIPAddress::getBPFStr(char *str, int max_str_len) const {
 }
 
 
-DstIPAddress::DstIPAddress(const u_char* packet):
-IPAddress(IP(packet)->ip_dst.s_addr) {}
+//DstIPAddress::DstIPAddress(const u_char* packet):
+//IPAddress(IP(packet)->ip_dst.s_addr) {}
 
 std::list<DstIPAddress*> DstIPAddress::genKeys(const u_char* packet) {
 	std::list<DstIPAddress*> li;
-	li.push_back(new DstIPAddress(packet));
-	return li;
+    if (IP(packet)->ip_v == 4)
+	    li.push_back(new DstIPAddress(IP(packet)->ip_dst.s_addr));
+    else
+	    li.push_back(new DstIPAddress(IP6(packet)->ip6_dst.s6_addr));
+    return li;
 }
+
+std::string DstIPAddress::getStrPkt(const u_char* packet) const
+{
+	std::stringstream ss;
+    
+	if (IP(packet)->ip_v == 4)
+		{
+        unsigned char *ip4 = (unsigned char *)&(IP(packet)->ip_dst.s_addr);      
+
+	    ss << " ip "
+	    << (ip4[0] & 0xff) << "."
+	    << (ip4[1] & 0xff) << "."
+	    << (ip4[2] & 0xff) << "."
+	    << (ip4[3] & 0xff);
+	    return ss.str();
+		}
+	else
+		{   
+
+        tmlog(TM_LOG_NOTE, "DstIPAddress: getStr(u_char*)", "IPAddress, IPv6");
+		char str[INET6_ADDRSTRLEN];
+
+		if ( ! inet_ntop(AF_INET6, IP6(packet)->ip6_dst.s6_addr, str, INET6_ADDRSTRLEN) )
+			return "<bad IPv6 address conversion";
+		else
+        {
+            ss << " ip for IPv6"
+
+            << "[" << str << "]";
+			return ss.str();
+        }
+	}
+}
+
 
 void DstIPAddress::getBPFStr(char *str, int max_str_len) const {
 	int rc = snprintf(str, max_str_len, "dst host %s", getStr().c_str());
@@ -284,6 +439,13 @@ std::string Port::getStr() const {
 	return ss.str();
 }
 
+std::string Port::getStrPkt(const u_char* packet) const
+{
+	std::stringstream ss;
+	ss << ntohs(port);
+	return ss.str();
+}
+
 void Port::getBPFStr(char *str, int max_str_len) const {
 	int rc = snprintf(str, max_str_len, "port %u", ntohs(port));
 	if ( rc >= max_str_len )
@@ -312,6 +474,13 @@ std::list<SrcPort*> SrcPort::genKeys(const u_char* packet) {
 	return li;
 }
 
+std::string SrcPort::getStrPkt(const u_char* packet) const
+{
+	std::stringstream ss;
+	ss << ntohs(port);
+	return ss.str();
+}
+
 void SrcPort::getBPFStr(char *str, int max_str_len) const {
 	int rc = snprintf(str, max_str_len, "src port %s", getStr().c_str());
 	if ( rc >= max_str_len )
@@ -338,6 +507,13 @@ std::list<DstPort*> DstPort::genKeys(const u_char* packet) {
 	std::list<DstPort*> li;
 	li.push_back(new DstPort(packet));
 	return li;
+}
+
+std::string DstPort::getStrPkt(const u_char* packet) const
+{
+	std::stringstream ss;
+	ss << ntohs(port);
+	return ss.str();
 }
 
 void DstPort::getBPFStr(char *str, int max_str_len) const {
@@ -411,6 +587,20 @@ IndexField* ConnectionIF4::parseQuery(const char *query) {
         }
         return NULL;
     }
+}
+
+void ConnectionIF4:: ip_to_str(const unsigned char* ip, char *str, int len) const {
+//#define UCP(x) ((unsigned char *)&(x))
+	str[0] = '\0';
+    /*
+	snprintf(str, len, "%d.%d.%d.%d",
+			 UCP(ip)[0] & 0xff,
+			 UCP(ip)[1] & 0xff,
+			 UCP(ip)[2] & 0xff,
+			 UCP(ip)[3] & 0xff);
+    */
+
+    snprintf(str, len, "%s", ip);
 }
 
 void ConnectionIF4::getBPFStr(char *str, int max_str_len) const {
@@ -504,6 +694,21 @@ IndexField* ConnectionIF3::parseQuery(const char *query) {
     }
 }
 
+void ConnectionIF3:: ip_to_str(const unsigned char* ip, char *str, int len) const {
+//#define UCP(x) ((unsigned char *)&(x))
+	str[0] = '\0';
+    /*
+	snprintf(str, len, "%d.%d.%d.%d",
+			 UCP(ip)[0] & 0xff,
+			 UCP(ip)[1] & 0xff,
+			 UCP(ip)[2] & 0xff,
+			 UCP(ip)[3] & 0xff);
+    */
+
+    snprintf(str, len, "%s", ip);
+}
+
+
 void ConnectionIF3::getBPFStr(char *str, int max_str_len) const {
 
 	char ip1_str[TM_IP_STR_SIZE];
@@ -571,6 +776,21 @@ IndexField* ConnectionIF2::parseQuery(const char *query) {
         return NULL;
     }
 }
+
+void ConnectionIF2:: ip_to_str(const unsigned char* ip, char *str, int len) const {
+//#define UCP(x) ((unsigned char *)&(x))
+	str[0] = '\0';
+    /*
+	snprintf(str, len, "%d.%d.%d.%d",
+			 UCP(ip)[0] & 0xff,
+			 UCP(ip)[1] & 0xff,
+			 UCP(ip)[2] & 0xff,
+			 UCP(ip)[3] & 0xff);
+    */
+
+    snprintf(str, len, "%s", ip);
+}
+
 
 void ConnectionIF2::getBPFStr(char *str, int max_str_len) const {
 

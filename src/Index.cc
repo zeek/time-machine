@@ -27,7 +27,7 @@
  */
 
 template <class T>
-Index<T>::Index(tm_time_t d_t, uint32_t hash_size, bool do_disk_index, Storage *storage):
+Index<T>::Index(tm_time_t d_t, uint64_t hash_size, bool do_disk_index, Storage *storage):
 		input_q(MyQueue(500000)),
 		cap_thread_iat(0), idx_thread_iat(0),
 		d_t(d_t),
@@ -94,8 +94,8 @@ void Index<T>::addPkt(const pcap_pkthdr* header, const u_char* packet) {
 
 	lock_queue();
     // keysPerPacket is the number of keys per packet
-    // so, for example, a connection2 packet has 2 keys, a connection3 packet
-    // has 3 keys, and a connection4 packet has 4 keys
+    // so, for example, a connectionIF2 has 1 key, connectionIF3 has 2 keys, and a connectionIF4 has 1 key
+    tmlog(TM_LOG_NOTE, "addPkt for indexfields", "there are %d keys for this packet %d", T::keysPerPacket(), header->ts.tv_usec);
 	for (int i=0; i<T::keysPerPacket(); i++) {
         // set curentry to the key, depends on i for which key
         // for example, i = 0 could mean source ip address for some connection type
@@ -108,7 +108,13 @@ void Index<T>::addPkt(const pcap_pkthdr* header, const u_char* packet) {
         // push this IndexField pointer entry to the front of the input queue, which is of type MyQueue
         // (Index.hh)
 		input_q.push_front(curentry);
+
+        tmlog(TM_LOG_NOTE, "addPkt for indexfields", "we are pushing in the front an indexfield to the input queue with timestamp %f and form %s and type %s", \
+        curentry->ts, curentry->getStrPkt(packet).c_str(), curentry->getIndexName().c_str());
+        tmlog(TM_LOG_NOTE, "addPkt: size of input q", "The size of the input queue in the for loop is %d", input_q.size());
 	}
+
+    tmlog(TM_LOG_NOTE, "addPkt: size of input q", "The size of the input queue is %d", input_q.size());
 
     // set the capture thread's oldest time stamp in memory, disk, and interarrival time to be
     // equal to that of storage's oldest time stamp in memory and disk, and interarrival time, 
@@ -124,8 +130,11 @@ void Index<T>::addPkt(const pcap_pkthdr* header, const u_char* packet) {
 	//TODO: Dont' hardcode the qlen 
     // if the input queue gets too full
 	if (input_q.size() > 10) 
+    {
+        tmlog(TM_LOG_NOTE, "addPkt for Index.cc", "we shoudl reach here when the input_q.size is > 10. The input queue size is %d", input_q.size());
         // alert index thread, which is implemented in the run() method
 		cond_broadcast_queue();
+    }
 	unlock_queue();
 }
 
@@ -181,6 +190,7 @@ void Index<T>::addEntry(IndexField *iqe) {
     // write/send the entries in bunches (batch job), Note that qlen, cur->getNumEntries() are dynamic
 	if ((last_rotated < idx_thread_oldestTimestampMem) &&
 			qlen < cur->getNumEntries()) {
+            tmlog(TM_LOG_NOTE, "Index.cc", "getting the number of entries in the current hash table");
         // returns 0 if lock for disk writing was successfully achieved (trylockDiskWrite function definition from Index.hh)
 		if (storage->getIndexes()->trylockDiskWrite() == 0) {
 
@@ -265,12 +275,13 @@ void Index<T>::addEntry(IndexField *iqe) {
 
     // determine if the entry to add is already in the hash table
 	IndexEntry* ie=cur->lookup(iqe);
+    tmlog(TM_LOG_NOTE, "addEntry", "check in the lookup for entry with timestamp %f is done and form %s", iqe->ts, iqe->getStr().c_str());
 
     // if it is not in the Hash table (== NULL)
 	if (ie==NULL) {
 
 
-        tmlog(TM_LOG_DEBUG, "addEntry", "beginning to add entry");
+        tmlog(TM_LOG_DEBUG, "addEntry", "beginning to add entry with timestamp %f and form %s", iqe->ts, iqe->getStr().c_str());
 
 		/* the key (ieq->indexField) is now owned by the IndexEntry, resp.
 		 * the hash. they will take care about deallocation */
@@ -281,6 +292,7 @@ void Index<T>::addEntry(IndexField *iqe) {
 				iqe->ts-IDX_PKT_SECURITY_MARGIN*idx_thread_iat, iqe->ts);
 		cur->add(iqe, ie_n);
 	} else {
+        tmlog(TM_LOG_NOTE, "addEntry", "updating the entry with timestamp %f and form %s", iqe->ts, iqe->getStr().c_str());
         // the entry is already in the hash table
         // update time to include iqe's interval...d_t is difference between end times of intervals? O.o
 		// FIXME: this looks ugly. handle the iat in some other way
@@ -381,13 +393,19 @@ void Index<T>::run() {
         // wait for queue to have something?
         // Wait for signal, that data is availabe in the queue 
         // from Index.hh
+
+        tmlog(TM_LOG_NOTE, "addEntry, run", "the size of the input_q is %d before the cond_wait_queue", input_q.size());
+
 		cond_wait_queue();
+
+        tmlog(TM_LOG_NOTE, "addEntry, run", "the size of the input_q is %d", input_q.size());
 
 		// XXX: Maybe we should read from the queue in burst of, say 10, 
 		// entries, so that we don't have that many lock(), unlock() calls
 		while (!input_q.empty()) {
             // set iqe pointer to the last element in the queue
 			iqe = input_q.back();
+            tmlog(TM_LOG_NOTE, "addEntry, run", "the entry we pop out from back timestamp %f and form %s and index name %s", iqe->ts, iqe->getStr().c_str(), iqe->getIndexName().c_str());
             // pop the last element of the queue from the queue
 			input_q.pop_back();
             // set myqlen to the new input queue size after popping the last element
@@ -406,6 +424,7 @@ void Index<T>::run() {
             // set qlen to myqlen, the new input queue length
 			qlen = myqlen;
             // do the infamous addEntry of the popped IndexField pointer last element
+            tmlog(TM_LOG_NOTE, "addEntry, run", "The entry we are adding has timestamp %f and form %s", iqe->ts, iqe->getStr().c_str());
 			addEntry(iqe);
 			unlock_hash();
 			lock_queue();

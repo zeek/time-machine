@@ -91,6 +91,7 @@ class MyQueue {
 			if (entries>0) {
 				rp++;
 				entries--;
+                tmlog(TM_LOG_NOTE, "idx_queue", "We pop the entry from back, decrement entry count to %d", entries);
 				if (rp>=maxsize)
 					rp = 0;
 			}
@@ -102,6 +103,7 @@ class MyQueue {
 			if (entries>=maxsize) {
 				drops++;
 				delete elem;
+                tmlog(TM_LOG_NOTE, "idx_queue", "we do not add this to the number of entries. Number of entries is: %d", entries);
 				return;
 			}
 
@@ -112,6 +114,7 @@ class MyQueue {
 			q[wp] = elem;
 			wp++;
 			entries++;
+            tmlog(TM_LOG_NOTE, "idx_queue", "increment the number of entries to %d", entries);
 			if (wp>=maxsize) 
 				wp = 0;
 		}
@@ -217,7 +220,7 @@ template <class T> class Index: public IndexType {
 public:
 	// rot_offset is a (small) offset to delay the rotation and thus the writing of
 	// the index to disk. This should be used 
-	Index(tm_time_t d_t, uint32_t hash_size, bool do_disk_index, Storage * storage);
+	Index(tm_time_t d_t, uint64_t hash_size, bool do_disk_index, Storage * storage);
 	~Index();
 	void cancelThread();
 	void lookupMem(IntervalSet* set, IndexField* key);

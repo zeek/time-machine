@@ -59,6 +59,7 @@
 
 #include <climits>
 #include <cstring>
+#include "tm.h"
 
 // The number of values representable by a byte.
 #define H3_BYTE_RANGE (UCHAR_MAX+1)
@@ -78,6 +79,7 @@ public:
 
 	void Init(bool have_seed, T seed)
 		{
+        tmlog(TM_LOG_NOTE, "H3 has function", "Just making sure that initialization was attempted with seed %lu\n", seed);
 		T bit_lookup[N * CHAR_BIT];
 
 		for ( size_t bit = 0; bit < N * CHAR_BIT; bit++ )
@@ -109,20 +111,28 @@ public:
 		const unsigned char *p = static_cast<const unsigned char*>(data);
 		T result = 0;
 
+		//printf("The offset is: %lu and the byte number is: %d\n", offset + 1, *p + 1);
+
+		//printf("H3_BYTE_RANGE is: %d\n", H3_BYTE_RANGE);
+
+        //printf("The byte look up is %lu\n", byte_lookup[offset + 1][*p + 1]);
+
 		// loop optmized with Duff's Device
 		register unsigned n = (size + 7) / 8;
 		switch ( size % 8 ) {
-		case 0: do { result ^= byte_lookup[offset++][*p++];
-		case 7:      result ^= byte_lookup[offset++][*p++];
-		case 6:      result ^= byte_lookup[offset++][*p++];
-		case 5:      result ^= byte_lookup[offset++][*p++];
-		case 4:      result ^= byte_lookup[offset++][*p++];
+		case 0: do { result ^= byte_lookup[offset++][*p++]; //printf("next 0\n");
+		case 7:      result ^= byte_lookup[offset++][*p++]; //printf("next 7\n");
+		case 6:      result ^= byte_lookup[offset++][*p++]; //printf("next 6\n");
+		case 5:      result ^= byte_lookup[offset++][*p++]; //printf("next 5\n");
+		case 4:      result ^= byte_lookup[offset++][*p++]; //printf("next 4\n");
 		case 3:      result ^= byte_lookup[offset++][*p++];
 		case 2:      result ^= byte_lookup[offset++][*p++];
 		case 1:      result ^= byte_lookup[offset++][*p++];
+                     //printf("we loop\n");
 				} while ( --n > 0 );
 			}
 
+        //printf("The resulting hash is %lu\n", result);
 		return result;
 		}
 

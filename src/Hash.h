@@ -7,6 +7,8 @@
 
 //#include "BroString.h"
 
+#include "util.h"
+
 #define UHASH_KEY_SIZE 36
 
 typedef uint64 hash_t;
@@ -20,8 +22,8 @@ typedef enum {
 
 class HashKey {
 public:
-	//HashKey(bro_int_t i);
-	//HashKey(bro_uint_t u);
+	HashKey(bro_int_t i);
+	HashKey(bro_uint_t u);
 	HashKey(uint32 u);
 	HashKey(const uint32 u[], int n);
 	HashKey(double d);
@@ -73,7 +75,7 @@ protected:
 	void* CopyKey(const void* key, int size) const;
 
 	union {
-		//bro_int_t i;
+		bro_int_t i;
 		uint32 u32;
 		double d;
 		const void* p;

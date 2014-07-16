@@ -3,6 +3,7 @@
 #define TM_H
 
 #include <string>
+#include <stdint.h>
 
 #include "types.h"
 
