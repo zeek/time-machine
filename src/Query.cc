@@ -27,6 +27,7 @@ QueryRequest::~QueryRequest() {
 	pcap_close(ph);
 }
 
+// note that typedef of pkt_ptr is u char*
 bool QueryRequest::matchPkt(const pkt_ptr p) {
 	/*
 	if (!have_bpf) compileBPF();
@@ -34,12 +35,16 @@ bool QueryRequest::matchPkt(const pkt_ptr p) {
 	    ((struct pcap_pkthdr *)p)->len,
 	    ((struct pcap_pkthdr *)p)->caplen);
 	*/
+	tmlog(TM_LOG_NOTE, "QueryRequest: matchPkt(const pkt_ptr)", "determine if a packet matches");
+	// matchPkt method from Fifo
 	return matchPkt((struct pcap_pkthdr *)p, p+sizeof(struct pcap_pkthdr));
 }
 
 bool QueryRequest::matchPkt(struct pcap_pkthdr *hdr, const u_char *pkt) {
+	tmlog(TM_LOG_NOTE, "QueryRequest: matchPkt(struct pcap_pkthdr, u_char pkt)", "determine if a packet matches");
 	if (!have_bpf) compileBPF();
-	return bpf_filter(fp.bf_insns, (u_char *)pkt,
+    tmlog(TM_LOG_NOTE, "QueryRequest: matchPkt(2 args)", "The value of the bpf_filter in query request  for packet %lu and %lu is %lu", hdr->ts.tv_sec, hdr->ts.tv_usec, bpf_filter(fp.bf_insns, (unsigned char*)(pkt), hdr->len, hdr->caplen));
+	return bpf_filter(fp.bf_insns, (u_char *)(pkt),
 					  hdr->len,
 					  hdr->caplen);
 }

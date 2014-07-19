@@ -362,6 +362,7 @@ void Index<T>::lookupMem(IntervalSet *set, IndexField* key) {
 	unlock_hash();
 }
 
+// disk_index is of types IndexFiles, from DiskIndex.cc
 template <class T>
 void Index<T>::lookupDisk(IntervalSet* set, IndexField* key, tm_time_t t0, tm_time_t t1) {
 	if (disk_index)

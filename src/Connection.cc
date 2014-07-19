@@ -806,6 +806,12 @@ hash_t ConnectionID4::hash() const
 
     HashKey* newHashKey = new HashKey(&key, sizeof(key));
 
+    tmlog(TM_LOG_NOTE, "ConnectionID4::hash()", "the hash of newhashkey is %u", newHashKey->Hash());
+
+    HashKey* newHashKeyDos = new HashKey(&key, sizeof(key));
+
+    tmlog(TM_LOG_NOTE, "ConnectionID4::hash()", "the second hash of newhashkeydos is %u", newHashKeyDos->Hash());
+
     //memcpy(&hash_key, newHashKey->Hash(), 8);
 
     //hash_key = newHashKey->Hash();

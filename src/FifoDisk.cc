@@ -10,6 +10,7 @@
 #include "tm.h"
 #include "FifoDisk.hh"
 #include "Query.hh"
+#include "bro_inet_ntop.h"
 
 
 /***************************************************************************
@@ -121,11 +122,28 @@ void FifoDisk::addPkt(const pkt_ptr p) {
 						 classname.c_str(), newestTimestamp);
                 // push back the newest disk file into the list of files
 				files.push_back(new FifoDiskFile(new_file_name, pcap_handle));
+
+                tmlog(TM_LOG_NOTE, "FifoDisk: addPkt", "the new file name is: %s", new_file_name);
                 // free new_file_name since we malloced it and don't need it anymore
 				free(new_file_name);
 			}
 			unlockQueryInProgress();
 		}
+
+        char str1[INET6_ADDRSTRLEN];
+
+        bro_inet_ntop(AF_INET6, &(IP6(p + 4 + sizeof(struct pcap_pkthdr))->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
+
+        //char s1[INET6_ADDRSTRLEN];
+
+        //inet_pton(AF_INET6, s1, str1);
+
+        char str2[INET6_ADDRSTRLEN];
+
+        bro_inet_ntop(AF_INET6, &(IP6(p + 4 + sizeof(struct pcap_pkthdr))->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
+
+        tmlog(TM_LOG_NOTE, "FifoDisk::addPkt", "we are going to add in next step the packet to the FifoDisk with src ip %s and dst ip %s", str1, str2);
+
         // in the last file, the newest file, add the packet
 		files.back()->addPkt(p);
         // get the oldest time stamp (the 1 milisecond if statement appears again)
@@ -242,6 +260,8 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
 	if (is_open)
 		flush();
 
+	//char errbuf[PCAP_ERRBUF_SIZE];
+
 	pcapnav_t *ph=pcapnav_open_offline(filename.c_str());
 	if (!ph) {
 		char *pcap_errstr = pcapnav_geterr(ph);
@@ -251,11 +271,13 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
 		struct pcap_pkthdr hdr;
 		const u_char *pkt;
 
+        
 		if (pcapnav_get_timespan(ph, &tv1, &tv2) != 0) {
 			tmlog(TM_LOG_WARN, "query",  "%d pcapnav could not obtain timespan.",
 					qres->getQueryID());
-			  /* Rest of error handling */
+			  //Rest of error handling
 		}
+        
 		tmlog(TM_LOG_DEBUG, "query", "%d FifoDiskFile::query: opened file %s. timespan is [%lf,%lf]",
 				qres->getQueryID(), filename.c_str(), to_tm_time(&tv1), to_tm_time(&tv2));
 
@@ -286,6 +308,7 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
 				tmlog(TM_LOG_DEBUG, "query", "%d Interval overlapped trace start. Goto 0",
 						qres->getQueryID());
 			}
+            
 			else 
 				res = pcapnav_goto_timestamp(ph, &tv);
 			switch(res) {
@@ -304,12 +327,14 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
 				default:
 					break;
 			}
+            
 			if (res != PCAPNAV_DEFINITELY) {
 				continue;
 			}
+            
 			first_pkt_for_this_int = 1;
 			do {
-				pkt = pcapnav_next(ph, &hdr);
+				pkt = pcapnav_next(ph, &hdr);// + 4;
 				scanned_packets++;
 				if (!pkt)
 					break;
@@ -324,6 +349,29 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
 					break;
 				if (t<qreq->getT0())
 					continue;
+                //tmlog("The result of matchPkt from QueryRequest is %d 
+                char str1[INET6_ADDRSTRLEN];
+
+                bro_inet_ntop(AF_INET6, &(IP6(pkt)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
+
+                //char s1[INET6_ADDRSTRLEN];
+
+                //inet_pton(AF_INET6, s1, str1);
+
+                char str2[INET6_ADDRSTRLEN];
+
+                bro_inet_ntop(AF_INET6, &(IP6(pkt)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
+                //char s2[INET6_ADDRSTRLEN];
+                /*
+                if ( inet_pton(AF_INET6, s2, str2) <=0 )
+			        {
+                    tmlog(TM_LOG_ERROR, "Bad IP address: %s", s2);
+                    }
+                */
+                tmlog(TM_LOG_NOTE, "FifoDisk.cc: query", "the query packet has source ip address: %s and dst ip address %s and header time stamp %lu and %lu", \
+                str1, str2, hdr.ts.tv_sec, hdr.ts.tv_usec);
+                tmlog(TM_LOG_NOTE, "FifoDisk.cc:query", "the query parameters are that it has a time interval from %f to %f, a hash of %lu, a timestamp of %f, and a form of %s", \
+                qreq->getT0(), qreq->getT1(), qreq->getField()->hash(), qreq->getField()->ts, qreq->getField()->getStr().c_str());
 				if (qreq->matchPkt(&hdr, pkt))  {
 					matches++;
 					qres->sendPkt(&hdr, pkt);

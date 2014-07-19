@@ -1,3 +1,8 @@
+0.1-4 | 2014-07-18 16:53:50 -0800
+    
+    * Some querying for IPv6 addresses is enabled. (Naoki Eto)
+
+    * VLAN tags are taken into account w/o MPLS labels (Naoki Eto)
 
 0.1-4 | 2013-02-07 14:37:50 -0800
 

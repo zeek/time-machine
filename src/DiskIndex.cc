@@ -211,6 +211,7 @@ template <class T>
 void IndexFiles<T>::lookup(IntervalSet *iset, IndexField *key, tm_time_t t0, tm_time_t t1) {
 	int level;
 	uint64_t curfile;
+    // class IndexFileReader from DiskIndex.hh
 	IndexFileReader *ifr;
 	char *fname;
 
@@ -226,6 +227,7 @@ void IndexFiles<T>::lookup(IntervalSet *iset, IndexField *key, tm_time_t t0, tm_
 				// the intervals [t0,t1] and [first,last] intersect 
 				// ==> look for matches
 				ifr->lookupEntry(iset, key);
+
 			}
 			delete ifr;
 		}

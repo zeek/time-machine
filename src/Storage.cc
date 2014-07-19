@@ -14,6 +14,7 @@
 #include "packet_headers.h"
 #include "conf.h"
 #include "tm.h"
+#include "bro_inet_ntop.h"
 
 #define SNAPLEN 8192
 
@@ -39,6 +40,20 @@ void callback(u_char *args, const struct pcap_pkthdr *header,
 	}
 	network_time=header->ts;
 	*/ 
+
+    char str1[INET6_ADDRSTRLEN];
+
+    inet_ntop(AF_INET6, &(IP6(packet)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
+
+    //char s1[INET6_ADDRSTRLEN];
+
+    //inet_pton(AF_INET6, s1, str1);
+
+    char str2[INET6_ADDRSTRLEN];
+
+    inet_ntop(AF_INET6, &(IP6(packet)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
+
+    tmlog(TM_LOG_NOTE, "Storage::callback", "we are going to call addpacket of storage on packet that has source ip %s and destination ip %s", str1, str2);
 
     // DEBUG DEBUG DEBUG
 	tmlog(TM_LOG_DEBUG, "storage callback: Storage.cc, ~line 29", "Callback function for pcap_loop%lu", header->ts.tv_usec);
@@ -264,6 +279,60 @@ void Storage::cancelThread() {
 	fifos.push_back(f);
 }*/
 
+int get_link_header_size(int dl)
+	{
+	switch ( dl ) {
+	case DLT_NULL:
+		return 4;
+
+	case DLT_EN10MB:
+		return 14;
+
+	case DLT_FDDI:
+		return 13 + 8;	// fddi_header + LLC
+
+#ifdef DLT_LINUX_SLL
+	case DLT_LINUX_SLL:
+		return 16;
+#endif
+
+	case DLT_PPP_SERIAL:	// PPP_SERIAL
+		return 4;
+
+	case DLT_RAW:
+		return 0;
+	}
+
+	return -1;
+	}
+
+void Storage::Close()
+	{
+	if ( ph )
+		{
+		pcap_close(ph);
+		ph = 0;
+		//closed = true;
+		}
+	}
+
+
+void Storage::SetHdrSize()
+	{
+	int dl = pcap_datalink(ph);
+	hdr_size = get_link_header_size(dl);
+
+	if ( hdr_size < 0 )
+		{
+		safe_snprintf(errbuf, sizeof(errbuf),
+			 "unknown data link type 0x%x", dl);
+		Close();
+		}
+
+	datalink = dl;
+	}
+
+
 
 // note that the pcap packet header has the timestamp of the packet
 void Storage::addPkt(const struct pcap_pkthdr *header,
@@ -284,11 +353,55 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
     // DEBUG DEBUG DEBUG
 	tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 240", "adding packet %lu !", header->ts.tv_usec);
 
+    SetHdrSize();
+
+	// Unfortunately some packets on the link might have MPLS labels
+	// while others don't. That means we need to ask the link-layer if
+	// labels are in place. TODO: Cannot handle MPLS labels just yet
+	//bool have_mpls = false;
+
 	const unsigned char* idxpacket=packet;
 	// skip VLAN header (related to ethernet frame header) for indexing TODO: look at VLAN header more closely
     // Virtual Bridged Local Area Network for logically group network devices together, which share the same 
     // physical network. VLAN tag is 4 bytes and so a VLAN header is 4 bytes longer than a regular ethernet header
-	if (ether_type==0x8100) idxpacket+=4;
+	//if (ether_type==0x8100) idxpacket+=4;
+    
+    if (ether_type == 0x8100)
+    {
+		// Check for MPLS in VLAN.
+        
+        // TODO: Cannot handle MPLS labels just yet
+        /*
+		if ( ((idxpacket[2] << 8) + idxpacket[3]) == 0x8847 )
+			have_mpls = true;
+        */
+
+		idxpacket += 4; // Skip the vlan header
+		//pkt_hdr_size = 0;
+
+		// Check for 802.1ah (Q-in-Q) containing IP.
+		// Only do a second layer of vlan tag
+		// stripping because there is no
+		// specification that allows for deeper
+		// nesting.
+		if ( ((idxpacket[2] << 8) + idxpacket[3]) == 0x0800 )
+			idxpacket += 4;
+    }
+
+    // TODO: Cannot handle MPLS labels just yet
+    /*
+	if ( have_mpls )
+		{
+		// Skip the MPLS label stack.
+		bool end_of_stack = false;
+
+		while ( ! end_of_stack )
+			{
+			end_of_stack = *(idxpacket + 2) & 0x01;
+			idxpacket += 4;
+			}
+		}
+    */
     // DEBUG DEBUG DEBUG
     tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 246", "ethernet phase/physical layer complete for packet %lu", header->ts.tv_usec);
 
@@ -381,7 +494,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
         // go through all the possible classes
 		for (std::list<Fifo*>::iterator i=fifos.begin(); i!=fifos.end(); i++) {
     
-            tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 310", "value of matchPkt of packet %lu is %lu", header->ts.tv_usec, (*i)->matchPkt(header, packet));
+            tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 310", "value of matchPkt of packet %lu is %lu", header->ts.tv_usec, (*i)->matchPkt(header, idxpacket));
 
 			if (// packet matches this class' filter (from Fifo.cc) and
 				(*i)->matchPkt(header, packet) &&
@@ -413,6 +526,20 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
             // 
 			if (TCP(packet)->th_flags & ( TH_FIN | TH_SYN | TH_RST ))
 				tcp_ctrl_flag=true;
+
+            char str1[INET6_ADDRSTRLEN];
+
+            bro_inet_ntop(AF_INET6, &(IP6(idxpacket)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
+
+            //char s1[INET6_ADDRSTRLEN];
+
+            //inet_pton(AF_INET6, s1, str1);
+
+            char str2[INET6_ADDRSTRLEN];
+
+            bro_inet_ntop(AF_INET6, &(IP6(idxpacket)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
+
+            tmlog(TM_LOG_NOTE, "Storage::addPkt", "we will be calling Fifo::Addpkt on packet that has source ip %s and destination ip %s", str1, str2);
         /* true if cutoff should not be done for this connection */
         // When the connection is subscribed or when a tcp control flag
         // is set, then addPkt is called with a connection NULL pointer
@@ -427,8 +554,8 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
         // So, it eventually leads to the writing of the class files (woo)
         // Also, note that f->addPkt returns true if we can add the packet, false otherwise
 		if ( (( c->getSuspendCutoff() | tcp_ctrl_flag )
-				&& f->addPkt(header, packet, NULL)) ||
-				f->addPkt(header, packet, c)) {
+				&& f->addPkt(header, idxpacket, NULL)) ||
+				f->addPkt(header, idxpacket, c)) {
 			/* packet was stored in Fifo *f */
             // woo-hoo! bytes from the packet were not cut
 			uncut_bytes += header->len;
@@ -561,6 +688,7 @@ void Storage::query(QueryRequest *query_req, QueryResult *query_res) {
 	gettimeofday(&t_start, NULL);
 	//fprintf(stderr, "Query ID: %d\n",  query_res->getQueryID());
 
+    // getIndexByName is from Index.hh from class Indexes
 	IndexType* idx=indexes->getIndexByName(query_req->getField()->getIndexName());
 	if (!idx) {
 		tmlog(TM_LOG_ERROR, "query", "Tried to query index \"%s\" but it does not exist\n",

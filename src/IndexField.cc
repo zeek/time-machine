@@ -90,10 +90,11 @@ IndexField* IPAddress::parseQuery(const char *query) {
     //char strIP[AFtypelength];
 
 
-    // DAHHHHH and so it begins i guess
+    // WHAT and so it begins i guess
     // INET6_ADDRSTRLEN is 46 and INET_ADDRSTRLEN is 16
     //char strIP46[INET6_ADDRSTRLEN];
 
+    tmlog(TM_LOG_NOTE, "parseQuery", "the argument we pass to IPAddress is %s", ip.c_str());
 
 	return new IPAddress(ip.c_str());//, strIP46);
 }
@@ -199,6 +200,7 @@ void IPAddress::Init(const std::string& s)
 			memset(ipv6_address.s6_addr, 0, sizeof(ipv6_address.s6_addr));
 			}
 		}
+        tmlog(TM_LOG_NOTE, "IPAddress::Init", "good IP Address %s", s.c_str());
 	}
 
 std::string IPAddress::getStr() const
@@ -330,7 +332,7 @@ std::string SrcIPAddress::getStrPkt(const u_char* packet) const
 			return "<bad IPv6 address conversion";
 		else
         {
-            ss << " ip for IPv6"
+            ss << "source stuff ip for IPv6"
 
             << "[" << str << "]";
 			return ss.str();
@@ -383,7 +385,7 @@ std::string DstIPAddress::getStrPkt(const u_char* packet) const
 			return "<bad IPv6 address conversion";
 		else
         {
-            ss << " ip for IPv6"
+            ss << "dst stuff ip for IPv6"
 
             << "[" << str << "]";
 			return ss.str();

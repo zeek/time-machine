@@ -496,7 +496,8 @@ public:
 	}
 	Connection(Connection *c);
 	virtual ~Connection() {
-		delete c_id;
+    // we need delete [] instead of delete because we allocated an array for the ipv6 addresses?
+		delete [] c_id;
 	}
 	void addPkt(const struct pcap_pkthdr* header, const u_char* packet);
 	tm_time_t getLastTs() {

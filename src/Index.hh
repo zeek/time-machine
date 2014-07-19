@@ -327,7 +327,11 @@ public:
 		for (std::list<IndexType*>::iterator i=indexes.begin();
 				i!=indexes.end();
 				i++)
-			if ((*i)->getIndexName()==name) return (*i);
+			if ((*i)->getIndexName()==name) 
+            {
+                tmlog(TM_LOG_NOTE, "Indexes: getIndexByName", "we have a match with the index name %s", name.c_str());
+                return (*i);
+            }
 		return NULL;
 	};
 	int trylockDiskWrite() {

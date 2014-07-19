@@ -114,6 +114,10 @@ IndexEntry* IndexHash::lookup( IndexField* key) {
 }
 
 void IndexHash::add(IndexField *key, IndexEntry *ie) {
+
+    tmlog(TM_LOG_NOTE, "idx_hash", "entering the add method");
+
+
 	IndexEntry *cur, *prev;
 	int cmp;
 	cur = troot;
