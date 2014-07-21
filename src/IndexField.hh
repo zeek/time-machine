@@ -116,6 +116,8 @@ public:
 
         hash_key = newHashKey->Hash();
 
+        delete newHashKey;
+
         free_hash_function();
     }
 /*
@@ -144,6 +146,8 @@ public:
         HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
 
         hash_key = newHashKey->Hash();
+
+        delete newHashKey;
 
         free_hash_function();
 	}

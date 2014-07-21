@@ -597,6 +597,8 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 		 * end 
 		 */
 	}
+
+    //delete c;
 }
 
 

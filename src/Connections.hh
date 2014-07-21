@@ -162,6 +162,10 @@ protected:
 	// these are 
 	inline Connection* lookup(ConnectionID4 *c_id);
 	inline Connection* addPkt (const struct pcap_pkthdr*, const u_char*);
+	Connection* addedconn;
+
+	void addConnHelper(ConnectionID4 *c_id);
+
 	Connection* addConn(ConnectionID4 *c_id); 
 
 private:
