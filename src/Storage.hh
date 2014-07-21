@@ -38,7 +38,7 @@ class StorageConfig {
 		Indexes *indexes;
 };
 
-extern int get_link_header_size(int dl);
+//extern int get_link_header_size(int dl);
 
 class Storage {
 public:
@@ -103,6 +103,7 @@ public:
 	
 	friend void *capture_thread(void *arg);
 
+/*
 protected:
     void Close();
     void SetHdrSize();
@@ -110,6 +111,7 @@ protected:
     char errbuf[PCAP_ERRBUF_SIZE];
     int hdr_size;
     //const u_char* data;
+*/
 
 private:
 	pcap_t *ph;

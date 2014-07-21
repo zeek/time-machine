@@ -88,4 +88,6 @@ protected:
 
 extern void init_hash_function();
 
+extern void free_hash_function();
+
 #endif

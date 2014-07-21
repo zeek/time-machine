@@ -31,6 +31,10 @@ void init_hash_function()
 	h3 = new H3<hash_t, UHASH_KEY_SIZE>();
 	}
 
+void free_hash_function()
+{
+    delete h3;
+}
 
 HashKey::HashKey(bro_int_t i)
 	{

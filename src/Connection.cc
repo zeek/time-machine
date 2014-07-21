@@ -72,6 +72,13 @@ void ConnectionID4::init(proto_t proto,
     ipv4_d_address.s_addr = d_ip;
     ipv4_s_address.s_addr = s_ip;
 
+	struct {
+		in6_addr ip1;
+		in6_addr ip2;
+		uint16 port1;
+		uint16 port2;
+	} key;
+
 	if (addr_port_canon_lt(s_ip,d_ip,s_port,d_port)) {
 		//    v.is_canonified=true;
 
@@ -93,7 +100,21 @@ void ConnectionID4::init(proto_t proto,
 
 		v6.port1=d_port;
 		v6.port2=s_port;
-	} else {
+
+        // this is for the hash key
+        in6_addr s6_ip;
+        in6_addr d6_ip;
+        
+        memcpy(s6_ip.s6_addr, v6.ip1, 16);
+        memcpy(d6_ip.s6_addr, v6.ip2, 16);
+
+        key.ip1 = s6_ip;
+        key.ip2 = d6_ip;
+        key.port1 = v6.port1;
+        key.port2 = v6.port2;
+
+	} 
+    else {
 		//    v.is_canonified=false;
 
         ConnectionID4(ipv4_s_address, ipv4_d_address);
@@ -114,7 +135,39 @@ void ConnectionID4::init(proto_t proto,
         
 		v6.port1=s_port;
 		v6.port2=d_port;
+
+        // this is for the hash key
+        in6_addr s6_ip;
+        in6_addr d6_ip;
+        
+        memcpy(s6_ip.s6_addr, v6.ip1, 16);
+        memcpy(d6_ip.s6_addr, v6.ip2, 16);
+
+	    key.ip1 = d6_ip;
+	    key.ip2 = s6_ip;
+	    key.port1 = v6.port2;
+	    key.port2 = v6.port1;
 	}
+
+    tmlog(TM_LOG_NOTE, "connection4: Connection.cc", "connection 4 with form %s", getStr().c_str());
+
+    init_hash_function();
+
+    HashKey* newHashKey = new HashKey(&key, sizeof(key));
+
+    tmlog(TM_LOG_NOTE, "ConnectionID4::hash()", "the hash of newhashkey is %u", newHashKey->Hash());
+
+    //HashKey* newHashKeyDos = new HashKey(&key, sizeof(key));
+
+    //tmlog(TM_LOG_NOTE, "ConnectionID4::hash()", "the second hash of newhashkeydos is %u", newHashKeyDos->Hash());
+
+    //memcpy(&hash_key, newHashKey->Hash(), 8);
+
+    hash_key = newHashKey->Hash();
+
+    delete newHashKey;
+
+    free_hash_function();
 }
 
 void ConnectionID4::init6(proto_t proto,
@@ -125,6 +178,17 @@ void ConnectionID4::init6(proto_t proto,
 
     v6.version = 6;
 	v6.proto=proto;
+
+	struct {
+		in6_addr ip1;
+		in6_addr ip2;
+		uint16 port1;
+		uint16 port2;
+	} key;
+
+	// Lookup up connection based on canonical ordering, which is
+	// the smaller of <src addr, src port> and <dst addr, dst port>
+	// followed by the other.
 	if (addr6_port_canon_lt(s_ip,d_ip,s_port,d_port)) {
 		//    v6.is_canonified=true;
         // memcpy(destination, source, size)
@@ -134,6 +198,19 @@ void ConnectionID4::init6(proto_t proto,
 		//v6.ip2=s_ip;
 		v6.port1=d_port;
 		v6.port2=s_port;
+
+        // this is for the hash key
+        in6_addr s6_ip;
+        in6_addr d6_ip;
+        
+        memcpy(s6_ip.s6_addr, v6.ip1, 16);
+        memcpy(d6_ip.s6_addr, v6.ip2, 16);
+
+        key.ip1 = s6_ip;
+        key.ip2 = d6_ip;
+        key.port1 = v6.port1;
+        key.port2 = v6.port2;
+
 	} else {
 		//    v6.is_canonified=false;
         memcpy(v6.ip1, s_ip, 16);
@@ -142,8 +219,38 @@ void ConnectionID4::init6(proto_t proto,
 		//v6.ip2=d_ip;
 		v6.port1=s_port;
 		v6.port2=d_port;
+
+        // this is for the hash key
+        in6_addr s6_ip;
+        in6_addr d6_ip;
+        
+        memcpy(s6_ip.s6_addr, v6.ip1, 16);
+        memcpy(d6_ip.s6_addr, v6.ip2, 16);
+
+	    key.ip1 = d6_ip;
+	    key.ip2 = s6_ip;
+	    key.port1 = v6.port2;
+	    key.port2 = v6.port1;
 	}
     tmlog(TM_LOG_NOTE, "connection4: Connection.cc", "connection 4 with form %s", getStr().c_str());
+
+    init_hash_function();
+
+    HashKey* newHashKey = new HashKey(&key, sizeof(key));
+
+    tmlog(TM_LOG_NOTE, "ConnectionID4::hash()", "the hash of newhashkey is %u", newHashKey->Hash());
+
+    //HashKey* newHashKeyDos = new HashKey(&key, sizeof(key));
+
+    //tmlog(TM_LOG_NOTE, "ConnectionID4::hash()", "the second hash of newhashkeydos is %u", newHashKeyDos->Hash());
+
+    //memcpy(&hash_key, newHashKey->Hash(), 8);
+
+    hash_key = newHashKey->Hash();
+
+    delete newHashKey;
+
+    free_hash_function();
 }
 
 void ConnectionID3::init(proto_t proto,
@@ -177,6 +284,55 @@ void ConnectionID3::init(proto_t proto,
     ConnectionID3(ipv4_s_address, ipv4_d_address);
 
 	v6.port2=port2;
+
+	struct {
+		in6_addr ip1;
+		in6_addr ip2;
+		uint16 port1;
+		uint16 port2;
+	} key;
+
+	// Lookup up connection based on canonical ordering, which is
+	// the smaller of <src addr, src port> and <dst addr, dst port>
+	// followed by the other.
+	if (addr6_port_canon_lt(v6.ip1, v6.ip2, 0, v6.port2))
+		{
+            in6_addr s6_ip;
+            in6_addr d6_ip;
+            
+            memcpy(s6_ip.s6_addr, v6.ip1, 16);
+            memcpy(d6_ip.s6_addr, v6.ip2, 16);
+
+		    key.ip1 = s6_ip;
+		    key.ip2 = d6_ip;
+		    key.port1 = 0;
+		    key.port2 = v6.port2;
+		}
+	else
+		{
+            in6_addr s6_ip;
+            in6_addr d6_ip;
+            
+            memcpy(s6_ip.s6_addr, v6.ip1, 16);
+            memcpy(d6_ip.s6_addr, v6.ip2, 16);
+
+		    key.ip1 = d6_ip;
+		    key.ip2 = s6_ip;
+		    key.port1 = v6.port2;
+		    key.port2 = 0;
+		}
+
+    init_hash_function();
+
+    HashKey* newHashKey = new HashKey(&key, sizeof(key));
+
+    //hash_key = newHashKey->Hash();
+
+	hash_key = newHashKey->Hash();
+
+    delete newHashKey;
+
+    free_hash_function();
 }
 
 void ConnectionID3::init6(proto_t proto,
@@ -197,6 +353,55 @@ void ConnectionID3::init6(proto_t proto,
 	//v.ip1=ip1;
 	//v.ip2=ip2;
 	v6.port2=port2;
+
+	struct {
+		in6_addr ip1;
+		in6_addr ip2;
+		uint16 port1;
+		uint16 port2;
+	} key;
+
+	// Lookup up connection based on canonical ordering, which is
+	// the smaller of <src addr, src port> and <dst addr, dst port>
+	// followed by the other.
+	if (addr6_port_canon_lt(v6.ip1, v6.ip2, 0, v6.port2))
+		{
+            in6_addr s6_ip;
+            in6_addr d6_ip;
+            
+            memcpy(s6_ip.s6_addr, v6.ip1, 16);
+            memcpy(d6_ip.s6_addr, v6.ip2, 16);
+
+		    key.ip1 = s6_ip;
+		    key.ip2 = d6_ip;
+		    key.port1 = 0;
+		    key.port2 = v6.port2;
+		}
+	else
+		{
+            in6_addr s6_ip;
+            in6_addr d6_ip;
+            
+            memcpy(s6_ip.s6_addr, v6.ip1, 16);
+            memcpy(d6_ip.s6_addr, v6.ip2, 16);
+
+		    key.ip1 = d6_ip;
+		    key.ip2 = s6_ip;
+		    key.port1 = v6.port2;
+		    key.port2 = 0;
+		}
+
+    init_hash_function();
+
+    HashKey* newHashKey = new HashKey(&key, sizeof(key));
+
+    //hash_key = newHashKey->Hash();
+
+	hash_key = newHashKey->Hash();
+
+    delete newHashKey;
+
+    free_hash_function();
 }
 
 void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
@@ -212,6 +417,13 @@ void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
     ipv4_d_address.s_addr = s_ip;
     ipv4_s_address.s_addr = d_ip;
 
+	struct {
+		in6_addr ip1;
+		in6_addr ip2;
+		uint16 port1;
+		uint16 port2;
+	} key;
+
 	if (addr_port_canon_lt(s_ip,d_ip,0,0)) {
 		//    v.is_canonified=true;
         /*
@@ -224,6 +436,18 @@ void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
 
         ConnectionID2(ipv4_d_address, ipv4_s_address);
 
+        // this is for the hash key
+        in6_addr s6_ip;
+        in6_addr d6_ip;
+        
+        memcpy(s6_ip.s6_addr, v6.ip1, 16);
+        memcpy(d6_ip.s6_addr, v6.ip2, 16);
+
+	    key.ip1 = s6_ip;
+	    key.ip2 = d6_ip;
+	    key.port1 = 0;
+	    key.port2 = 0;
+
 	} else {
 		//    v.is_canonified=false;
         /*
@@ -235,7 +459,31 @@ void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
         */
 
         ConnectionID2(ipv4_s_address, ipv4_d_address);
+
+        // this is for the hash key
+        in6_addr s6_ip;
+        in6_addr d6_ip;
+        
+        memcpy(s6_ip.s6_addr, v6.ip1, 16);
+        memcpy(d6_ip.s6_addr, v6.ip2, 16);
+
+	    key.ip1 = d6_ip;
+	    key.ip2 = s6_ip;
+	    key.port1 = 0;
+	    key.port2 = 0;
 	}
+
+    init_hash_function();
+
+    HashKey* newHashKey = new HashKey(&key, sizeof(key));
+
+    //hash_key = newHashKey->Hash();
+
+	hash_key = newHashKey->Hash();
+
+    delete newHashKey;
+
+    free_hash_function();
 }
 
 void ConnectionID2::init6( unsigned char s_ip[], unsigned char d_ip[]) {
@@ -245,6 +493,13 @@ void ConnectionID2::init6( unsigned char s_ip[], unsigned char d_ip[]) {
 
     v6.version = 6;
 
+	struct {
+		in6_addr ip1;
+		in6_addr ip2;
+		uint16 port1;
+		uint16 port2;
+	} key;
+
 	if (addr6_port_canon_lt(s_ip,d_ip,0,0)) {
 		//    v.is_canonified=true;
         // memcpy(destination, source, size)
@@ -253,13 +508,50 @@ void ConnectionID2::init6( unsigned char s_ip[], unsigned char d_ip[]) {
 
 		//v6.ip1=d_ip;
 		//v6.ip2=s_ip;
+
+        // this is for the hash key
+        in6_addr s6_ip;
+        in6_addr d6_ip;
+        
+        memcpy(s6_ip.s6_addr, v6.ip1, 16);
+        memcpy(d6_ip.s6_addr, v6.ip2, 16);
+
+	    key.ip1 = s6_ip;
+	    key.ip2 = d6_ip;
+	    key.port1 = 0;
+	    key.port2 = 0;
+
 	} else {
 		//    v.is_canonified=false;
         memcpy(v6.ip1, s_ip, 16);
         memcpy(v6.ip2, d_ip, 16);
 		//v.ip1=s_ip;
 		//v.ip2=d_ip;
+
+        // this is for the hash key
+        in6_addr s6_ip;
+        in6_addr d6_ip;
+        
+        memcpy(s6_ip.s6_addr, v6.ip1, 16);
+        memcpy(d6_ip.s6_addr, v6.ip2, 16);
+
+	    key.ip1 = d6_ip;
+	    key.ip2 = s6_ip;
+	    key.port1 = 0;
+	    key.port2 = 0;
 	}
+
+    init_hash_function();
+
+    HashKey* newHashKey = new HashKey(&key, sizeof(key));
+
+    //hash_key = newHashKey->Hash();
+
+	hash_key = newHashKey->Hash();
+
+    delete newHashKey;
+
+    free_hash_function();
 }
 
 
@@ -765,154 +1057,17 @@ std::string ConnectionID2::getStr() const {
 
 hash_t ConnectionID4::hash() const
 	{
-	struct {
-		in6_addr ip1;
-		in6_addr ip2;
-		uint16 port1;
-		uint16 port2;
-	} key;
-
-	// Lookup up connection based on canonical ordering, which is
-	// the smaller of <src addr, src port> and <dst addr, dst port>
-	// followed by the other.
-	if (addr6_port_canon_lt(v6.ip1, v6.ip2, v6.port1, v6.port2))
-		{
-            in6_addr s6_ip;
-            in6_addr d6_ip;
-            
-            memcpy(s6_ip.s6_addr, v6.ip1, 16);
-            memcpy(d6_ip.s6_addr, v6.ip2, 16);
-
-		    key.ip1 = s6_ip;
-		    key.ip2 = d6_ip;
-		    key.port1 = v6.port1;
-		    key.port2 = v6.port2;
-		}
-	else
-		{
-            in6_addr s6_ip;
-            in6_addr d6_ip;
-            
-            memcpy(s6_ip.s6_addr, v6.ip1, 16);
-            memcpy(d6_ip.s6_addr, v6.ip2, 16);
-
-		    key.ip1 = d6_ip;
-		    key.ip2 = s6_ip;
-		    key.port1 = v6.port2;
-		    key.port2 = v6.port1;
-		}
-
-    init_hash_function();
-
-    HashKey* newHashKey = new HashKey(&key, sizeof(key));
-
-    tmlog(TM_LOG_NOTE, "ConnectionID4::hash()", "the hash of newhashkey is %u", newHashKey->Hash());
-
-    HashKey* newHashKeyDos = new HashKey(&key, sizeof(key));
-
-    tmlog(TM_LOG_NOTE, "ConnectionID4::hash()", "the second hash of newhashkeydos is %u", newHashKeyDos->Hash());
-
-    //memcpy(&hash_key, newHashKey->Hash(), 8);
-
-    //hash_key = newHashKey->Hash();
-
-	return newHashKey->Hash();
+	    return hash_key;
 	}
 
 hash_t ConnectionID3::hash() const
 	{
-	struct {
-		in6_addr ip1;
-		in6_addr ip2;
-		uint16 port1;
-		uint16 port2;
-	} key;
-
-	// Lookup up connection based on canonical ordering, which is
-	// the smaller of <src addr, src port> and <dst addr, dst port>
-	// followed by the other.
-	if (addr6_port_canon_lt(v6.ip1, v6.ip2, 0, v6.port2))
-		{
-            in6_addr s6_ip;
-            in6_addr d6_ip;
-            
-            memcpy(s6_ip.s6_addr, v6.ip1, 16);
-            memcpy(d6_ip.s6_addr, v6.ip2, 16);
-
-		    key.ip1 = s6_ip;
-		    key.ip2 = d6_ip;
-		    key.port1 = 0;
-		    key.port2 = v6.port2;
-		}
-	else
-		{
-            in6_addr s6_ip;
-            in6_addr d6_ip;
-            
-            memcpy(s6_ip.s6_addr, v6.ip1, 16);
-            memcpy(d6_ip.s6_addr, v6.ip2, 16);
-
-		    key.ip1 = d6_ip;
-		    key.ip2 = s6_ip;
-		    key.port1 = v6.port2;
-		    key.port2 = 0;
-		}
-
-    init_hash_function();
-
-    HashKey* newHashKey = new HashKey(&key, sizeof(key));
-
-    //hash_key = newHashKey->Hash();
-
-	return newHashKey->Hash();
+        return hash_key;
 	}
 
 hash_t ConnectionID2::hash() const
 	{
-	struct {
-		in6_addr ip1;
-		in6_addr ip2;
-		uint16 port1;
-		uint16 port2;
-	} key;
-
-	// Lookup up connection based on canonical ordering, which is
-	// the smaller of <src addr, src port> and <dst addr, dst port>
-	// followed by the other.
-	if (addr6_port_canon_lt(v6.ip1, v6.ip2, 0, 0))
-		{
-            in6_addr s6_ip;
-            in6_addr d6_ip;
-            
-            memcpy(s6_ip.s6_addr, v6.ip1, 16);
-            memcpy(d6_ip.s6_addr, v6.ip2, 16);
-
-		    key.ip1 = s6_ip;
-		    key.ip2 = d6_ip;
-		    key.port1 = 0;
-		    key.port2 = 0;
-		}
-	else
-		{
-            in6_addr s6_ip;
-            in6_addr d6_ip;
-            
-            memcpy(s6_ip.s6_addr, v6.ip1, 16);
-            memcpy(d6_ip.s6_addr, v6.ip2, 16);
-
-		    key.ip1 = d6_ip;
-		    key.ip2 = s6_ip;
-		    key.port1 = 0;
-		    key.port2 = 0;
-		}
-
-    init_hash_function();
-
-    HashKey* newHashKey = new HashKey(&key, sizeof(key));
-
-    //hash_key = newHashKey->Hash();
-
-	return newHashKey->Hash();
+        return hash_key;
 	}
 
 // Static Member initialization

@@ -188,8 +188,6 @@ public:
 
     hash_t hash() const;
 
-    hash_t hash_key;
-
 protected:
 	void init(proto_t proto, uint32_t s_ip, uint32_t d_ip,
 			  uint16_t s_port, uint16_t d_port);
@@ -197,6 +195,7 @@ protected:
                uint16_t s_port, uint16_t d_port);
 	//v_t v;
     v6_t v6;
+    hash_t hash_key;
 
 private:
 	static std::string pattern_connection4;
@@ -239,7 +238,8 @@ public:
 		memcpy(&v6.ip2[12], &in4_ip2.s_addr, sizeof(in4_ip2.s_addr));
 		}
 
-	virtual ~ConnectionID3() {};
+	virtual ~ConnectionID3() {
+    };
     /*
 	uint32_t hash() const {
 		//TODO: initval

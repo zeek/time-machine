@@ -188,6 +188,13 @@ void IPAddress::Init(const std::string& s)
 		uint32_t addr = (a[0] << 24) | (a[1] << 16) | (a[2] << 8) | a[3];
 		addr = htonl(addr);
 		memcpy(&ipv6_address.s6_addr[12], &addr, sizeof(uint32_t));
+
+        init_hash_function();
+        HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
+
+        hash_key = newHashKey->Hash();
+
+        free_hash_function();
 		}
 
 	else
@@ -201,6 +208,13 @@ void IPAddress::Init(const std::string& s)
 			}
 		}
         tmlog(TM_LOG_NOTE, "IPAddress::Init", "good IP Address %s", s.c_str());
+
+        init_hash_function();
+        HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
+
+        hash_key = newHashKey->Hash();
+
+        free_hash_function();
 	}
 
 std::string IPAddress::getStr() const

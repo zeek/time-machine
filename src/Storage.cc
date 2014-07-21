@@ -279,6 +279,7 @@ void Storage::cancelThread() {
 	fifos.push_back(f);
 }*/
 
+/*
 int get_link_header_size(int dl)
 	{
 	switch ( dl ) {
@@ -331,7 +332,7 @@ void Storage::SetHdrSize()
 
 	datalink = dl;
 	}
-
+*/
 
 
 // note that the pcap packet header has the timestamp of the packet
@@ -353,7 +354,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
     // DEBUG DEBUG DEBUG
 	tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 240", "adding packet %lu !", header->ts.tv_usec);
 
-    SetHdrSize();
+    //SetHdrSize();
 
 	// Unfortunately some packets on the link might have MPLS labels
 	// while others don't. That means we need to ask the link-layer if
@@ -554,8 +555,8 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
         // So, it eventually leads to the writing of the class files (woo)
         // Also, note that f->addPkt returns true if we can add the packet, false otherwise
 		if ( (( c->getSuspendCutoff() | tcp_ctrl_flag )
-				&& f->addPkt(header, idxpacket, NULL)) ||
-				f->addPkt(header, idxpacket, c)) {
+				&& f->addPkt(header, packet, NULL)) ||
+				f->addPkt(header, packet, c)) {
 			/* packet was stored in Fifo *f */
             // woo-hoo! bytes from the packet were not cut
 			uncut_bytes += header->len;

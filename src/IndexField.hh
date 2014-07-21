@@ -89,6 +89,13 @@ public:
 
 		memcpy(ipv6_address.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
 		memcpy(&ipv6_address.s6_addr[12], &in4.s_addr, sizeof(in4.s_addr));
+
+        init_hash_function();
+        HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
+
+        hash_key = newHashKey->Hash();
+
+        free_hash_function();
     }
 /*
     IPAddress(unsigned char ip6[])
@@ -103,6 +110,13 @@ public:
     IPAddress(unsigned char ip6[])
     {
         memcpy(ipv6_address.s6_addr, ip6, 16);
+
+        init_hash_function();
+        HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
+
+        hash_key = newHashKey->Hash();
+
+        free_hash_function();
     }
 /*
     // The inet_addr() function converts the Internet host address cp from IPv4 
@@ -125,9 +139,17 @@ public:
     }
 	IPAddress(void *p) {
 		memcpy((void*)getConstKeyPtr(), p, getKeySize());
+
+        init_hash_function();
+        HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
+
+        hash_key = newHashKey->Hash();
+
+        free_hash_function();
 	}
 	virtual ~IPAddress() {
         tmlog(TM_LOG_NOTE, "IPAddress", "deleting an ipaddress type");
+        //delete [] ip6_address;
         //delete [] strIP;
     };
 
@@ -166,10 +188,7 @@ public:
 
 	virtual hash_t hash() const {
 		// TODO: initval
-        init_hash_function();
-        HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
-
-	    return newHashKey->Hash();
+        return hash_key;
 	}
 	virtual const unsigned char* getInt() const {
 		return ipv6_address.s6_addr;
@@ -203,7 +222,9 @@ public:
 	static IndexField* parseQuery(const char *query);
 	virtual void getBPFStr(char *, int) const;
 
+protected:
     hash_t hash_key;
+
 private:
 
 	/**
@@ -329,8 +350,23 @@ public:
 
 class Port: public IndexField {
 public:
-	Port(): port(0) {}
+	Port(): port(0) {
+        init_hash_function();
+
+        HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
+
+	    hash_key =  newHashKey->Hash();
+
+        free_hash_function();
+    }
 	Port(uint16_t port): port(port) {  /* printf("Port(%u)\n", port); */
+        init_hash_function();
+
+        HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
+
+	    hash_key =  newHashKey->Hash();
+
+        free_hash_function();
 	}
 	virtual ~Port() {}
 
@@ -376,11 +412,7 @@ public:
     */
 	virtual hash_t hash() const {
 		// TODO: initval
-        init_hash_function();
-
-        HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
-
-	    return newHashKey->Hash();
+        return hash_key;
 	}
 
 	virtual const std::string getIndexName() const {
@@ -394,6 +426,7 @@ public:
     virtual std::string getStrPkt(const u_char* packet) const;
 	virtual void getBPFStr(char *, int) const;
 protected:
+    hash_t hash_key;
 	uint16_t port;
 	static std::string pattern;
 	static RE2 re;
