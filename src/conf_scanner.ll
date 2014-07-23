@@ -90,6 +90,7 @@ NEWLINE \n
 			}
 \".*\"	 { conflval.s=strdup(yytext+1);
 		   conflval.s[strlen(conflval.s)-1]=0;
+           /*free(conflval.s)*/
 		   return TOK_STRING;
 		 } 
 {WHITE}

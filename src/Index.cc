@@ -293,6 +293,8 @@ void Index<T>::addEntry(IndexField *iqe) {
 		IndexEntry* ie_n=new IndexEntry(iqe, 
 				iqe->ts-IDX_PKT_SECURITY_MARGIN*idx_thread_iat, iqe->ts);
 		cur->add(iqe, ie_n);
+
+    	last_updated = iqe->ts;
 	} else {
         tmlog(TM_LOG_NOTE, "addEntry", "updating the entry with timestamp %f and form %s", iqe->ts, iqe->getStr().c_str());
         // the entry is already in the hash table
@@ -303,7 +305,7 @@ void Index<T>::addEntry(IndexField *iqe) {
 		delete iqe;
 	}
     // update last_updated time
-	last_updated = iqe->ts;
+	//last_updated = iqe->ts;
 
     // Note that old hash table is now the formerly current hash table. So, it is in the memory, and we can do look up on it
     // This must be the table that Aashish says that indexes do not persist, part of of index persistence (other part is

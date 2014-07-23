@@ -20,22 +20,47 @@ Connections::Connections(uint32_t hash_size):
 
 Connections::~Connections() {
 	delete[] htable;
+    addedconn = NULL;
     delete addedconn;
+    //delete addedpacket;
 	pthread_mutex_destroy(&lock_mutex);
 }
 
 void Connections::addConnHelper(ConnectionID4 *c_id)
 {
-    Connection *c;
+    //Connection *c;
     unsigned hval;
 
-    c = new Connection(c_id); // c_id now owned by c
+    addedconn = new Connection(c_id); // c_id now owned by c
     hval = c_id->hash()%size;
     num_entries++;
 
     /* LOCK-XXX: we cannot guarantee that the compiler doesn't reorder, so 
      * we must use a lock()
      */
+    lock();
+    addedconn->col_next = htable[hval];
+    addedconn->col_prev = NULL;
+    htable[hval] = addedconn;
+
+    if (addedconn->col_next != NULL) 
+	    addedconn->col_next->col_prev = addedconn;
+    unlock();
+
+    //addedconn = c;
+
+/*
+    Connection *c;
+    unsigned hval;
+
+    c = new Connection(c_id); // c_id now owned by c
+    hval = c_id->hash()%size;
+    num_entries++;
+*/
+    /* LOCK-XXX: we cannot guarantee that the compiler doesn't reorder, so 
+     * we must use a lock()
+     */
+/*
     lock();
     c->col_next = htable[hval];
     c->col_prev = NULL;
@@ -46,6 +71,7 @@ void Connections::addConnHelper(ConnectionID4 *c_id)
     unlock();
 
     addedconn = c;
+*/
 }
 
 /* add a new connection to the table */

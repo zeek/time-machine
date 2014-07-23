@@ -248,6 +248,8 @@ class IndexHash {
 				w->parent = NULL;
 			}
 		}
+    //private:
+    //	const void* Insert(IndexEntry* entry, IndexField *key);
 };
 
 

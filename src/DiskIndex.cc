@@ -389,6 +389,7 @@ void IndexFiles<T>::aggregate(tm_time_t oldestTimestampDisk) {
 			unlink(oldest_fname);
 			file_number_oldest[num_aggregate_levels-1]++;
 		}
+        //free(oldest_fname);
 		delete ifr;
 	}
 	unlock_file_numbers();

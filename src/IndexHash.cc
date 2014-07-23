@@ -117,95 +117,203 @@ void IndexHash::add(IndexField *key, IndexEntry *ie) {
 
     tmlog(TM_LOG_NOTE, "idx_hash", "entering the add method");
 
+    /*
+	const void* old_val = Insert(ie, key);
 
-	IndexEntry *cur, *prev;
-	int cmp;
-	cur = troot;
-	prev = NULL;
-	cmp = 0;
-#ifdef TM_HEAVY_DEBUG
-	assert(!lookup(key));
-	if (troot)
-		assert(troot->parent == NULL);
-	assert(ie->parent == NULL);
-	assert(ie->left == NULL);
-	assert(ie->right == NULL);
-	assert(ie->avlbal == 0);
-#endif
+    // A same entry was already in the table
+    if (old_val)
+    {
+        tmlog(TM_LOG_NOTE, "idx_has", "we already have the same entry!");
+        delete ie;
+        return;
+    }
+
+    else
+    {
+    */
+	    IndexEntry *cur, *prev;
+	    int cmp;
+	    cur = troot;
+	    prev = NULL;
+	    cmp = 0;
+    #ifdef TM_HEAVY_DEBUG
+	    assert(!lookup(key));
+	    if (troot)
+		    assert(troot->parent == NULL);
+	    assert(ie->parent == NULL);
+	    assert(ie->left == NULL);
+	    assert(ie->right == NULL);
+	    assert(ie->avlbal == 0);
+    #endif
 	
-    tmlog(TM_LOG_NOTE, "idx_hash", "the entry to add has key: %d", *(key->getConstKeyPtr()));
+        tmlog(TM_LOG_NOTE, "idx_hash", "the entry to add has key: %d", *(key->getConstKeyPtr()));
 
-    tmlog(TM_LOG_NOTE, "idx_hash", "the entry to add has timestampe: %f", key->ts);
+        tmlog(TM_LOG_NOTE, "idx_hash", "the entry to add has timestampe: %f", key->ts);
 
-	while (cur) {
-#ifdef TM_HEAVY_DEBUG
-		assert(cur->avlbal>=-1 && cur->avlbal<=1);
-#endif
-		prev = cur;
-		cmp = memcmp(key->getConstKeyPtr(), cur->getKey()->getConstKeyPtr(), key->getKeySize());
-		if (cmp > 0)
-			cur = cur->left;
-		else if (cmp < 0)
-			cur = cur->right;
-		else {
-            tmlog(TM_LOG_ERROR, "idx_hash", "the already existing entry is: %d\n", *(cur->getKey()->getConstKeyPtr()));
-			tmlog(TM_LOG_ERROR, "idx_hash",  "tried to insert an already existing entry into the tree. numEntries=%d\n",
-					getNumEntries());
-			//h->add_or_update(key, ie);
-			abort();
-			return ; // entry exists, shouldn't happen	
-		}
-	}
+	    while (cur) {
+    #ifdef TM_HEAVY_DEBUG
+		    assert(cur->avlbal>=-1 && cur->avlbal<=1);
+    #endif
 
-	if (!troot) {
-		troot = ie;
-#ifdef TM_HEAVY_DEBUG
-		assert(troot->parent == NULL);
-		assert(troot->left == NULL);
-		assert(troot->right == NULL);
-		assert(troot->avlbal == 0);
-#endif
-	}
-	else {
-#ifdef TM_HEAVY_DEBUG
-		assert(prev);
-		assert(!cur);
-		assert(cmp!=0);
-#endif
-		// We are now at a terminal node. Insert the entry
-		ie->parent = prev;
-		if (cmp>0) {
-			prev->left = ie;
-			prev->avlbal--;
-		}
-		else {
-			prev->right = ie;
-			prev->avlbal++;
-		}
-		rebalance(prev);
-	}
+		    prev = cur;
+            // determine where to put the entry?
+            // determines where current pointer to Index Entry should be (transversing through tree)
+            // this compares the 16 bytes/128-bit char arrays
+		    cmp = memcmp(key->getConstKeyPtr(), cur->getKey()->getConstKeyPtr(), key->getKeySize());
 
-	unsigned hval;
+	        if ( key->hash() == cur->getKey()->hash() &&
+	             cmp )
+		        {
+	                unsigned hvalconflict;
 
-	hval = key->hash()%numBuckets;
+	                hvalconflict = key->hash()%numBuckets;
 
-	ie->col_next = htable[hval];
-	ie->col_prev = NULL;
-	htable[hval] = ie;
+	                ie->col_next = htable[hvalconflict];
+	                ie->col_prev = NULL;
+	                htable[hvalconflict] = ie;
+                    return;
+		        }
 
-    ie->key->hash_key = hval;
+		    if (cmp > 0)
+			    cur = cur->left;
+		    else if (cmp < 0)
+			    cur = cur->right;
+		    else 
+            {
+                tmlog(TM_LOG_NOTE, "idx_hash", "the already existing entry is: %d\n", *(cur->getKey()->getConstKeyPtr()));
+			    tmlog(TM_LOG_NOTE, "idx_hash",  "tried to insert an already existing entry into the tree. numEntries=%d\n",
+					    getNumEntries());
+			    //h->add_or_update(key, ie);
+                delete ie;
+                delete key;
+			    abort();
+			    return ; // entry exists, shouldn't happen	
+		    }
+	    }
 
-    tmlog(TM_LOG_NOTE, "idxhash", "this entry for which we have foudn the bucket value %d for has this timestamp %f and form %s", hval, key->ts, key->getStr().c_str());
+	    if (!troot) {
+		    troot = ie;
+    #ifdef TM_HEAVY_DEBUG
+		    assert(troot->parent == NULL);
+		    assert(troot->left == NULL);
+		    assert(troot->right == NULL);
+		    assert(troot->avlbal == 0);
+    #endif
+	    }
+	    else {
+    #ifdef TM_HEAVY_DEBUG
+		    assert(prev);
+		    assert(!cur);
+		    assert(cmp!=0);
+    #endif
+		    // We are now at a terminal node. Insert the entry
+		    ie->parent = prev;
+		    if (cmp>0) {
+			    prev->left = ie;
+			    prev->avlbal--;
+		    }
+		    else {
+			    prev->right = ie;
+			    prev->avlbal++;
+		    }
+		    rebalance(prev);
+	    }
 
-    tmlog(TM_LOG_NOTE, "idx_hash", "setting an entry in the hash table at %d", hval);
+	    unsigned hval;
+
+	    hval = key->hash()%numBuckets;
+
+	    ie->col_next = htable[hval];
+	    ie->col_prev = NULL;
+	    htable[hval] = ie;
+
+        ie->key->hash_key = hval;
+
+        tmlog(TM_LOG_NOTE, "idxhash", "this entry for which we have foudn the bucket value %d for has this timestamp %f and form %s", hval, key->ts, key->getStr().c_str());
+
+        tmlog(TM_LOG_NOTE, "idx_hash", "setting an entry in the hash table at %d", hval);
 	
-	if (ie->col_next != NULL) 
-		ie->col_next->col_prev = ie;
+	    if (ie->col_next != NULL) 
+		    ie->col_next->col_prev = ie;
 
-	numEntries++;
-	return;
+	    numEntries++;
+	    return;
+    //}
 }
 
+/*
+// private
+const void* IndexHash::Insert(IndexEntry* new_entry, IndexField *key)
+{
+	//int* num_entries_ptr;
+	//int* max_num_entries_ptr;
+	unsigned h;
+    h = key->hash() % numBuckets;
+
+	IndexEntry* chain = htable[h];
+
+	int n = key->getKeySize();
+
+    // if a collisions list/element exists in that particular spot in the hash table
+	if ( chain )
+	{
+        IndexEntry *cur = chain;
+        
+        // go through all the elements in the collisions list
+	    while (cur != NULL)
+	    {
+	        IndexEntry entry = *chain;
+
+            // the hashes, length, and the keys are all the same
+            // then that means the entry with the same exact parameters
+            // already exists. So, we just return the old entry value.
+	        if ( entry.getKey()->hash() == key->hash() &&
+	             entry.getKey()->getKeySize() == n &&
+	             ! memcmp(entry.getKey()->getConstKeyPtr(), key->getConstKeyPtr(), n) )
+		        {
+                    const void* old_value;
+                    if (key->getConstKeyPtr() != 0)
+                        old_value = key->getConstKeyPtr();
+		            return old_value;
+		        }
+            // next element in collisions list
+            cur = cur->col_next;
+	    }
+	}
+
+	else
+		// Create new chain.
+		chain = ttbl[h] = new PList(DictEntry);
+
+	// If we got this far, then we couldn't use an existing copy
+	// of the key, so make a new one if necessary.
+	if ( copy_key )
+		{
+		void* old_key = new_entry->key;
+		new_entry->key = (void*) new char[n];
+		memcpy(new_entry->key, old_key, n);
+		delete (char*) old_key;
+		}
+
+	// We happen to know (:-() that appending is more efficient
+	// on lists than prepending.
+	chain->append(new_entry);
+
+	if ( *max_num_entries_ptr < ++*num_entries_ptr )
+		*max_num_entries_ptr = *num_entries_ptr;
+
+	// For ongoing iterations: If we already passed the bucket where this
+	// entry was put, add it to the cookie's list of inserted entries.
+	loop_over_list(cookies, i)
+		{
+		IterCookie* c = cookies[i];
+		if ( h < (unsigned int) c->bucket )
+			c->inserted.append(new_entry);
+		}
+
+	return 0;
+}
+*/
 
 // rebalance an avl tree. 
 // cur is the parent of the just inserted node
