@@ -97,19 +97,19 @@ void FifoMem::addPkt(const struct pcap_pkthdr *header,
 
 
 
-        char str1[INET6_ADDRSTRLEN];
+        //char str1[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(IP6(wp + 4 + sizeof(struct pcap_pkthdr))->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
+        //bro_inet_ntop(AF_INET6, &(IP6(wp + 4 + sizeof(struct pcap_pkthdr))->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
 
         //char s1[INET6_ADDRSTRLEN];
 
         //inet_pton(AF_INET6, s1, str1);
 
-        char str2[INET6_ADDRSTRLEN];
+        //char str2[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(IP6(wp + 4 + sizeof(struct pcap_pkthdr))->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
+        //bro_inet_ntop(AF_INET6, &(IP6(wp + 4 + sizeof(struct pcap_pkthdr))->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
 
-        tmlog(TM_LOG_NOTE, "FifoMem::addPkt", "we just wrote to the fifo memory ring buffer the packet with src ip %s and dst ip %s", str1, str2);
+        //tmlog(TM_LOG_NOTE, "FifoMem::addPkt", "we just wrote to the fifo memory ring buffer the packet with src ip %s and dst ip %s", str1, str2);
 
 
 
@@ -157,7 +157,7 @@ void FifoMem::addPkt(const struct pcap_pkthdr *header,
 		}
         // increment these since we are adding a packet with bytes
 		tot_pkts++;
-		tot_pktbytes+=header->caplen;
+		tot_pktbytes+=header->caplen; //len;
 		held_pkts++;
 		held_bytes+=header->caplen;
 

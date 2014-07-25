@@ -87,8 +87,8 @@ public:
     }
     */
 	bool operator==(const ConnectionID& other) const { 
-		return (v6.ip1 == ((ConnectionID4*)&other)->v6.ip1)
-			   && (v6.ip2 == ((ConnectionID4*)&other)->v6.ip2)
+		return (!memcmp(v6.ip1, ((ConnectionID4*)&other)->v6.ip1, 16))
+			   && (!memcmp(v6.ip2, ((ConnectionID4*)&other)->v6.ip2, 16))
 			   && (v6.port1 == ((ConnectionID4*)&other)->v6.port1)
 			   && (v6.port2 == ((ConnectionID4*)&other)->v6.port2)
 			   && (v6.proto == ((ConnectionID4*)&other)->v6.proto);
@@ -168,6 +168,15 @@ public:
 	}
     // have the structure fields align on one-byte boundaries
 	__attribute__((packed)) v6_t;
+
+    typedef struct {
+        in6_addr ip1;
+        in6_addr ip2;
+        uint16 port1;
+        uint16 port2;
+    } 
+    __attribute__((packed)) key_t;
+
     /*
 	v_t* getV() {
 		return &v;
@@ -195,6 +204,7 @@ protected:
                uint16_t s_port, uint16_t d_port);
 	//v_t v;
     v6_t v6;
+    key_t key;
     hash_t hash_key;
 
 private:
@@ -311,6 +321,14 @@ public:
 	}
 	__attribute__((packed)) v6_t;
 
+    typedef struct {
+        in6_addr ip1;
+        in6_addr ip2;
+        uint16 port1;
+        uint16 port2;
+    }
+    __attribute__((packed)) key_t;
+
 /*
 	v_t* getV() {
 		return &v;
@@ -347,6 +365,7 @@ protected:
                uint16_t port);
 	//v_t v;
     v6_t v6;
+    key_t key;
 
 
 //private:
@@ -442,6 +461,15 @@ public:
 		//    bool is_canonified;
 	}
 	__attribute__((packed)) v6_t;
+
+    typedef struct {
+        in6_addr ip1;
+        in6_addr ip2;
+        uint16 port1;
+        uint16 port2;
+    }
+    __attribute__((packed)) key_t;
+
 /*
 	v_t* getV() {
 		return &v;
@@ -474,6 +502,7 @@ protected:
     void init6( unsigned char s_ip[], unsigned char d_ip[]);
 	//v_t v;
     v6_t v6;
+    key_t key;
 
 //private:
 	//in6_addr in6; // IPv6 or v4-to-v6-mapped address

@@ -116,19 +116,19 @@ uint64_t Fifo::pktEviction() {
         // getS() method is from FifoMem.c - it gets the beginning of first valid packet in the memory ring buffer block
 
 
-        char str1[INET6_ADDRSTRLEN];
+        //char str1[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(IP6(fm->getS() + 4 + sizeof(struct pcap_pkthdr))->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
+        //bro_inet_ntop(AF_INET6, &(IP6(fm->getS() + 4 + sizeof(struct pcap_pkthdr))->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
 
         //char s1[INET6_ADDRSTRLEN];
 
         //inet_pton(AF_INET6, s1, str1);
 
-        char str2[INET6_ADDRSTRLEN];
+        //char str2[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(IP6(fm->getS() + 4 + sizeof(struct pcap_pkthdr))->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
+        //bro_inet_ntop(AF_INET6, &(IP6(fm->getS() + 4 + sizeof(struct pcap_pkthdr))->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
 
-        tmlog(TM_LOG_NOTE, "Fifo::pktEviction", "we ard adding the packet to the FifoDisk with src ip %s and dst ip %s", str1, str2);
+        //tmlog(TM_LOG_NOTE, "Fifo::pktEviction", "we ard adding the packet to the FifoDisk with src ip %s and dst ip %s", str1, str2);
 		fd->addPkt(fm->getS());
         // pop the packet from the memory ring buffer (I'm still not sure about the align stuff, with a_s, a_lp)
         // note that popPkt returns the size of the popped packet in bytes
@@ -160,23 +160,23 @@ bool Fifo::addPkt(const struct pcap_pkthdr* header,
 			return false;
 		} else {
 
-            char str1[INET6_ADDRSTRLEN];
+            //char str1[INET6_ADDRSTRLEN];
 
-            bro_inet_ntop(AF_INET6, &(IP6(packet + 4)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
+            //bro_inet_ntop(AF_INET6, &(IP6(packet + 4)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
 
             //char s1[INET6_ADDRSTRLEN];
 
             //inet_pton(AF_INET6, s1, str1);
 
-            char str2[INET6_ADDRSTRLEN];
+            //char str2[INET6_ADDRSTRLEN];
 
-            bro_inet_ntop(AF_INET6, &(IP6(packet + 4)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
+            //bro_inet_ntop(AF_INET6, &(IP6(packet + 4)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
 
-            tmlog(TM_LOG_NOTE, "Fifo::addPkt", "the packet we are adding to FifoMem has source ip %s and destination ip %s", str1, str2);
+            //tmlog(TM_LOG_NOTE, "Fifo::addPkt", "the packet we are adding to FifoMem has source ip %s and destination ip %s", str1, str2);
 
 			// normal addition to Memory Fifo since this packet is not cutoff
 			fm->addPkt(header, packet);
-            tmlog(TM_LOG_DEBUG, "addPkt: Fifo.cc, ~line 121", "Connection cut-off did not occur for packet %lu", header->ts.tv_usec);
+            //tmlog(TM_LOG_DEBUG, "addPkt: Fifo.cc, ~line 121", "Connection cut-off did not occur for packet %lu", header->ts.tv_usec);
             // increment the stored_pkts and stored_bytes
 			stored_pkts++;
 			stored_bytes+=header->len;

@@ -339,7 +339,7 @@ std::string SrcIPAddress::getStrPkt(const u_char* packet) const
 	else
 		{   
 
-        tmlog(TM_LOG_NOTE, "SrcIPAddress: getStr(u_char*)", "IPAddress, IPv6");
+        //tmlog(TM_LOG_NOTE, "SrcIPAddress: getStr(u_char*)", "IPAddress, IPv6");
 		char str[INET6_ADDRSTRLEN];
 
 		if ( ! inet_ntop(AF_INET6, IP6(packet)->ip6_src.s6_addr, str, INET6_ADDRSTRLEN) )
@@ -470,18 +470,38 @@ void Port::getBPFStr(char *str, int max_str_len) const {
 }
 
 
-SrcPort::SrcPort(const u_char* packet) {
-	switch (IP(packet)->ip_p) {
-	case IPPROTO_UDP:
-		port=(UDP(packet)->uh_sport);
-		break;
-	case IPPROTO_TCP:
-		port=(TCP(packet)->th_sport);
-		break;
-	default:
-		port=0;
-		break;
+SrcPort::SrcPort(const u_char* packet)  {
+
+    if (IP(packet)->ip_v==4)
+    { 
+	    switch (IP(packet)->ip_p) {
+	    case IPPROTO_UDP:
+		    port=(UDP(packet)->uh_sport);
+		    break;
+		case IPPROTO_TCP:
+			port=(TCP(packet)->th_sport);
+			break;
+		default:
+			port=0;
+			break;
+		}
 	}
+
+	else
+	{
+		switch (IP6(packet)->ip6_ctlun.ip6_un1.ip6_un1_nxt)
+        {
+            case IPPROTO_UDP:
+            	port=(UDP6(packet)->uh_sport); 
+                break;
+            case IPPROTO_TCP:
+				port=(TCP6(packet)->th_sport);
+				break;
+			default:
+				port=0;
+				break;
+        }
+    }		
 };
 
 std::list<SrcPort*> SrcPort::genKeys(const u_char* packet) {
@@ -506,17 +526,37 @@ void SrcPort::getBPFStr(char *str, int max_str_len) const {
 
 
 DstPort::DstPort(const u_char* packet) {
-	switch (IP(packet)->ip_p) {
-	case IPPROTO_UDP:
-		port=(UDP(packet)->uh_dport);
-		break;
-	case IPPROTO_TCP:
-		port=(TCP(packet)->th_dport);
-		break;
-	default:
-		port=0;
-		break;
+
+    if (IP(packet)->ip_v==4)
+    {
+		switch (IP(packet)->ip_p) {
+		case IPPROTO_UDP:
+			port=(UDP(packet)->uh_dport);
+			break;
+		case IPPROTO_TCP:
+			port=(TCP(packet)->th_dport);
+			break;
+		default:
+			port=0;
+			break;
+		}
 	}
+
+    else
+    {
+        switch (IP6(packet)->ip6_ctlun.ip6_un1.ip6_un1_nxt)
+        {
+            case IPPROTO_UDP:
+                port=(UDP6(packet)->uh_dport);
+                break;
+            case IPPROTO_TCP:
+                port=(TCP6(packet)->th_dport);
+                break;
+            default:
+                port=0;
+                break;
+        }
+    }
 };
 
 std::list<DstPort*> DstPort::genKeys(const u_char* packet) {
@@ -590,16 +630,19 @@ IndexField* ConnectionIF4::parseQuery(const char *query) {
     
     else
     {
-        unsigned char src_ip6[16];
-        unsigned char dst_ip6[16];
+        //unsigned char src_ip6[16];
+        //unsigned char dst_ip6[16];
 
         //const char* src_ip6;
         //char* dst_ip6;
 
-        if (inet_pton(AF_INET6, src_ip.c_str(), src_ip6) == 1 && inet_pton(AF_INET6, dst_ip.c_str(), dst_ip6) == 1)
+        in6_addr src_addr6;
+        in6_addr dst_addr6;
+
+        if (inet_pton(AF_INET6, src_ip.c_str(), &(src_addr6)) == 1 && inet_pton(AF_INET6, dst_ip.c_str(), &(dst_addr6)) == 1)
         {
-	        return new ConnectionIF4(proto, src_ip6, htons(src_port),
-	                dst_ip6, htons(dst_port));
+	        return new ConnectionIF4(proto, src_addr6.s6_addr, htons(src_port),
+	                dst_addr6.s6_addr, htons(dst_port));
         }
         return NULL;
     }
@@ -699,12 +742,15 @@ IndexField* ConnectionIF3::parseQuery(const char *query) {
     }
     else
     {
-        unsigned char src_ip6[16];
-        unsigned char dst_ip6[16];
+        //unsigned char src_ip6[16];
+        //unsigned char dst_ip6[16];
 
-        if (inet_pton(AF_INET6, src_ip.c_str(), src_ip6) == 1 && inet_pton(AF_INET6, dst_ip.c_str(), dst_ip6) == 1)
+        in6_addr src_addr6;
+        in6_addr dst_addr6;
+
+        if (inet_pton(AF_INET6, src_ip.c_str(), &(src_addr6)) == 1 && inet_pton(AF_INET6, dst_ip.c_str(), &(dst_addr6)) == 1)
         {
-            return new ConnectionIF3(proto, src_ip6, dst_ip6, htons(port));
+            return new ConnectionIF3(proto, src_addr6.s6_addr, dst_addr6.s6_addr, htons(port));
         }
         return NULL;
     }
@@ -782,12 +828,15 @@ IndexField* ConnectionIF2::parseQuery(const char *query) {
     }
     else
     {
-        unsigned char src_ip6[16];
-        unsigned char dst_ip6[16];
+        //unsigned char src_ip6[16];
+        //unsigned char dst_ip6[16];
 
-        if (inet_pton(AF_INET6, src_ip.c_str(), src_ip6) == 1 && inet_pton(AF_INET6, dst_ip.c_str(), dst_ip6) == 1)
+        in6_addr src_addr6;
+        in6_addr dst_addr6;
+
+        if (inet_pton(AF_INET6, src_ip.c_str(), &(src_addr6)) == 1 && inet_pton(AF_INET6, dst_ip.c_str(), &(dst_addr6)) == 1)
         {
-            return new ConnectionIF2(src_ip6, dst_ip6);
+            return new ConnectionIF2(src_addr6.s6_addr, dst_addr6.s6_addr);
         }
         return NULL;
     }

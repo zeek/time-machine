@@ -130,19 +130,19 @@ void FifoDisk::addPkt(const pkt_ptr p) {
 			unlockQueryInProgress();
 		}
 
-        char str1[INET6_ADDRSTRLEN];
+        //char str1[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(IP6(p + 4 + sizeof(struct pcap_pkthdr))->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
+        //bro_inet_ntop(AF_INET6, &(IP6(p + 4 + sizeof(struct pcap_pkthdr))->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
 
         //char s1[INET6_ADDRSTRLEN];
 
         //inet_pton(AF_INET6, s1, str1);
 
-        char str2[INET6_ADDRSTRLEN];
+        //char str2[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(IP6(p + 4 + sizeof(struct pcap_pkthdr))->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
+        //bro_inet_ntop(AF_INET6, &(IP6(p + 4 + sizeof(struct pcap_pkthdr))->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
 
-        tmlog(TM_LOG_NOTE, "FifoDisk::addPkt", "we are going to add in next step the packet to the FifoDisk with src ip %s and dst ip %s", str1, str2);
+        //tmlog(TM_LOG_NOTE, "FifoDisk::addPkt", "we are going to add in next step the packet to the FifoDisk with src ip %s and dst ip %s", str1, str2);
 
         // in the last file, the newest file, add the packet
 		files.back()->addPkt(p);
@@ -154,7 +154,7 @@ void FifoDisk::addPkt(const pkt_ptr p) {
         // increment the number of held packets
 		held_pkts++;
         // increment the number of total bytes entered into this Fifo by the size of the pcap packet header struct and the length of the packet
-		tot_bytes+=sizeof(struct pcap_pkthdr)+((struct pcap_pkthdr*)p)->caplen;
+		tot_bytes+=sizeof(struct pcap_pkthdr)+((struct pcap_pkthdr*)p)->caplen; //len;
         // increment the number of total packets entered into this Fifo
 		tot_pkts++;
 	}

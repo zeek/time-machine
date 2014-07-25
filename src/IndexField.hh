@@ -95,6 +95,8 @@ public:
 
         hash_key = newHashKey->Hash();
 
+        delete newHashKey;
+
         free_hash_function();
     }
 /*
@@ -244,7 +246,7 @@ private:
 	static const uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
 
 	//uint32_t ip_address;
-    unsigned char ip6_address[16]; // unsigned char ip6_address[16]
+    //unsigned char ip6_address[16]; // unsigned char ip6_address[16]
  	static std::string pattern;
     static std::string pattern6;
 	static RE2 re;
@@ -361,6 +363,8 @@ public:
 
 	    hash_key =  newHashKey->Hash();
 
+        delete newHashKey;
+
         free_hash_function();
     }
 	Port(uint16_t port): port(port) {  /* printf("Port(%u)\n", port); */
@@ -369,6 +373,8 @@ public:
         HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
 
 	    hash_key =  newHashKey->Hash();
+
+        delete newHashKey;
 
         free_hash_function();
 	}

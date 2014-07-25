@@ -41,19 +41,19 @@ void callback(u_char *args, const struct pcap_pkthdr *header,
 	network_time=header->ts;
 	*/ 
 
-    char str1[INET6_ADDRSTRLEN];
+    //char str1[INET6_ADDRSTRLEN];
 
-    inet_ntop(AF_INET6, &(IP6(packet)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
+    //inet_ntop(AF_INET6, &(IP6(packet)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
 
     //char s1[INET6_ADDRSTRLEN];
 
     //inet_pton(AF_INET6, s1, str1);
 
-    char str2[INET6_ADDRSTRLEN];
+    //char str2[INET6_ADDRSTRLEN];
 
-    inet_ntop(AF_INET6, &(IP6(packet)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
+    //inet_ntop(AF_INET6, &(IP6(packet)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
 
-    tmlog(TM_LOG_NOTE, "Storage::callback", "we are going to call addpacket of storage on packet that has source ip %s and destination ip %s", str1, str2);
+    //tmlog(TM_LOG_NOTE, "Storage::callback", "we are going to call addpacket of storage on packet that has source ip %s and destination ip %s", str1, str2);
 
     // DEBUG DEBUG DEBUG
 	tmlog(TM_LOG_DEBUG, "storage callback: Storage.cc, ~line 29", "Callback function for pcap_loop%lu", header->ts.tv_usec);
