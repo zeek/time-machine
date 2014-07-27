@@ -97,7 +97,7 @@ public:
 
         delete newHashKey;
 
-        free_hash_function();
+        //free_hash_function();
     }
 /*
     IPAddress(unsigned char ip6[])
@@ -120,7 +120,7 @@ public:
 
         delete newHashKey;
 
-        free_hash_function();
+        //free_hash_function();
     }
 /*
     // The inet_addr() function converts the Internet host address cp from IPv4 
@@ -151,7 +151,7 @@ public:
 
         delete newHashKey;
 
-        free_hash_function();
+        //free_hash_function();
 	}
 	virtual ~IPAddress() {
         tmlog(TM_LOG_NOTE, "IPAddress", "deleting an ipaddress type");
@@ -365,7 +365,7 @@ public:
 
         delete newHashKey;
 
-        free_hash_function();
+        //free_hash_function();
     }
 	Port(uint16_t port): port(port) {  /* printf("Port(%u)\n", port); */
         init_hash_function();
@@ -376,7 +376,7 @@ public:
 
         delete newHashKey;
 
-        free_hash_function();
+        //free_hash_function();
 	}
 	virtual ~Port() {}
 

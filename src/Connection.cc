@@ -170,7 +170,7 @@ void ConnectionID4::init(proto_t proto,
 
     delete newHashKey;
 
-    free_hash_function();
+    //free_hash_function();
 }
 
 void ConnectionID4::init6(proto_t proto,
@@ -246,7 +246,7 @@ void ConnectionID4::init6(proto_t proto,
 
     delete newHashKey;
 
-    free_hash_function();
+    //free_hash_function();
 }
 
 void ConnectionID3::init(proto_t proto,
@@ -281,6 +281,7 @@ void ConnectionID3::init(proto_t proto,
 
 	v6.port2=port2;
 
+    /*	
 	// Lookup up connection based on canonical ordering, which is
 	// the smaller of <src addr, src port> and <dst addr, dst port>
 	// followed by the other.
@@ -310,6 +311,18 @@ void ConnectionID3::init(proto_t proto,
 		    key.port1 = v6.port2;
 		    key.port2 = 0;
 		}
+	*/
+
+        in6_addr s6_ip;
+        in6_addr d6_ip;
+
+        memcpy(s6_ip.s6_addr, v6.ip1, 16);
+        memcpy(d6_ip.s6_addr, v6.ip2, 16);
+
+        key.ip1 = d6_ip;
+        key.ip2 = s6_ip;
+        key.port1 = v6.port2;
+        key.port2 = 0;
 
     init_hash_function();
 
@@ -321,7 +334,7 @@ void ConnectionID3::init(proto_t proto,
 
     delete newHashKey;
 
-    free_hash_function();
+    //free_hash_function();
 }
 
 void ConnectionID3::init6(proto_t proto,
@@ -344,6 +357,7 @@ void ConnectionID3::init6(proto_t proto,
 	//v.ip2=ip2;
 	v6.port2=port2;
 
+	/*
 	// Lookup up connection based on canonical ordering, which is
 	// the smaller of <src addr, src port> and <dst addr, dst port>
 	// followed by the other.
@@ -377,6 +391,21 @@ void ConnectionID3::init6(proto_t proto,
 		    key.port1 = v6.port2;
 		    key.port2 = 0;
 		}
+	*/
+		
+        in6_addr s6_ip;
+        in6_addr d6_ip;
+    
+        // setting s6_ip to have source address and d6_ip to have dest address
+        memcpy(s6_ip.s6_addr, ip1, 16);
+        memcpy(d6_ip.s6_addr, ip2, 16);
+
+        // setting key.ip1 to be dest address and key.ip2 to be source address
+        key.ip1 = d6_ip;
+        key.ip2 = s6_ip;
+        key.port1 = v6.port2;
+        key.port2 = 0;
+	
 
     init_hash_function();
 
@@ -388,7 +417,7 @@ void ConnectionID3::init6(proto_t proto,
 
     delete newHashKey;
 
-    free_hash_function();
+    //free_hash_function();
 }
 
 void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
@@ -469,7 +498,7 @@ void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
 
     delete newHashKey;
 
-    free_hash_function();
+    //free_hash_function();
 }
 
 void ConnectionID2::init6( unsigned char s_ip[], unsigned char d_ip[]) {
@@ -530,7 +559,7 @@ void ConnectionID2::init6( unsigned char s_ip[], unsigned char d_ip[]) {
 
     delete newHashKey;
 
-    free_hash_function();
+    //free_hash_function();
 }
 
 

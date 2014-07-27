@@ -194,7 +194,7 @@ void IPAddress::Init(const std::string& s)
 
         hash_key = newHashKey->Hash();
 
-        free_hash_function();
+        //free_hash_function();
 		}
 
 	else
@@ -214,7 +214,7 @@ void IPAddress::Init(const std::string& s)
 
         hash_key = newHashKey->Hash();
 
-        free_hash_function();
+        //free_hash_function();
 	}
 
 std::string IPAddress::getStr() const
