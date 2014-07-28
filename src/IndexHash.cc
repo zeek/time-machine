@@ -198,7 +198,7 @@ void IndexHash::add(IndexField *key, IndexEntry *ie) {
 					    getNumEntries());
 			    //h->add_or_update(key, ie);
                 //delete ie;
-                delete key;
+                 // delete key;
 			    //abort();
 			    return ; // entry exists, shouldn't happen	
 		    }
