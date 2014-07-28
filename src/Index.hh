@@ -11,6 +11,7 @@
 #include <sstream>
 #include <pthread.h>
 #include <time.h>
+#include <gperftools/profiler.h>
 
 #include "types.h"
 #include "tm.h"
