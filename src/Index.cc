@@ -11,6 +11,7 @@
 
 #include <fstream>
 #include <queue>
+#include <gperftools/profiler.h>
 
 #include "tm.h"
 #include "types.h"
@@ -282,6 +283,7 @@ void Index<T>::addEntry(IndexField *iqe) {
     // if it is not in the Hash table (== NULL)
 	if (ie==NULL) {
 
+        ProfilerStart("IndexHash_add");
 
         tmlog(TM_LOG_DEBUG, "addEntry", "beginning to add entry with timestamp %f and form %s", iqe->ts, iqe->getStr().c_str());
 
@@ -295,6 +297,8 @@ void Index<T>::addEntry(IndexField *iqe) {
 		cur->add(iqe, ie_n);
 
     	last_updated = iqe->ts;
+
+        ProfilerStop();
 	} else {
         tmlog(TM_LOG_NOTE, "addEntry", "updating the entry with timestamp %f and form %s", iqe->ts, iqe->getStr().c_str());
         // the entry is already in the hash table
