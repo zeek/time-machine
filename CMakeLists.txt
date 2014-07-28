@@ -31,6 +31,7 @@ endif ()
 set(HAVE_PERFTOOLS false)
 set(USE_PERFTOOLS_DEBUG false)
 set(USE_PERFTOOLS_TCMALLOC false)
+set(USE_PERFTOOLS_CPU false)
 
 if (NOT DISABLE_PERFTOOLS)
    find_package(GooglePerftools)
@@ -52,6 +53,15 @@ if (GOOGLEPERFTOOLS_FOUND)
             # Link in tcmalloc for better performance.
             list(APPEND OPTLIBS ${GooglePerftools_LIBRARIES})
         endif ()
+        
+        if (ENABLE_PERFTOOLS_CPU)
+            # Enable CPU usage debugging with perftools.
+            set(USE_PERFTOOLS_CPU true)
+            include_directories(BEFORE ${GooglePerftools_INCLUDE_CPU})
+            list(APPEND OPTLIBS ${GooglePerftools_LIBRARIES_CPU})
+        else ()
+            list(APPEND OPTLIBS ${GooglePerftools_LIBRARIES})
+        endif ()
     endif ()
 endif ()
 
@@ -62,7 +72,7 @@ if (MISSING_PREREQS)
     message(FATAL_ERROR "Configuration aborted due to missing prerequisites")
 endif ()
 
-if (ENABLE_PERFTOOLS_DEBUG OR ENABLE_PERFTOOLS)
+if (ENABLE_PERFTOOLS_CPU OR ENABLE_PERFTOOLS_DEBUG OR ENABLE_PERFTOOLS)
     # Just a no op to prevent CMake from complaining about manually-specified
     # ENABLE_PERFTOOLS_DEBUG or ENABLE_PERFTOOLS not being used if google
     # perftools weren't found
@@ -135,6 +145,7 @@ message(
     "\ngperftools found:  ${HAVE_PERFTOOLS}"
     "\n        tcmalloc:  ${USE_PERFTOOLS_TCMALLOC}"
     "\n       debugging:  ${USE_PERFTOOLS_DEBUG}"
+    "\n     cpu_profile:  ${USE_PERFTOOLS_CPU}"
     "\n================================================================\n"
 )
 
