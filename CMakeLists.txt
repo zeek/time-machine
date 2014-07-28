@@ -28,11 +28,44 @@ if (BROCCOLI_FOUND)
     list(APPEND OPTLIBS ${Broccoli_LIBRARY})
 endif ()
 
+set(HAVE_PERFTOOLS false)
+set(USE_PERFTOOLS_DEBUG false)
+set(USE_PERFTOOLS_TCMALLOC false)
+
+if (NOT DISABLE_PERFTOOLS)
+   find_package(GooglePerftools)
+endif ()
+
+if (GOOGLEPERFTOOLS_FOUND)
+    set(HAVE_PERFTOOLS true)
+    # Non-Linux systems may not be well-supported by gperftools, so
+    # require explicit request from user to enable it in that case.
+    if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ENABLE_PERFTOOLS)
+        set(USE_PERFTOOLS_TCMALLOC true)
+
+        if (ENABLE_PERFTOOLS_DEBUG)
+            # Enable heap debugging with perftools.
+            set(USE_PERFTOOLS_DEBUG true)
+            include_directories(BEFORE ${GooglePerftools_INCLUDE_DIR})
+            list(APPEND OPTLIBS ${GooglePerftools_LIBRARIES_DEBUG})
+        else ()
+            # Link in tcmalloc for better performance.
+            list(APPEND OPTLIBS ${GooglePerftools_LIBRARIES})
+        endif ()
+    endif ()
+endif ()
+
 if (MISSING_PREREQS)
     foreach (prereq ${MISSING_PREREQ_DESCS})
         message(SEND_ERROR ${prereq})
     endforeach ()
     message(FATAL_ERROR "Configuration aborted due to missing prerequisites")
+endif ()
+
+if (ENABLE_PERFTOOLS_DEBUG OR ENABLE_PERFTOOLS)
+    # Just a no op to prevent CMake from complaining about manually-specified
+    # ENABLE_PERFTOOLS_DEBUG or ENABLE_PERFTOOLS not being used if google
+    # perftools weren't found
 endif ()
 
 set(CMAKE_CXX_FLAGS "-g -Wall")
@@ -99,6 +132,9 @@ message(
     "\nCPP:               ${CMAKE_CXX_COMPILER}"
     "\n"
     "\nBroccoli:          ${USE_BROCCOLI}"
+    "\ngperftools found:  ${HAVE_PERFTOOLS}"
+    "\n        tcmalloc:  ${USE_PERFTOOLS_TCMALLOC}"
+    "\n       debugging:  ${USE_PERFTOOLS_DEBUG}"
     "\n================================================================\n"
 )
 
