@@ -31,5 +31,5 @@ query to_file "testquery.pcap" index ip "[2001:558:fe0d:1c::2]"
 
 Not using brackets around an ipv6 address will result in a querying error.
 
-
+Note that to use gperftools' CPU profiler, you will have to first install libunwind.
 

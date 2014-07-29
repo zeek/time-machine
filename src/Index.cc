@@ -283,7 +283,7 @@ void Index<T>::addEntry(IndexField *iqe) {
     // if it is not in the Hash table (== NULL)
 	if (ie==NULL) {
 
-        ProfilerStart("test.prof");
+        //ProfilerStart("/home/lakers/timemachine_results/profile/blah.prof");
 
         tmlog(TM_LOG_DEBUG, "addEntry", "beginning to add entry with timestamp %f and form %s", iqe->ts, iqe->getStr().c_str());
 
@@ -298,7 +298,7 @@ void Index<T>::addEntry(IndexField *iqe) {
 
     	last_updated = iqe->ts;
 
-        ProfilerStop();
+        //ProfilerStop();
 	} else {
         tmlog(TM_LOG_NOTE, "addEntry", "updating the entry with timestamp %f and form %s", iqe->ts, iqe->getStr().c_str());
         // the entry is already in the hash table

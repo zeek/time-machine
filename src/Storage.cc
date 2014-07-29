@@ -4,6 +4,7 @@
 
 #include <sstream>
 #include <iostream>
+#include <gperftools/profiler.h>
 
 #include "DynClass.hh"
 #include "types.h"
@@ -338,6 +339,8 @@ void Storage::SetHdrSize()
 // note that the pcap packet header has the timestamp of the packet
 void Storage::addPkt(const struct pcap_pkthdr *header,
 					 const unsigned char *packet) {
+
+	//ProfilerStart("/home/lakers/timemachine_results/profile/blah.prof");
 	uint16_t ether_type=ntohs(ETHERNET(packet)->ether_type);
     // ETHERTYPE_IP is EtherType 0x800, for IPv4 addresses
     // EtherType 0x8100 is for VLAN header
@@ -415,6 +418,8 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
      * otherwise create the entry (from Connections.hh)
      */
 	Connection* c=conns.addPkt(header, idxpacket);
+
+    //ProfilerStop();
 
     // a flow of packets characterized by the 5-tuple of (layer 4 protocol, source ip, source port, destination ip, destination port)
     // note that for protocols other than tcp/udp, may not include source/dest ports

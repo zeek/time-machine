@@ -28,6 +28,8 @@
 #define USE_MALLINFO
 #endif
 #include <sys/ioctl.h>
+#include <gperftools/profiler.h>
+
 
 #ifdef USE_BROCCOLI
 #include "BroccoliComm.hh"
@@ -616,6 +618,8 @@ void usage() {
 
 int
 main(int argc, char** argv) {
+
+	ProfilerStart("/home/lakers/timemachine_results/profile/blah.prof");
 	const char *conffile="@BRO_ETC_INSTALL_DIR@/timemachine.cfg";
 	struct sigaction exit_action;
 	int i;
@@ -850,6 +854,7 @@ main(int argc, char** argv) {
 				pause();
 		}
 
+		ProfilerStop();
         delete stats_log_file;
         delete classes_log_file;
         delete index_log_file; 
