@@ -122,7 +122,7 @@ void IPAddress::getStr(char* s, int maxsize) const {
         tmlog(TM_LOG_NOTE, "IPAddress", "IPAddress, IPv4");
 		char ucp[INET_ADDRSTRLEN];
 
-		if ( ! inet_ntop(AF_INET, &ipv6_address.s6_addr[12], ucp, INET_ADDRSTRLEN) )
+		if ( ! bro_inet_ntop(AF_INET, &ipv6_address.s6_addr[12], ucp, INET_ADDRSTRLEN) )
 			tmlog(TM_LOG_ERROR, "IPAddress", "<bad IPv4 address conversion");
 		else
 			snprintf(s, maxsize, "%s", ucp);
@@ -132,7 +132,7 @@ void IPAddress::getStr(char* s, int maxsize) const {
         tmlog(TM_LOG_NOTE, "IPAddress", "IPAddress, IPv6");
 		char ucp[INET6_ADDRSTRLEN];
 
-		if ( ! inet_ntop(AF_INET6, ipv6_address.s6_addr, ucp, INET6_ADDRSTRLEN) )
+		if ( ! bro_inet_ntop(AF_INET6, ipv6_address.s6_addr, ucp, INET6_ADDRSTRLEN) )
 			tmlog(TM_LOG_ERROR, "IPAddress", "<bad IPv6 address conversion");
 		else
 			snprintf(s, maxsize, "%s", ucp);
@@ -189,7 +189,7 @@ void IPAddress::Init(const std::string& s)
 		addr = htonl(addr);
 		memcpy(&ipv6_address.s6_addr[12], &addr, sizeof(uint32_t));
 
-        init_hash_function();
+        //init_hash_function();
         HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
 
         hash_key = newHashKey->Hash();
@@ -209,7 +209,7 @@ void IPAddress::Init(const std::string& s)
 		}
         tmlog(TM_LOG_NOTE, "IPAddress::Init", "good IP Address %s", s.c_str());
 
-        init_hash_function();
+        //init_hash_function();
         HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
 
         hash_key = newHashKey->Hash();
@@ -225,7 +225,7 @@ std::string IPAddress::getStr() const
         tmlog(TM_LOG_NOTE, "IPAddress: getStr()", "IPAddress, IPv4");
 		char s[INET_ADDRSTRLEN];
 
-		if ( ! bro_inet_ntop(AF_INET, &ipv6_address.s6_addr[12], s, INET_ADDRSTRLEN) )
+		if ( ! bro_inet_ntop(AF_INET, &ipv6_address.s6_addr[12], s, INET_ADDRSTRLEN) ) //bro_inet_ntop(AF_INET, &ipv6_address.s6_addr[12], s, INET_ADDRSTRLEN) )
 			return "<bad IPv4 address conversion";
 		else
 			return s;
@@ -236,7 +236,7 @@ std::string IPAddress::getStr() const
         tmlog(TM_LOG_NOTE, "IPAddress: getStr()", "IPAddress, IPv6");
 		char s[INET6_ADDRSTRLEN];
 
-		if ( ! bro_inet_ntop(AF_INET6, ipv6_address.s6_addr, s, INET6_ADDRSTRLEN) )
+		if ( ! bro_inet_ntop(AF_INET6, ipv6_address.s6_addr, s, INET6_ADDRSTRLEN) ) //bro_inet_ntop(AF_INET6, ipv6_address.s6_addr, s, INET6_ADDRSTRLEN) )
 			return "<bad IPv6 address conversion";
 		else
 			return s;
@@ -269,7 +269,7 @@ std::string IPAddress::getStrPkt(const u_char* packet) const
         tmlog(TM_LOG_NOTE, "IPAddress: getStr(u_char*)", "IPAddress, IPv6");
 		char str[INET6_ADDRSTRLEN];
 
-		if ( ! inet_ntop(AF_INET6, ipv6_address.s6_addr, str, INET6_ADDRSTRLEN) )
+		if ( ! bro_inet_ntop(AF_INET6, ipv6_address.s6_addr, str, INET6_ADDRSTRLEN) )
 			return "<bad IPv6 address conversion";
 		else
         {
@@ -342,7 +342,7 @@ std::string SrcIPAddress::getStrPkt(const u_char* packet) const
         //tmlog(TM_LOG_NOTE, "SrcIPAddress: getStr(u_char*)", "IPAddress, IPv6");
 		char str[INET6_ADDRSTRLEN];
 
-		if ( ! inet_ntop(AF_INET6, IP6(packet)->ip6_src.s6_addr, str, INET6_ADDRSTRLEN) )
+		if ( ! bro_inet_ntop(AF_INET6, IP6(packet)->ip6_src.s6_addr, str, INET6_ADDRSTRLEN) )
 			return "<bad IPv6 address conversion";
 		else
         {
@@ -395,7 +395,7 @@ std::string DstIPAddress::getStrPkt(const u_char* packet) const
         tmlog(TM_LOG_NOTE, "DstIPAddress: getStr(u_char*)", "IPAddress, IPv6");
 		char str[INET6_ADDRSTRLEN];
 
-		if ( ! inet_ntop(AF_INET6, IP6(packet)->ip6_dst.s6_addr, str, INET6_ADDRSTRLEN) )
+		if ( ! bro_inet_ntop(AF_INET6, IP6(packet)->ip6_dst.s6_addr, str, INET6_ADDRSTRLEN) )
 			return "<bad IPv6 address conversion";
 		else
         {
@@ -705,7 +705,7 @@ std::string ConnectionIF3::pattern6_connection3 = "\\s*(\\w+)\\s+"
 
 RE2 ConnectionIF3::re(ConnectionIF3::pattern_connection3);
 
-RE2 ConnectionIF3::re6(ConnectionIF3::pattern_connection3);
+RE2 ConnectionIF3::re6(ConnectionIF3::pattern6_connection3);
 
 std::list<ConnectionIF3*>
 ConnectionIF3::genKeys(const u_char* packet) {

@@ -9,7 +9,7 @@
 #include "FifoMem.hh"
 #include "Query.hh"
 #include "Index.hh"
-#include "bro_inet_ntop.h"
+//#include "bro_inet_ntop.h"
 
 
 FifoMem::FifoMem(uint64_t size): size(size), oldestTimestamp(0), newestTimestamp(0) {
@@ -413,23 +413,28 @@ uint64_t FifoMem::query(QueryRequest *qreq, QueryResult *qres,
 #endif
 			while ( (p_will_wrap || (p<=lp)) 
 					&& pkt_t(p) <= i->getLast() ) {
-                char str1[INET6_ADDRSTRLEN];
+                //char str1[INET6_ADDRSTRLEN];
 
-                bro_inet_ntop(AF_INET6, &(IP6(p)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
+                //bro_inet_ntop(AF_INET6, &(IP6(p)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
 
-                char s1[INET6_ADDRSTRLEN];
+                //inet_ntop(AF_INET6, &(IP6(p)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
 
-                inet_pton(AF_INET6, s1, str1);
+                //char s1[INET6_ADDRSTRLEN];
 
-                char str2[INET6_ADDRSTRLEN];
+                //inet_pton(AF_INET6, s1, str1);
 
-                bro_inet_ntop(AF_INET6, &(IP6(p)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
-                char s2[INET6_ADDRSTRLEN];
+                //char str2[INET6_ADDRSTRLEN];
 
-                inet_pton(AF_INET6, s2, str2);
+                //bro_inet_ntop(AF_INET6, &(IP6(p)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
+                
+                //inet_ntop(AF_INET6, &(IP6(p)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
 
-                tmlog(TM_LOG_NOTE, "FifoMem.cc: query", "the query packet has source ip address: %s and dst ip address %s", str1, str2);
-                tmlog(TM_LOG_NOTE, "FifoMem.cc:query", "the query parameters in mem are that it has a time interval from %f to %f, a hash of %lu, a timestamp of %f, and a form of %s", \
+                //char s2[INET6_ADDRSTRLEN];
+
+                //inet_pton(AF_INET6, s2, str2);
+
+                //tmlog(TM_LOG_NOTE, "FifoMem.cc: query", "the query packet has source ip address: %s and dst ip address %s", str1, str2);
+                //tmlog(TM_LOG_NOTE, "FifoMem.cc:query", "the query parameters in mem are that it has a time interval from %f to %f, a hash of %lu, a timestamp of %f, and a form of %s", \
                 qreq->getT0(), qreq->getT1(), qreq->getField()->hash(), qreq->getField()->ts, qreq->getField()->getStr().c_str());
 				if (qreq->matchPkt(p) && last_match_ts < pkt_t(p))  {
 					qres->sendPkt(p);

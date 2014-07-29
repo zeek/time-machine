@@ -15,7 +15,7 @@
 #include "packet_headers.h"
 #include "conf.h"
 #include "tm.h"
-#include "bro_inet_ntop.h"
+//#include "bro_inet_ntop.h"
 
 #define SNAPLEN 8192
 
@@ -412,6 +412,8 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
     // set now to be the time stamp field of the pcap packet header
 	tm_time_t now = to_tm_time(&header->ts);
 
+    //init_hash_function();
+
 	/* update connections state, classify, elephant cutoff */
     // conns is of type Connections
     /* add a packet. lookup the connection and increment byte and pkt counters if it exists,
@@ -533,19 +535,19 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 			if (TCP(packet)->th_flags & ( TH_FIN | TH_SYN | TH_RST ))
 				tcp_ctrl_flag=true;
 
-            char str1[INET6_ADDRSTRLEN];
+            //char str1[INET6_ADDRSTRLEN];
 
-            bro_inet_ntop(AF_INET6, &(IP6(idxpacket)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
+            //bro_inet_ntop(AF_INET6, &(IP6(idxpacket)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
 
             //char s1[INET6_ADDRSTRLEN];
 
             //inet_pton(AF_INET6, s1, str1);
 
-            char str2[INET6_ADDRSTRLEN];
+            //char str2[INET6_ADDRSTRLEN];
 
-            bro_inet_ntop(AF_INET6, &(IP6(idxpacket)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
+            //bro_inet_ntop(AF_INET6, &(IP6(idxpacket)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
 
-            tmlog(TM_LOG_NOTE, "Storage::addPkt", "we will be calling Fifo::Addpkt on packet that has source ip %s and destination ip %s", str1, str2);
+            //tmlog(TM_LOG_NOTE, "Storage::addPkt", "we will be calling Fifo::Addpkt on packet that has source ip %s and destination ip %s", str1, str2);
         /* true if cutoff should not be done for this connection */
         // When the connection is subscribed or when a tcp control flag
         // is set, then addPkt is called with a connection NULL pointer

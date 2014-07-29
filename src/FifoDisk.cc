@@ -10,7 +10,7 @@
 #include "tm.h"
 #include "FifoDisk.hh"
 #include "Query.hh"
-#include "bro_inet_ntop.h"
+//#include "bro_inet_ntop.h"
 
 
 /***************************************************************************
@@ -350,17 +350,22 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
 				if (t<qreq->getT0())
 					continue;
                 //tmlog("The result of matchPkt from QueryRequest is %d 
-                char str1[INET6_ADDRSTRLEN];
+                //char str1[INET6_ADDRSTRLEN];
 
-                bro_inet_ntop(AF_INET6, &(IP6(pkt)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
+                //bro_inet_ntop(AF_INET6, &(IP6(pkt)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
+
+                //inet_ntop(AF_INET6, &(IP6(pkt)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN); 
 
                 //char s1[INET6_ADDRSTRLEN];
 
                 //inet_pton(AF_INET6, s1, str1);
 
-                char str2[INET6_ADDRSTRLEN];
+                //char str2[INET6_ADDRSTRLEN];
 
-                bro_inet_ntop(AF_INET6, &(IP6(pkt)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
+                //bro_inet_ntop(AF_INET6, &(IP6(pkt)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
+
+                //inet_ntop(AF_INET6, &(IP6(pkt)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);               
+
                 //char s2[INET6_ADDRSTRLEN];
                 /*
                 if ( inet_pton(AF_INET6, s2, str2) <=0 )
@@ -368,7 +373,7 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
                     tmlog(TM_LOG_ERROR, "Bad IP address: %s", s2);
                     }
                 */
-                tmlog(TM_LOG_NOTE, "FifoDisk.cc: query", "the query packet has source ip address: %s and dst ip address %s and header time stamp %lu and %lu", \
+                //tmlog(TM_LOG_NOTE, "FifoDisk.cc: query", "the query packet has source ip address: %s and dst ip address %s and header time stamp %lu and %lu", \
                 str1, str2, hdr.ts.tv_sec, hdr.ts.tv_usec);
                 tmlog(TM_LOG_NOTE, "FifoDisk.cc:query", "the query parameters are that it has a time interval from %f to %f, a hash of %lu, a timestamp of %f, and a form of %s", \
                 qreq->getT0(), qreq->getT1(), qreq->getField()->hash(), qreq->getField()->ts, qreq->getField()->getStr().c_str());

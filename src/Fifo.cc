@@ -10,7 +10,7 @@
 #include "Connection.hh"
 #include "FifoDisk.hh"
 #include "tm.h"
-#include "bro_inet_ntop.h"
+//#include "bro_inet_ntop.h"
 
 Fifo::Fifo() {
 	init();

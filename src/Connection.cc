@@ -12,6 +12,8 @@
 #include "Query.hh"
 #include "tm.h"
 
+#include "bro_inet_ntop.h"
+
 #ifdef __FreeBSD__
 #include <sys/socket.h>
 #endif
@@ -154,7 +156,7 @@ void ConnectionID4::init(proto_t proto,
 
     tmlog(TM_LOG_NOTE, "connection4: Connection.cc", "connection 4 with form %s", getStr().c_str());
 
-    init_hash_function();
+    //init_hash_function();
 
     HashKey* newHashKey = new HashKey(&key, sizeof(key));
 
@@ -230,7 +232,7 @@ void ConnectionID4::init6(proto_t proto,
 	}
     tmlog(TM_LOG_NOTE, "connection4: Connection.cc", "connection 4 with form %s", getStr().c_str());
 
-    init_hash_function();
+    //init_hash_function();
 
     HashKey* newHashKey = new HashKey(&key, sizeof(key));
 
@@ -324,7 +326,7 @@ void ConnectionID3::init(proto_t proto,
         key.port1 = v6.port2;
         key.port2 = 0;
 
-    init_hash_function();
+    //init_hash_function();
 
     HashKey* newHashKey = new HashKey(&key, sizeof(key));
 
@@ -407,7 +409,7 @@ void ConnectionID3::init6(proto_t proto,
         key.port2 = 0;
 	
 
-    init_hash_function();
+    //init_hash_function();
 
     HashKey* newHashKey = new HashKey(&key, sizeof(key));
 
@@ -488,7 +490,7 @@ void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
 	    key.port2 = 0;
 	}
 
-    init_hash_function();
+    //init_hash_function();
 
     HashKey* newHashKey = new HashKey(&key, sizeof(key));
 
@@ -549,7 +551,7 @@ void ConnectionID2::init6( unsigned char s_ip[], unsigned char d_ip[]) {
 	    key.port2 = 0;
 	}
 
-    init_hash_function();
+    //init_hash_function();
 
     HashKey* newHashKey = new HashKey(&key, sizeof(key));
 
@@ -853,11 +855,11 @@ std::string ConnectionID4::getStr() const {
 
         char str1[INET6_ADDRSTRLEN];
 
-        inet_ntop(AF_INET6, &(v6.ip1), str1, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, &(v6.ip1), str1, INET6_ADDRSTRLEN);
 
         char str2[INET6_ADDRSTRLEN];
 
-        inet_ntop(AF_INET6, &(v6.ip2), str2, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, &(v6.ip2), str2, INET6_ADDRSTRLEN);
 
 
         ss << " ConnectionID4 for IPv6"
@@ -928,11 +930,11 @@ std::string ConnectionID3::getStr() const {
 
         char str1[INET6_ADDRSTRLEN];
 
-        inet_ntop(AF_INET6, &(v6.ip1), str1, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, &(v6.ip1), str1, INET6_ADDRSTRLEN);
 
         char str2[INET6_ADDRSTRLEN];
 
-        inet_ntop(AF_INET6, &(v6.ip2), str2, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, &(v6.ip2), str2, INET6_ADDRSTRLEN);
 
         ss << " ConnectionID3 for IPv6"
 
@@ -1021,11 +1023,11 @@ std::string ConnectionID2::getStr() const {
 
         char str1[INET6_ADDRSTRLEN];
 
-        inet_ntop(AF_INET6, &(v6.ip1), str1, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, &(v6.ip1), str1, INET6_ADDRSTRLEN);
 
         char str2[INET6_ADDRSTRLEN];
 
-        inet_ntop(AF_INET6, &(v6.ip2), str2, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, &(v6.ip2), str2, INET6_ADDRSTRLEN);
 
         ss << " ConnectionID2 for IPv6"
 

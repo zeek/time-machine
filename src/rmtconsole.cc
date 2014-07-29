@@ -13,6 +13,7 @@
 #include "tm.h"
 #include "Storage.hh"
 #include "conf.h"
+#include "bro_inet_ntop.h"
 
 /* External functions and vars */
 extern Storage* storage;
@@ -128,7 +129,7 @@ rmtconsole_listen_thread(void *arg) {
 
 		
 		tmlog(TM_LOG_NOTE, "rmtconsole", "incoming connection from %s port %d",
-		       inet_ntop(AF_INET, &remote_addr.sin_addr,
+		       bro_inet_ntop(AF_INET, &remote_addr.sin_addr,
 		                 addrbuf, sizeof(addrbuf)),
 		       ntohs(remote_addr.sin_port));
 		// FIXME: Check return values

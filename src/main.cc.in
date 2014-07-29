@@ -45,6 +45,7 @@
 #include "LogFile.hh"
 #include "Query.hh"
 #include "Index.hh"
+#include "Hash.h"
 
 
 /***************************************************************************
@@ -730,6 +731,8 @@ main(int argc, char** argv) {
 
 	// Initialise cmd_parser
 	cmd_parser_init();
+
+        init_hash_function();
 
 	try {
 		storage = new Storage(storageConf);

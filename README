@@ -33,3 +33,7 @@ Not using brackets around an ipv6 address will result in a querying error.
 
 Note that to use gperftools' CPU profiler, you will have to first install libunwind.
 
+Also note that to use pprof to read the .prof files, you will need to install
+perl5, gv, and dot. You can use apt-get install for the gv and dot (if on Ubuntu),
+and install perl5 from source.
+
