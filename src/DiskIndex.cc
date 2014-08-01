@@ -335,7 +335,7 @@ void IndexFiles<T>::writeIndex( IndexHash *ih) {
     
         // set the indexentry to be written to be disk to be the next visited and deleted entry from the hash table
 		ie=ih->getNextDelete();
-        tmlog(TM_LOG_NOTE, "DiskIndex:wrting", "Deleting the IndexEntry type from the hash table");
+        //tmlog(TM_LOG_NOTE, "DiskIndex:wrting", "Deleting the IndexEntry type from the hash table");
 	}
 	tmlog(TM_LOG_DEBUG, T::getIndexNameStatic().c_str(), 
 			"Heigth of tree was: %d. level=%d. we wrote %d entries.", ih->height, ih->level, count);

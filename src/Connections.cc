@@ -20,8 +20,8 @@ Connections::Connections(uint32_t hash_size):
 
 Connections::~Connections() {
 	delete[] htable;
-    addedconn = NULL;
-    delete addedconn;
+    //addedconn = NULL;
+    //delete addedconn;
     //delete addedpacket;
 	pthread_mutex_destroy(&lock_mutex);
 }
@@ -77,7 +77,7 @@ Connection* Connections::addConn(ConnectionID4 *c_id) {
  
     unsigned hval;
 
-    addedconn = new Connection(c_id); // c_id now owned by c
+    Connection* c = new Connection(c_id); // c_id now owned by c
     hval = c_id->hash()%size;
     num_entries++;
 
@@ -85,15 +85,15 @@ Connection* Connections::addConn(ConnectionID4 *c_id) {
      * we must use a lock()
      */
     lock();
-    addedconn->col_next = htable[hval];
-    addedconn->col_prev = NULL;
-    htable[hval] = addedconn;
+    c->col_next = htable[hval];
+    c->col_prev = NULL;
+    htable[hval] = c;
 
-    if (addedconn->col_next != NULL)
-        addedconn->col_next->col_prev = addedconn;
+    if (c->col_next != NULL)
+        c->col_next->col_prev = c;
     unlock();
    
-    return addedconn;
+    return c;
 }
 
 

@@ -70,50 +70,59 @@ void ConnectionID4::init(proto_t proto,
 						 uint32_t s_ip, uint32_t d_ip,
 						 uint16_t s_port, uint16_t d_port) {
     // DEBUG DEBUG DEBUG
-	tmlog(TM_LOG_NOTE, "connection 4: Connection.cc, ~line 48", "connection 4 for ipv4 initialized");
+	//tmlog(TM_LOG_NOTE, "connection 4: Connection.cc, ~line 48", "connection 4 for ipv4 initialized");
 
-    in4_addr ipv4_d_address;
-    in4_addr ipv4_s_address;
+    //in4_addr ipv4_d_address;
+    //in4_addr ipv4_s_address;
 
     v6.version = 4;
 	v6.proto=proto;
 
-    ipv4_d_address.s_addr = d_ip;
-    ipv4_s_address.s_addr = s_ip;
+    static uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
+
+
+    //ipv4_d_address.s_addr = d_ip;
+    //ipv4_s_address.s_addr = s_ip;
 
 	if (addr_port_canon_lt(s_ip,d_ip,s_port,d_port)) {
 		//    v.is_canonified=true;
 
         // setting v6.ip1 to be  destination address and v6.ip2 to be source address
-        ConnectionID4(ipv4_d_address, ipv4_s_address);
+        memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip1.s6_addr[12], &d_ip, sizeof(d_ip));
+
+        memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip2.s6_addr[12], &s_ip, sizeof(s_ip));
+
+
 
         /*
         IPAddr(ipv4_d_address);
 
-        memcpy(in6.s6_addr, v6.ip1, 16);
+        //memcpy(in6.s6_addr, v6.ip1, 16);
 
 		//v6.ip1=in6.s6_addr;
 
         IPAddr(ipv4_s_address);
 
-        memcpy(in6.s6_addr, v6.ip2, 16);
+        //memcpy(in6.s6_addr, v6.ip2, 16);
 
 		//v6.ip2=in6.s6_addr;
         */
 
-		v6.port1=d_port;
-		v6.port2=s_port;
+		//v6.port1=d_port;
+		//v6.port2=s_port;
 
         // this is for the hash key
-        in6_addr s6_ip;
-        in6_addr d6_ip;
+        //in6_addr s6_ip;
+        //in6_addr d6_ip;
  
         // setting s6_ip to be source address and d6_ip to be dest address       
-        memcpy(s6_ip.s6_addr, v6.ip2, 16);
-        memcpy(d6_ip.s6_addr, v6.ip1, 16);
+        //memcpy(s6_ip.s6_addr, v6.ip2, 16);
+        //memcpy(d6_ip.s6_addr, v6.ip1, 16);
 
-        key.ip1 = s6_ip;
-        key.ip2 = d6_ip;
+        //key.ip1 = s6_ip;
+        //key.ip2 = d6_ip;
         key.port1 = s_port;
         key.port2 = d_port;
 
@@ -122,45 +131,51 @@ void ConnectionID4::init(proto_t proto,
 		//    v.is_canonified=false;
 
         // setting v6.ip1 to be source address and v6.ip2 to be destination address
-        ConnectionID4(ipv4_s_address, ipv4_d_address);
+
+        memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip1.s6_addr[12], &s_ip, sizeof(s_ip));
+
+        memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip2.s6_addr[12], &d_ip, sizeof(d_ip));
+
 
         /*
         IPAddr(ipv4_s_address);
 
-        memcpy(in6.s6_addr, v6.ip1, 16);
+        //memcpy(in6.s6_addr, v6.ip1, 16);
 
 		//v6.ip1=in6.s6_addr;
 
         IPAddr(ipv4_d_address);
 
-        memcpy(in6.s6_addr, v6.ip2, 16);
+        //memcpy(in6.s6_addr, v6.ip2, 16);
 
 		//v6.ip2=in6.s6_addr;
         */        
         
-		v6.port1=s_port;
-		v6.port2=d_port;
+		//v6.port1=s_port;
+		//v6.port2=d_port;
 
         // this is for the hash key
-        in6_addr s6_ip;
-        in6_addr d6_ip;
+        //in6_addr s6_ip;
+        //in6_addr d6_ip;
         
-        memcpy(s6_ip.s6_addr, v6.ip1, 16);
-        memcpy(d6_ip.s6_addr, v6.ip2, 16);
+        //memcpy(s6_ip.s6_addr, v6.ip1, 16);
+        //memcpy(d6_ip.s6_addr, v6.ip2, 16);
 
-	    key.ip1 = d6_ip;
-	    key.ip2 = s6_ip;
+	    //key.ip1 = d6_ip;
+	    //key.ip2 = s6_ip;
 	    key.port1 = d_port;
 	    key.port2 = s_port;
 	}
 
-    tmlog(TM_LOG_NOTE, "connection4: Connection.cc", "connection 4 with form %s", getStr().c_str());
+    //tmlog(TM_LOG_NOTE, "connection4: Connection.cc", "connection 4 with form %s", getStr().c_str());
 
     //init_hash_function();
 
-    HashKey* newHashKey = new HashKey(&key, sizeof(key));
+    //HashKey* newHashKey = new HashKey(&key, sizeof(key));
 
-    tmlog(TM_LOG_NOTE, "ConnectionID4::hash()", "the hash of newhashkey is %u", newHashKey->Hash());
+    //tmlog(TM_LOG_NOTE, "ConnectionID4::hash()", "the hash of newhashkey is %u", newHashKey->Hash());
 
     //HashKey* newHashKeyDos = new HashKey(&key, sizeof(key));
 
@@ -168,9 +183,9 @@ void ConnectionID4::init(proto_t proto,
 
     //memcpy(&hash_key, newHashKey->Hash(), 8);
 
-    hash_key = newHashKey->Hash();
+    hash_key = HashKey::HashBytes(&key, sizeof(key)); //newHashKey->Hash();
 
-    delete newHashKey;
+    //delete newHashKey;
 
     //free_hash_function();
 }
@@ -179,7 +194,7 @@ void ConnectionID4::init6(proto_t proto,
                   unsigned char s_ip[], unsigned char d_ip[],
                   uint16_t s_port, uint16_t d_port) {
     // DEBUG DEBUG DEBUG
-	tmlog(TM_LOG_NOTE, "connection 4: Connection.cc, ~line 48", "connection 4 for ipv6 initialized");
+	//tmlog(TM_LOG_NOTE, "connection 4: Connection.cc, ~line 48", "connection 4 for ipv6 initialized");
 
     v6.version = 6;
 	v6.proto=proto;
@@ -190,53 +205,53 @@ void ConnectionID4::init6(proto_t proto,
 	if (addr6_port_canon_lt(s_ip,d_ip,s_port,d_port)) {
 		//    v6.is_canonified=true;
         // memcpy(destination, source, size)
-        memcpy(v6.ip1, d_ip, 16);
-        memcpy(v6.ip2, s_ip, 16);
+        memcpy(key.ip1.s6_addr, d_ip, 16);
+        memcpy(key.ip2.s6_addr, s_ip, 16);
 		//v6.ip1=d_ip;
 		//v6.ip2=s_ip;
-		v6.port1=d_port;
-		v6.port2=s_port;
+		//v6.port1=d_port;
+		//v6.port2=s_port;
 
         // this is for the hash key
-        in6_addr s6_ip;
-        in6_addr d6_ip;
+        //in6_addr s6_ip;
+        //in6_addr d6_ip;
         
-        memcpy(s6_ip.s6_addr, s_ip, 16);
-        memcpy(d6_ip.s6_addr, d_ip, 16);
+        //memcpy(s6_ip.s6_addr, s_ip, 16);
+        //memcpy(d6_ip.s6_addr, d_ip, 16);
 
-        key.ip1 = s6_ip;
-        key.ip2 = d6_ip;
+        //key.ip1 = s6_ip;
+        //key.ip2 = d6_ip;
         key.port1 = s_port;
         key.port2 = d_port;
 
 	} else {
 		//    v6.is_canonified=false;
-        memcpy(v6.ip1, s_ip, 16);
-        memcpy(v6.ip2, d_ip, 16);
+        memcpy(key.ip1.s6_addr, s_ip, 16);
+        memcpy(key.ip2.s6_addr, d_ip, 16);
 		//v6.ip1=s_ip;
 		//v6.ip2=d_ip;
-		v6.port1=s_port;
-		v6.port2=d_port;
+		//v6.port1=s_port;
+		//v6.port2=d_port;
 
         // this is for the hash key
-        in6_addr s6_ip;
-        in6_addr d6_ip;
+        //in6_addr s6_ip;
+        //in6_addr d6_ip;
         
-        memcpy(s6_ip.s6_addr, s_ip, 16);
-        memcpy(d6_ip.s6_addr, d_ip, 16);
+        //memcpy(s6_ip.s6_addr, s_ip, 16);
+        //memcpy(d6_ip.s6_addr, d_ip, 16);
 
-	    key.ip1 = d6_ip;
-	    key.ip2 = s6_ip;
+	    //key.ip1 = d6_ip;
+	    //key.ip2 = s6_ip;
 	    key.port1 = d_port;
 	    key.port2 = s_port;
 	}
-    tmlog(TM_LOG_NOTE, "connection4: Connection.cc", "connection 4 with form %s", getStr().c_str());
+    //tmlog(TM_LOG_NOTE, "connection4: Connection.cc", "connection 4 with form %s", getStr().c_str());
 
     //init_hash_function();
 
-    HashKey* newHashKey = new HashKey(&key, sizeof(key));
+    //HashKey* newHashKey = new HashKey(&key, sizeof(key));
 
-    tmlog(TM_LOG_NOTE, "ConnectionID4::hash()", "the hash of newhashkey is %u", newHashKey->Hash());
+    //tmlog(TM_LOG_NOTE, "ConnectionID4::hash()", "the hash of newhashkey is %u", newHashKey->Hash());
 
     //HashKey* newHashKeyDos = new HashKey(&key, sizeof(key));
 
@@ -244,9 +259,9 @@ void ConnectionID4::init6(proto_t proto,
 
     //memcpy(&hash_key, newHashKey->Hash(), 8);
 
-    hash_key = newHashKey->Hash();
+    hash_key = HashKey::HashBytes(&key, sizeof(key));
 
-    delete newHashKey;
+    //delete newHashKey;
 
     //free_hash_function();
 }
@@ -256,32 +271,39 @@ void ConnectionID3::init(proto_t proto,
 						 uint16_t port2) {
 
     // DEBUG DEBUG DEBUG
-	tmlog(TM_LOG_DEBUG, "connection 3: Connection.cc, ~line 71", "connection 3 initialized");
+	//tmlog(TM_LOG_DEBUG, "connection 3: Connection.cc, ~line 71", "connection 3 initialized");
 
-    in4_addr ipv4_d_address;
-    in4_addr ipv4_s_address;
+    //in4_addr ipv4_d_address;
+    //in4_addr ipv4_s_address;
 
     v6.version = 4;
 
 	v6.proto=proto;
+
+    static uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
     
-    ipv4_s_address.s_addr = ip1;
-    ipv4_d_address.s_addr = ip2;
+    //ipv4_s_address.s_addr = ip1;
+    //ipv4_d_address.s_addr = ip2;
 
     /*
     IPAddr(ipv4_s_address);
 
-    memcpy(in6.s6_addr, v6.ip1, 16);
+    //memcpy(in6.s6_addr, v6.ip1, 16);
 
     IPAddr(ipv4_d_address);
 
-    memcpy(in6.s6_addr, v6.ip2, 16);
+    //memcpy(in6.s6_addr, v6.ip2, 16);
 
     */
 
-    ConnectionID3(ipv4_s_address, ipv4_d_address);
+    memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+    memcpy(&key.ip1.s6_addr[12], &ip1, sizeof(ip1));
 
-	v6.port2=port2;
+    memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+    memcpy(&key.ip2.s6_addr[12], &ip2, sizeof(ip2));
+
+
+	//key.port2=port2;
 
     /*	
 	// Lookup up connection based on canonical ordering, which is
@@ -292,8 +314,8 @@ void ConnectionID3::init(proto_t proto,
             in6_addr s6_ip;
             in6_addr d6_ip;
             
-            memcpy(s6_ip.s6_addr, v6.ip1, 16);
-            memcpy(d6_ip.s6_addr, v6.ip2, 16);
+            //memcpy(s6_ip.s6_addr, v6.ip1, 16);
+            //memcpy(d6_ip.s6_addr, v6.ip2, 16);
 
 		    key.ip1 = s6_ip;
 		    key.ip2 = d6_ip;
@@ -305,8 +327,8 @@ void ConnectionID3::init(proto_t proto,
             in6_addr s6_ip;
             in6_addr d6_ip;
             
-            memcpy(s6_ip.s6_addr, v6.ip1, 16);
-            memcpy(d6_ip.s6_addr, v6.ip2, 16);
+            //memcpy(s6_ip.s6_addr, v6.ip1, 16);
+            //memcpy(d6_ip.s6_addr, v6.ip2, 16);
 
 		    key.ip1 = d6_ip;
 		    key.ip2 = s6_ip;
@@ -315,26 +337,26 @@ void ConnectionID3::init(proto_t proto,
 		}
 	*/
 
-        in6_addr s6_ip;
-        in6_addr d6_ip;
+        //in6_addr s6_ip;
+        //in6_addr d6_ip;
 
-        memcpy(s6_ip.s6_addr, v6.ip1, 16);
-        memcpy(d6_ip.s6_addr, v6.ip2, 16);
+        //memcpy(s6_ip.s6_addr, v6.ip1, 16);
+        //memcpy(d6_ip.s6_addr, v6.ip2, 16);
 
-        key.ip1 = d6_ip;
-        key.ip2 = s6_ip;
-        key.port1 = v6.port2;
-        key.port2 = 0;
+        //key.ip1 = d6_ip;
+        //key.ip2 = s6_ip;
+        key.port1 = 0;
+        key.port2 = port2;
 
     //init_hash_function();
 
-    HashKey* newHashKey = new HashKey(&key, sizeof(key));
+    //HashKey* newHashKey = new HashKey(&key, sizeof(key));
 
     //hash_key = newHashKey->Hash();
 
-	hash_key = newHashKey->Hash();
+	hash_key = HashKey::HashBytes(&key, sizeof(key));//newHashKey->Hash();
 
-    delete newHashKey;
+    //delete newHashKey;
 
     //free_hash_function();
 }
@@ -344,7 +366,7 @@ void ConnectionID3::init6(proto_t proto,
 						 uint16_t port2) {
 
     // DEBUG DEBUG DEBUG
-	tmlog(TM_LOG_DEBUG, "connection 3: Connection.cc, ~line 71", "connection 3 initialized");
+	//tmlog(TM_LOG_DEBUG, "connection 3: Connection.cc, ~line 71", "connection 3 initialized");
 
 	v6.proto=proto;
 
@@ -352,12 +374,12 @@ void ConnectionID3::init6(proto_t proto,
 
     // memcpy(destination, source, size)
     // setting v6.ip1 to be source address and v6.ip2 to be destination address 
-    memcpy(v6.ip1, ip1, 16);
-    memcpy(v6.ip2, ip2, 16);
+    memcpy(key.ip1.s6_addr, ip1, 16);
+    memcpy(key.ip2.s6_addr, ip2, 16);
 
 	//v.ip1=ip1;
 	//v.ip2=ip2;
-	v6.port2=port2;
+	//key.port2=port2;
 
 	/*
 	// Lookup up connection based on canonical ordering, which is
@@ -369,8 +391,8 @@ void ConnectionID3::init6(proto_t proto,
             in6_addr d6_ip;
     
             // setting s6_ip to have source address and d6_ip to have dest address        
-            memcpy(s6_ip.s6_addr, ip1, 16);
-            memcpy(d6_ip.s6_addr, ip2, 16);
+            //memcpy(s6_ip.s6_addr, ip1, 16);
+            //memcpy(d6_ip.s6_addr, ip2, 16);
 
             // setting key.ip1 to be source address and key.ip2 to be dest address 
 		    key.ip1 = s6_ip;
@@ -384,8 +406,8 @@ void ConnectionID3::init6(proto_t proto,
             in6_addr d6_ip;
         
             // setting s6_ip to have source address and d6_ip to have dest address    
-            memcpy(s6_ip.s6_addr, ip1, 16);
-            memcpy(d6_ip.s6_addr, ip2, 16);
+            //memcpy(s6_ip.s6_addr, ip1, 16);
+            //memcpy(d6_ip.s6_addr, ip2, 16);
 
             // setting key.ip1 to be dest address and key.ip2 to be source address
 		    key.ip1 = d6_ip;
@@ -395,29 +417,29 @@ void ConnectionID3::init6(proto_t proto,
 		}
 	*/
 		
-        in6_addr s6_ip;
-        in6_addr d6_ip;
+        //in6_addr s6_ip;
+        //in6_addr d6_ip;
     
         // setting s6_ip to have source address and d6_ip to have dest address
-        memcpy(s6_ip.s6_addr, ip1, 16);
-        memcpy(d6_ip.s6_addr, ip2, 16);
+        //memcpy(s6_ip.s6_addr, ip1, 16);
+        //memcpy(d6_ip.s6_addr, ip2, 16);
 
         // setting key.ip1 to be dest address and key.ip2 to be source address
-        key.ip1 = d6_ip;
-        key.ip2 = s6_ip;
-        key.port1 = v6.port2;
-        key.port2 = 0;
+        //key.ip1 = d6_ip;
+        //key.ip2 = s6_ip;
+        key.port1 = 0;
+        key.port2 = port2;
 	
 
     //init_hash_function();
 
-    HashKey* newHashKey = new HashKey(&key, sizeof(key));
+    //HashKey* newHashKey = new HashKey(&key, sizeof(key));
 
     //hash_key = newHashKey->Hash();
 
-	hash_key = newHashKey->Hash();
+	hash_key = HashKey::HashBytes(&key, sizeof(key)); //newHashKey->Hash();
 
-    delete newHashKey;
+    //delete newHashKey;
 
     //free_hash_function();
 }
@@ -425,40 +447,47 @@ void ConnectionID3::init6(proto_t proto,
 void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
 
     // DEBUG DEBUG DEBUG
-	tmlog(TM_LOG_DEBUG, "connection 2: Connection.cc, ~line 82", "connection 2 initialized");
+	//tmlog(TM_LOG_DEBUG, "connection 2: Connection.cc, ~line 82", "connection 2 initialized");
 
     v6.version = 4;
 
-    in4_addr ipv4_d_address;
-    in4_addr ipv4_s_address;
+    static uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
 
-    ipv4_s_address.s_addr = s_ip;
-    ipv4_d_address.s_addr = d_ip;
+    //in4_addr ipv4_d_address;
+    //in4_addr ipv4_s_address;
+
+    //ipv4_s_address.s_addr = s_ip;
+    //ipv4_d_address.s_addr = d_ip;
 
 	if (addr_port_canon_lt(s_ip,d_ip,0,0)) {
 		//    v.is_canonified=true;
         /*
         ConnectionID4 ipv4_addr = ConnectionID4(ipv4_d_address);
-        memcpy(v6.ip1, in6.s6_addr, 16);
+        //memcpy(v6.ip1, in6.s6_addr, 16);
 
         IPAddr(ipv4_s_address);
-        memcpy(in6.s6_addr, v6.ip2, 16);
+        //memcpy(in6.s6_addr, v6.ip2, 16);
         */
 
         // setting v6.ip1 to dest address and v6.ip2 to source address
-        ConnectionID2(ipv4_d_address, ipv4_s_address);
+
+        memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip1.s6_addr[12], &d_ip, sizeof(d_ip));
+
+        memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip2.s6_addr[12], &s_ip, sizeof(s_ip));
 
         // this is for the hash key
-        in6_addr s6_ip;
-        in6_addr d6_ip;
+        //in6_addr s6_ip;
+        //in6_addr d6_ip;
  
         // setting s6_ip to be source address and d6_ip to be dest address       
-        memcpy(s6_ip.s6_addr, v6.ip2, 16);
-        memcpy(d6_ip.s6_addr, v6.ip1, 16);
+        //memcpy(s6_ip.s6_addr, v6.ip2, 16);
+        //memcpy(d6_ip.s6_addr, v6.ip1, 16);
 
         // setting key.ip1 to be source address and key.ip2 to be dest address
-	    key.ip1 = s6_ip;
-	    key.ip2 = d6_ip;
+	    //key.ip1 = s6_ip;
+	    //key.ip2 = d6_ip;
 	    key.port1 = 0;
 	    key.port2 = 0;
 
@@ -466,39 +495,45 @@ void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
 		//    v.is_canonified=false;
         /*
         IPAddr(ipv4_s_address);
-        memcpy(in6.s6_addr, v6.ip1, 16);
+        //memcpy(in6.s6_addr, v6.ip1, 16);
 
         IPAddr(ipv4_d_address);
-        memcpy(in6.s6_addr, v6.ip2, 16);
+        //memcpy(in6.s6_addr, v6.ip2, 16);
         */
 
         // setting v6.ip1 to be source address and v6.ip2 to be dest address
-        ConnectionID2(ipv4_s_address, ipv4_d_address);
+
+        memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip1.s6_addr[12], &s_ip, sizeof(s_ip));
+
+        memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip2.s6_addr[12], &d_ip, sizeof(d_ip));
+
 
         // this is for the hash key
-        in6_addr s6_ip;
-        in6_addr d6_ip;
+        //in6_addr s6_ip;
+        //in6_addr d6_ip;
  
         // ssetting s6_ip to be source address and d6_ip to be dest address    
-        memcpy(s6_ip.s6_addr, v6.ip1, 16); 
-        memcpy(d6_ip.s6_addr, v6.ip2, 16);
+        //memcpy(s6_ip.s6_addr, v6.ip1, 16); 
+        //memcpy(d6_ip.s6_addr, v6.ip2, 16);
 
         // setting key.ip1 to be dest address and key.ip2 to be source address
-	    key.ip1 = d6_ip;
-	    key.ip2 = s6_ip;
+	    //key.ip1 = d6_ip;
+	    //key.ip2 = s6_ip;
 	    key.port1 = 0;
 	    key.port2 = 0;
 	}
 
     //init_hash_function();
 
-    HashKey* newHashKey = new HashKey(&key, sizeof(key));
+    //HashKey* newHashKey = new HashKey(&key, sizeof(key));
 
     //hash_key = newHashKey->Hash();
 
-	hash_key = newHashKey->Hash();
+	hash_key = HashKey::HashBytes(&key, sizeof(key)); //newHashKey->Hash();
 
-    delete newHashKey;
+    //delete newHashKey;
 
     //free_hash_function();
 }
@@ -506,60 +541,60 @@ void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
 void ConnectionID2::init6( unsigned char s_ip[], unsigned char d_ip[]) {
 
     // DEBUG DEBUG DEBUG
-	tmlog(TM_LOG_DEBUG, "connection 2: Connection.cc, ~line 82", "connection 2 initialized");
+	//tmlog(TM_LOG_DEBUG, "connection 2: Connection.cc, ~line 82", "connection 2 initialized");
 
     v6.version = 6;
 
 	if (addr6_port_canon_lt(s_ip,d_ip,0,0)) {
 		//    v.is_canonified=true;
         // memcpy(destination, source, size)
-        memcpy(v6.ip1, d_ip, 16);
-        memcpy(v6.ip2, s_ip, 16);
+        memcpy(key.ip1.s6_addr, d_ip, 16);
+        memcpy(key.ip2.s6_addr, s_ip, 16);
 
 		//v6.ip1=d_ip;
 		//v6.ip2=s_ip;
 
         // this is for the hash key
-        in6_addr s6_ip;
-        in6_addr d6_ip;
+        //in6_addr s6_ip;
+        //in6_addr d6_ip;
         
-        memcpy(s6_ip.s6_addr, s_ip, 16);
-        memcpy(d6_ip.s6_addr, d_ip, 16);
+        //memcpy(s6_ip.s6_addr, s_ip, 16);
+        //memcpy(d6_ip.s6_addr, d_ip, 16);
 
-	    key.ip1 = d6_ip;
-	    key.ip2 = s6_ip;
+	    //key.ip1 = d6_ip;
+	    //key.ip2 = s6_ip;
 	    key.port1 = 0;
 	    key.port2 = 0;
 
 	} else {
 		//    v.is_canonified=false;
-        memcpy(v6.ip1, s_ip, 16);
-        memcpy(v6.ip2, d_ip, 16);
+        memcpy(key.ip1.s6_addr, s_ip, 16);
+        memcpy(key.ip2.s6_addr, d_ip, 16);
 		//v.ip1=s_ip;
 		//v.ip2=d_ip;
 
         // this is for the hash key
-        in6_addr s6_ip;
-        in6_addr d6_ip;
+        //in6_addr s6_ip;
+        //in6_addr d6_ip;
         
-        memcpy(s6_ip.s6_addr, s_ip, 16);
-        memcpy(d6_ip.s6_addr, d_ip, 16);
+        //memcpy(s6_ip.s6_addr, s_ip, 16);
+        //memcpy(d6_ip.s6_addr, d_ip, 16);
 
-	    key.ip1 = s6_ip;
-	    key.ip2 = d6_ip;
+	    //key.ip1 = s6_ip;
+	    //key.ip2 = d6_ip;
 	    key.port1 = 0;
 	    key.port2 = 0;
 	}
 
     //init_hash_function();
 
-    HashKey* newHashKey = new HashKey(&key, sizeof(key));
+    //HashKey* newHashKey = new HashKey(&key, sizeof(key));
 
     //hash_key = newHashKey->Hash();
 
-	hash_key = newHashKey->Hash();
+	hash_key = HashKey::HashBytes(&key, sizeof(key)); //newHashKey->Hash();
 
-    delete newHashKey;
+    //delete newHashKey;
 
     //free_hash_function();
 }
@@ -573,13 +608,13 @@ ConnectionID4::ConnectionID4(const u_char* packet) {
     if (IP(packet)->ip_v != 4 && IP6(packet)->ip6_ctlun.ip6_un2_vfc >> 4 != 6)
     {
         // This should never happen
-        tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "Neither IPv4 nor IPv6");
+        //tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "Neither IPv4 nor IPv6");
         return;
     }
 
     else if (IP(packet)->ip_v == 4)
     {
-        tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "IPv4");
+        //tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "IPv4");
         // check the protocol
 	    switch (IP(packet)->ip_p) {
 	    case IPPROTO_UDP:
@@ -602,32 +637,32 @@ ConnectionID4::ConnectionID4(const u_char* packet) {
 
     else
     {
-        tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "IPv6");
+        //tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "IPv6");
 
-        unsigned char src_ip6[16];
-        unsigned char dst_ip6[16];
+        //unsigned char src_ip6[16];
+        //unsigned char dst_ip6[16];
 
-        memcpy(src_ip6, IP6(packet)->ip6_src.s6_addr, 16);
-        memcpy(dst_ip6, IP6(packet)->ip6_dst.s6_addr, 16);
+        //memcpy(src_ip6, IP6(packet)->ip6_src.s6_addr, 16);
+        //memcpy(dst_ip6, IP6(packet)->ip6_dst.s6_addr, 16);
 
         // check the protocol
 	    switch (IP6(packet)->ip6_ctlun.ip6_un1.ip6_un1_nxt) {
 	    case IPPROTO_UDP:
-            tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "UDP IPv6");
+            //tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "UDP IPv6");
 		    init6(IP6(packet)->ip6_ctlun.ip6_un1.ip6_un1_nxt,
-			     src_ip6, dst_ip6,
+			     IP6(packet)->ip6_src.s6_addr, IP6(packet)->ip6_dst.s6_addr,
 			     UDP6(packet)->uh_sport, UDP6(packet)->uh_dport);
 		    break;
 	    case IPPROTO_TCP:
-            tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "TCP IPv6");
+            //tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "TCP IPv6");
 		    init6(IP6(packet)->ip6_ctlun.ip6_un1.ip6_un1_nxt,
-			     src_ip6, dst_ip6,
+			     IP6(packet)->ip6_src.s6_addr, IP6(packet)->ip6_dst.s6_addr,
 			     TCP6(packet)->th_sport, TCP6(packet)->th_dport);
 		    break;
 	    default:
-            tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "default IPv6");
+            //tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "default IPv6");
 		    init6(IP6(packet)->ip6_ctlun.ip6_un1.ip6_un1_nxt,
-			     src_ip6, dst_ip6,
+			     IP6(packet)->ip6_src.s6_addr, IP6(packet)->ip6_dst.s6_addr,
 			     0, 0);
 		    break;
 	    }
@@ -641,13 +676,13 @@ ConnectionID3::ConnectionID3(const u_char* packet,
     if (IP(packet)->ip_v != 4 && IP6(packet)->ip6_ctlun.ip6_un2_vfc >> 4 != 6)
     {
         // This should never happen
-        tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID3", "Neither IPv4 nor IPv6");
+        //tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID3", "Neither IPv4 nor IPv6");
         return;
     }
 
     else if (IP(packet)->ip_v == 4)
     {
-        tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID3", "IPv4");
+        //tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID3", "IPv4");
 
 	    switch (IP(packet)->ip_p) {
 	    case IPPROTO_UDP:
@@ -685,10 +720,10 @@ ConnectionID3::ConnectionID3(const u_char* packet,
 
     else
     {
-        tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID3", "IPv6 with version %d", IP6(packet)->ip6_ctlun.ip6_un2_vfc >> 4);
+        //tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID3", "IPv6 with version %d", IP6(packet)->ip6_ctlun.ip6_un2_vfc >> 4);
 	    switch (IP6(packet)->ip6_ctlun.ip6_un1.ip6_un1_nxt) {
 	    case IPPROTO_UDP:
-            tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "UDP IPv6");
+            //tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "UDP IPv6");
 		    if (wildcard_port) 
 			    init6(IP6(packet)->ip6_ctlun.ip6_un1.ip6_un1_nxt,
 				     IP6(packet)->ip6_src.s6_addr, IP6(packet)->ip6_dst.s6_addr,
@@ -699,7 +734,7 @@ ConnectionID3::ConnectionID3(const u_char* packet,
 				     UDP6(packet)->uh_sport);
 		    break;
 	    case IPPROTO_TCP:
-            tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "TCP IPv6");
+            //tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "TCP IPv6");
 		    if (wildcard_port) 
 			    init6(IP6(packet)->ip6_ctlun.ip6_un1.ip6_un1_nxt,
 				     IP6(packet)->ip6_src.s6_addr, IP6(packet)->ip6_dst.s6_addr,
@@ -710,7 +745,7 @@ ConnectionID3::ConnectionID3(const u_char* packet,
 				     TCP6(packet)->th_sport);
 		    break;
 	    default:
-            tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "default IPv6");
+            //tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID4", "default IPv6");
 		    if (wildcard_port) 
 			    init6(IP6(packet)->ip6_ctlun.ip6_un1.ip6_un1_nxt,
 				     IP6(packet)->ip6_src.s6_addr, IP6(packet)->ip6_dst.s6_addr,
@@ -730,19 +765,19 @@ ConnectionID2::ConnectionID2(const u_char* packet) {
     if (IP(packet)->ip_v != 4 && IP6(packet)->ip6_ctlun.ip6_un2_vfc >> 4 != 6)
     {
         // This should never happen
-        tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID2", "Neither IPv4 nor IPv6");
+        //tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID2", "Neither IPv4 nor IPv6");
         return;
     }
 
     else if (IP(packet)->ip_v == 4)
     {
-        tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID2", "IPv4");
+        //tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID2", "IPv4");
     	init(IP(packet)->ip_src.s_addr, IP(packet)->ip_dst.s_addr);
     }
 
     else
     {
-        tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID3", "IPv6");
+        //tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID3", "IPv6");
     	init6(IP6(packet)->ip6_src.s6_addr, IP6(packet)->ip6_dst.s6_addr);
     }
 }
@@ -751,19 +786,21 @@ ConnectionID2::ConnectionID2(const u_char* packet) {
 //TODO: MAke this inline (i.e. move to Connection.hh so that it is
 //consistent with ConnectionID4
 bool ConnectionID3::operator==(const ConnectionID& other) const {
-	return (v6.proto == ((ConnectionID3*)&other)->v6.proto)
-		   && (!memcmp(v6.ip1, ((ConnectionID3*)&other)->v6.ip1, 16))
-		   && (!memcmp(v6.ip2, ((ConnectionID3*)&other)->v6.ip2, 16))
-		   && (v6.port2 == ((ConnectionID3*)&other)->v6.port2)
-           && (v6.version == ((ConnectionID3*)&other)->v6.version);
+
+        return (!memcmp(&key.ip1, &((ConnectionID3*)&other)->key.ip1, sizeof(in6_addr)))
+               && (!memcmp(&key.ip2, &((ConnectionID3*)&other)->key.ip2, sizeof(in6_addr)))
+               && (key.port2 == ((ConnectionID3*)&other)->key.port2)
+               && (v6.proto == ((ConnectionID3*)&other)->v6.proto);
+
 }
 
 //TODO: MAke this inline (i.e. move to Connection.hh so that it is
 //consistent with ConnectionID4
 bool ConnectionID2::operator==(const ConnectionID& other) const {
-	return (!memcmp(v6.ip1, ((ConnectionID2*)&other)->v6.ip1, 16))
-		   && (!memcmp(v6.ip2, ((ConnectionID2*)&other)->v6.ip2, 16))
-           && (v6.version == ((ConnectionID2*)&other)->v6.version);
+
+        return (!memcmp(&key.ip1, &((ConnectionID2*)&other)->key.ip1, sizeof(in6_addr)))
+               && (!memcmp(&key.ip2, &((ConnectionID2*)&other)->key.ip2, sizeof(in6_addr)));
+
 }
 
 void ConnectionID4::getStr(char* s, int maxsize) const {
@@ -813,17 +850,18 @@ std::string ConnectionID4::getStr() const {
 	    //uint32_t s_ip=v.ip1; //get_s_ip();
 	    //uint32_t d_ip=v.ip2; //get_d_ip();
 
-        unsigned char s_ip[16];
-        unsigned char d_ip[16];
+        //unsigned char s_ip[16];
+        //unsigned char d_ip[16];
 
-        memcpy(s_ip, v6.ip1, 16);
-        memcpy(d_ip, v6.ip2, 16);
+        //memcpy(s_ip, key.ip1.s6_addr, 16);
+        //memcpy(d_ip, key.ip2.s6_addr, 16);
 
 	    ss << " ConnectionID4 "
 	    
 	     //<< " Proto " << 0+get_proto()
 	     //<< " canonified " << get_is_canonified() << " "
-	    
+	   
+/* 
 	    << (UCP(s_ip)[0] & 0xff) << "."
 	    << (UCP(s_ip)[1] & 0xff) << "."
 	    << (UCP(s_ip)[2] & 0xff) << "."
@@ -836,6 +874,21 @@ std::string ConnectionID4::getStr() const {
 	    << (UCP(d_ip)[2] & 0xff) << "."
 	    << (UCP(d_ip)[3] & 0xff)
 	    << ":"
+*/
+        << (UCP(key.ip1.s6_addr)[0] & 0xff) << "."
+        << (UCP(key.ip1.s6_addr)[1] & 0xff) << "."
+        << (UCP(key.ip1.s6_addr)[2] & 0xff) << "."
+        << (UCP(key.ip1.s6_addr)[3] & 0xff)
+        << ":"
+        << ntohs(get_port1())
+        << " - "
+        << (UCP(key.ip2.s6_addr)[0] & 0xff) << "."
+        << (UCP(key.ip2.s6_addr)[1] & 0xff) << "."
+        << (UCP(key.ip2.s6_addr)[2] & 0xff) << "."
+        << (UCP(key.ip2.s6_addr)[3] & 0xff)
+        << ":"
+
+
 	    << ntohs(get_port2());
 	    return ss.str();
         }
@@ -855,11 +908,11 @@ std::string ConnectionID4::getStr() const {
 
         char str1[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(v6.ip1), str1, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, &(key.ip1.s6_addr), str1, INET6_ADDRSTRLEN);
 
         char str2[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(v6.ip2), str2, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, &(key.ip2.s6_addr), str2, INET6_ADDRSTRLEN);
 
 
         ss << " ConnectionID4 for IPv6"
@@ -893,22 +946,22 @@ std::string ConnectionID3::getStr() const {
     if (v6.version == 4)
     {
 
-        unsigned char s_ip[16];
-        unsigned char d_ip[16];
+        //unsigned char s_ip[16];
+        //unsigned char d_ip[16];
 
-        memcpy(s_ip, v6.ip1, 16);
-        memcpy(d_ip, v6.ip2, 16);
+        //memcpy(s_ip, key.ip1.s6_addr, 16);
+        //memcpy(d_ip, key.ip2.s6_addr, 16);
 
 	    ss << " ConnectionID3 "
-	    << (UCP(s_ip)[0] & 0xff) << "."
-	    << (UCP(s_ip)[1] & 0xff) << "."
-	    << (UCP(s_ip)[2] & 0xff) << "."
-	    << (UCP(s_ip)[3] & 0xff)
+	    << (UCP(key.ip1.s6_addr)[0] & 0xff) << "."
+	    << (UCP(key.ip1.s6_addr)[1] & 0xff) << "."
+	    << (UCP(key.ip1.s6_addr)[2] & 0xff) << "."
+	    << (UCP(key.ip1.s6_addr)[3] & 0xff)
 	    << " - "
-	    << (UCP(d_ip)[0] & 0xff) << "."
-	    << (UCP(d_ip)[1] & 0xff) << "."
-	    << (UCP(d_ip)[2] & 0xff) << "."
-	    << (UCP(d_ip)[3] & 0xff)
+	    << (UCP(key.ip2.s6_addr)[0] & 0xff) << "."
+	    << (UCP(key.ip2.s6_addr)[1] & 0xff) << "."
+	    << (UCP(key.ip2.s6_addr)[2] & 0xff) << "."
+	    << (UCP(key.ip2.s6_addr)[3] & 0xff)
 	    << ":"
 	    << get_port();
 	    return ss.str();
@@ -930,11 +983,11 @@ std::string ConnectionID3::getStr() const {
 
         char str1[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(v6.ip1), str1, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, &(key.ip1.s6_addr), str1, INET6_ADDRSTRLEN);
 
         char str2[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(v6.ip2), str2, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, &(key.ip2.s6_addr), str2, INET6_ADDRSTRLEN);
 
         ss << " ConnectionID3 for IPv6"
 
@@ -987,22 +1040,22 @@ std::string ConnectionID2::getStr() const {
     if (v6.version == 4)
     {
 
-        unsigned char s_ip[16];
-        unsigned char d_ip[16];
+        //unsigned char s_ip[16];
+        //unsigned char d_ip[16];
 
-        memcpy(s_ip, v6.ip1, 16);
-        memcpy(d_ip, v6.ip2, 16);
+        //memcpy(s_ip, key.ip1.s6_addr, 16);
+        //memcpy(d_ip, key.ip2.s6_addr, 16);
 
 	    ss << " ConnectionID2 "
-	    << (UCP(s_ip)[0] & 0xff) << "."
-	    << (UCP(s_ip)[1] & 0xff) << "."
-	    << (UCP(s_ip)[2] & 0xff) << "."
-	    << (UCP(s_ip)[3] & 0xff)
+	    << (UCP(key.ip1.s6_addr)[0] & 0xff) << "."
+	    << (UCP(key.ip1.s6_addr)[1] & 0xff) << "."
+	    << (UCP(key.ip1.s6_addr)[2] & 0xff) << "."
+	    << (UCP(key.ip1.s6_addr)[3] & 0xff)
 	    << " - "
-	    << (UCP(d_ip)[0] & 0xff) << "."
-	    << (UCP(d_ip)[1] & 0xff) << "."
-	    << (UCP(d_ip)[2] & 0xff) << "."
-	    << (UCP(d_ip)[3] & 0xff);
+	    << (UCP(key.ip2.s6_addr)[0] & 0xff) << "."
+	    << (UCP(key.ip2.s6_addr)[1] & 0xff) << "."
+	    << (UCP(key.ip2.s6_addr)[2] & 0xff) << "."
+	    << (UCP(key.ip2.s6_addr)[3] & 0xff);
 	    return ss.str();
     }
 
@@ -1023,11 +1076,11 @@ std::string ConnectionID2::getStr() const {
 
         char str1[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(v6.ip1), str1, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, &(key.ip1.s6_addr), str1, INET6_ADDRSTRLEN);
 
         char str2[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(v6.ip2), str2, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, &(key.ip2.s6_addr), str2, INET6_ADDRSTRLEN);
 
         ss << " ConnectionID2 for IPv6"
 

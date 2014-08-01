@@ -375,8 +375,8 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
                 */
                 //tmlog(TM_LOG_NOTE, "FifoDisk.cc: query", "the query packet has source ip address: %s and dst ip address %s and header time stamp %lu and %lu", \
                 str1, str2, hdr.ts.tv_sec, hdr.ts.tv_usec);
-                tmlog(TM_LOG_NOTE, "FifoDisk.cc:query", "the query parameters are that it has a time interval from %f to %f, a hash of %lu, a timestamp of %f, and a form of %s", \
-                qreq->getT0(), qreq->getT1(), qreq->getField()->hash(), qreq->getField()->ts, qreq->getField()->getStr().c_str());
+                //tmlog(TM_LOG_NOTE, "FifoDisk.cc:query", "the query parameters are that it has a time interval from %f to %f, a hash of %lu, a timestamp of %f, and a form of %s", \
+                //qreq->getT0(), qreq->getT1(), qreq->getField()->hash(), qreq->getField()->ts, qreq->getField()->getStr().c_str());
 				if (qreq->matchPkt(&hdr, pkt))  {
 					matches++;
 					qres->sendPkt(&hdr, pkt);

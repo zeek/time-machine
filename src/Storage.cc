@@ -4,7 +4,7 @@
 
 #include <sstream>
 #include <iostream>
-#include <gperftools/profiler.h>
+//#include <gperftools/profiler.h>
 
 #include "DynClass.hh"
 #include "types.h"
@@ -57,7 +57,7 @@ void callback(u_char *args, const struct pcap_pkthdr *header,
     //tmlog(TM_LOG_NOTE, "Storage::callback", "we are going to call addpacket of storage on packet that has source ip %s and destination ip %s", str1, str2);
 
     // DEBUG DEBUG DEBUG
-	tmlog(TM_LOG_DEBUG, "storage callback: Storage.cc, ~line 29", "Callback function for pcap_loop%lu", header->ts.tv_usec);
+	//tmlog(TM_LOG_DEBUG, "storage callback: Storage.cc, ~line 29", "Callback function for pcap_loop%lu", header->ts.tv_usec);
 
 	storage->addPkt(header, packet);
 
@@ -72,7 +72,7 @@ void *capture_thread(void *arg) {
 	Storage *storage = (Storage *)arg;
 	//  sleep(15);
 	pcap_loop(storage->ph, -1, (pcap_handler)callback, (u_char*)storage);
-	tmlog(TM_LOG_NOTE, "storage: Storage.cc, ~line 59", "pcap input exhausted");
+	//tmlog(TM_LOG_NOTE, "storage: Storage.cc, ~line 59", "pcap input exhausted");
 	return NULL;
 }
 
@@ -191,7 +191,7 @@ Storage::Storage(StorageConfig& conf):
 
 	// Start Capture thread
 	pthread_attr_init(&capture_thread_attr);
-    tmlog(TM_LOG_DEBUG, "capture thread: Storage.cc, ~line 141", "initializing capture thread attribute");
+    //tmlog(TM_LOG_DEBUG, "capture thread: Storage.cc, ~line 141", "initializing capture thread attribute");
 #ifdef __FreeBSD__
 	{
 		int scope = -1;
@@ -267,7 +267,7 @@ Storage::~Storage() {
 }
 
 void Storage::cancelThread() {
-	tmlog(TM_LOG_DEBUG, "storage: Storage.cc, ~line 217", "Canceling capture thread");
+	//tmlog(TM_LOG_DEBUG, "storage: Storage.cc, ~line 217", "Canceling capture thread");
 	pthread_cancel(capture_thread_tid);
 	tmlog(TM_LOG_DEBUG, "storage: Storage.cc, ~line 219", "Joining capture thread.");
 	pthread_join(capture_thread_tid, NULL);
@@ -348,14 +348,14 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
     // EtherType is a field in the ethernet header frame
 	if ( ! (ether_type==ETHERTYPE_IP || ether_type==0x8100 || ether_type==0x86DD) ) {
 
-        tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 240", "unknown ether_type 0x%.4X", ether_type);
+        //tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 240", "unknown ether_type 0x%.4X", ether_type);
 
 		//    fprintf(stderr,"unknown ether_type 0x%.4X\n", ether_type);
 		return;
 	}
 
     // DEBUG DEBUG DEBUG
-	tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 240", "adding packet %lu !", header->ts.tv_usec);
+	//tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 240", "adding packet %lu !", header->ts.tv_usec);
 
     //SetHdrSize();
 
@@ -407,7 +407,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 		}
     */
     // DEBUG DEBUG DEBUG
-    tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 246", "ethernet phase/physical layer complete for packet %lu", header->ts.tv_usec);
+    //tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 246", "ethernet phase/physical layer complete for packet %lu", header->ts.tv_usec);
 
     // set now to be the time stamp field of the pcap packet header
 	tm_time_t now = to_tm_time(&header->ts);
@@ -425,7 +425,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 
     // a flow of packets characterized by the 5-tuple of (layer 4 protocol, source ip, source port, destination ip, destination port)
     // note that for protocols other than tcp/udp, may not include source/dest ports
-    tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 255", "updating connection state to have the packet %lu", header->ts.tv_usec);
+    //tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 255", "updating connection state to have the packet %lu", header->ts.tv_usec);
     // get class for connection
 	Fifo *f=c->getFifo();
 	QueryResult *qr=c->getSubscription();
@@ -451,14 +451,14 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
         // go through the source and destination addresses
 		for (int i=0; i<2; i++) {
 			if (i==0) {
-                tmlog(TM_LOG_NOTE, "Storage:addPkt", "source ip address get key");
+                //tmlog(TM_LOG_NOTE, "Storage:addPkt", "source ip address get key");
                 // get the ip address of source - in the definition in IndexField.hh, the 0 is an option in a 
                 // case statement that is for the ip address of the source
 				ip = SrcIPAddress::genKey(packet, 0);
 				curdir = TM_DYNCLASS_ORIG;
 			}
 			else {
-                tmlog(TM_LOG_NOTE, "Storage:addPkt", "destination ip address get key");
+                //tmlog(TM_LOG_NOTE, "Storage:addPkt", "destination ip address get key");
                 // get the ip address of destination - in the definition, the 0 is an option in a case statement
                 // that is for the ip address of destination
 				ip = DstIPAddress::genKey(packet, 0);
@@ -502,13 +502,13 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
         // go through all the possible classes
 		for (std::list<Fifo*>::iterator i=fifos.begin(); i!=fifos.end(); i++) {
     
-            tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 310", "value of matchPkt of packet %lu is %lu", header->ts.tv_usec, (*i)->matchPkt(header, idxpacket));
+            //tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 310", "value of matchPkt of packet %lu is %lu", header->ts.tv_usec, (*i)->matchPkt(header, idxpacket));
 
 			if (// packet matches this class' filter (from Fifo.cc) and
 				(*i)->matchPkt(header, packet) &&
 				// first match or higher precedence match
 				(f==NULL || (*i)->getPrecedence()>max_precedence) ) {
-                tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 316", "Packet match for packet %lu", header->ts.tv_usec);
+                //tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 316", "Packet match for packet %lu", header->ts.tv_usec);
 
                 // class assigned
 				f=*i;
@@ -522,7 +522,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
             // remember, c is of type Connection pointer
 			c->setFifo(f);
 	} // if (!f)
-    tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 324", "class assigned for packet %lu", header->ts.tv_usec);
+    //tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 324", "class assigned for packet %lu", header->ts.tv_usec);
 
     // if class is assigned
 	if (f) {
@@ -585,7 +585,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 
                 //tmlog(TM_LOG_DEBUG, "addPkt: Storage.cc, ~line 348", "testing to see whether connection 4 is called after this");
 
-                tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 350", "adding packet %lu to indices for this index type %s", header->ts.tv_usec, (*i)->getIndexName().c_str());
+                //tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 350", "adding packet %lu to indices for this index type %s", header->ts.tv_usec, (*i)->getIndexName().c_str());
 			}
 		} // if (f->addPkt) ... else it was "cut off"
 
@@ -801,13 +801,13 @@ bool Storage::setDynClass(IPAddress *ip, int dir, const char *classname) {
 	gettimeofday(&tv, NULL);
 	now = to_tm_time(&tv);
 
-	tmlog(TM_LOG_DEBUG, "dyn_class", "Setting IP %s to class %s, direction %d",
-			ip->getStr().c_str(), classname, dir);
+	//tmlog(TM_LOG_DEBUG, "dyn_class", "Setting IP %s to class %s, direction %d",
+			//ip->getStr().c_str(), classname, dir);
 	f = getFifoByName(std::string("class_") + classname);
 	if (f) {
 		if (dynclasses.get(ip) != NULL) {
-			tmlog(TM_LOG_NOTE, "dyn_class", "Overwrite dynamic assignment for IP %s",
-					ip->getStr().c_str());
+			//tmlog(TM_LOG_NOTE, "dyn_class", "Overwrite dynamic assignment for IP %s",
+			//		ip->getStr().c_str());
 		}
 		dynclasses.insert_or_update(ip, dir, f, now+f->getDynTimeout());
 	}
@@ -820,7 +820,7 @@ bool Storage::setDynClass(IPAddress *ip, int dir, const char *classname) {
 	return retval;
 }
 bool Storage::unsetDynClass(IPAddress *ip) {
-	tmlog(TM_LOG_DEBUG, "dyn_class", "Remvoing setting for IP %s (if it exists)", ip->getStr().c_str());
+	//tmlog(TM_LOG_DEBUG, "dyn_class", "Remvoing setting for IP %s (if it exists)", ip->getStr().c_str());
 	dynclasses.remove(ip);
 	delete(ip);
 	return true;

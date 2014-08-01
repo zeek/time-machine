@@ -34,7 +34,7 @@ public:
 	virtual const int getKeySize() const=0;
 	virtual void getStr(char* s, int maxsize) const=0;
 	virtual std::string getStr() const=0;
-    virtual std::string getStrPkt(const u_char* packet) const = 0;
+    //virtual std::string getStrPkt(const u_char* packet) const = 0;
 	virtual bool operator==(const IndexField& other) const {
 		//  printf("IndexField::operator==(const IndexField& other)\n");
 		return !memcmp(getConstKeyPtr(),other.getConstKeyPtr(),getKeySize());
@@ -91,11 +91,17 @@ public:
 		memcpy(&ipv6_address.s6_addr[12], &in4.s_addr, sizeof(in4.s_addr));
 
         //init_hash_function();
-        HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
+        //HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
 
-        hash_key = newHashKey->Hash();
+        key_u.u32 = ip;
+       
+        key = (void*) &key_u;
 
-        delete newHashKey;
+        //hash_key = newHashKey->Hash();
+
+        hash_key = HashKey::HashBytes(key, sizeof(key));
+ 
+        //delete newHashKey;
 
         //free_hash_function();
     }
@@ -116,7 +122,17 @@ public:
         //init_hash_function();
         HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
 
+        //key_u.u32 = ipv6_address.s6_addr;
+
         hash_key = newHashKey->Hash();
+
+        //key = HashKey::CopyKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
+
+        //hash_key = HashKey::HashBytes(key, sizeof(ipv6_address.s6_addr));
+
+        //key = (void*) &key_u
+
+        //hash_key = HashKey::HashBytes(key, sizeof(key));
 
         delete newHashKey;
 
@@ -137,10 +153,12 @@ public:
     }
 */
 
+    
     IPAddress(const char* str_arg)
     {
         Init(str_arg);
     }
+    
 	IPAddress(void *p) {
 		memcpy((void*)getConstKeyPtr(), p, getKeySize());
 
@@ -209,7 +227,7 @@ public:
 	virtual void getStr(char* s, int maxsize) const;
 	virtual std::string getStr() const;
 
-    virtual std::string getStrPkt(const u_char* packet) const;
+    //virtual std::string getStrPkt(const u_char* packet) const;
 
 	virtual const std::string getIndexName() const {
 		return "ip";
@@ -229,6 +247,15 @@ public:
 	virtual void getBPFStr(char *, int) const;
 
 protected:
+    union {
+            bro_int_t i;
+            uint32 u32;
+            double d;
+            const void* p;
+        } key_u;
+
+    void* key;
+
     hash_t hash_key;
 
 private:
@@ -263,22 +290,29 @@ public:
     SrcIPAddress(unsigned char ip6[]): IPAddress(ip6) {}
 	//SrcIPAddress(const char* ip, char strIP[]): IPAddress(ip, strIP) {}
 
-    SrcIPAddress(const char* ip): IPAddress(ip) {}
+    //SrcIPAddress(const char* ip): IPAddress(ip) {}
 
 	//SrcIPAddress(const u_char* packet);
 	static std::list<SrcIPAddress*> genKeys(const u_char* packet);
 
-    std::string getStrPkt(const u_char* packet) const;
+    //std::string getStrPkt(const u_char* packet) const;
 
 	static int keysPerPacket() {
 		return 1;
 	}
 	static SrcIPAddress* genKey (const u_char* packet, int keynum) {
+        /*
+        switch (keynum) {
+            case 0: return new SrcIPAddress(packet);
+            default: return NULL;
+        }
+        */
 
         if (keynum == 0)
         {
             if(IP(packet)->ip_v == 4)
             {
+                
                 tmlog(TM_LOG_NOTE, "SrcIPAddress: genKey", "get key for IPv4 address");
                 return new SrcIPAddress(IP(packet)->ip_src.s_addr);
             }
@@ -311,12 +345,12 @@ public:
     DstIPAddress(unsigned char ip6[]): IPAddress(ip6) {}
 	//DstIPAddress(const char* ip, char strIP[]): IPAddress(ip, strIP) {}
 
-    DstIPAddress(const char* ip): IPAddress(ip) {}
+    //DstIPAddress(const char* ip): IPAddress(ip) {}
 
 	//DstIPAddress(const u_char* packet);
 	static std::list<DstIPAddress*> genKeys(const u_char* packet);
 
-    std::string getStrPkt(const u_char* packet) const;
+    //std::string getStrPkt(const u_char* packet) const;
 
 	static int keysPerPacket() {
 		return 1;
@@ -358,24 +392,24 @@ class Port: public IndexField {
 public:
 	Port(): port(0) {
         //init_hash_function();
-
+        /*
         HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
 
 	    hash_key =  newHashKey->Hash();
 
         delete newHashKey;
-
+        */
         //free_hash_function();
     }
 	Port(uint16_t port): port(port) {  /* printf("Port(%u)\n", port); */
         //init_hash_function();
-
+        /*
         HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
 
 	    hash_key =  newHashKey->Hash();
 
         delete newHashKey;
-
+        */
         //free_hash_function();
 	}
 	virtual ~Port() {}
@@ -422,6 +456,12 @@ public:
     */
 	virtual hash_t hash() const {
 		// TODO: initval
+        HashKey* newHashKey = new HashKey(uint32_t(port));
+
+        hash_t hash_key =  newHashKey->Hash();
+
+        delete newHashKey;
+
         return hash_key;
 	}
 
@@ -433,10 +473,10 @@ public:
 	}
 	virtual void getStr(char* s, int maxsize) const;
 	virtual std::string getStr() const;
-    virtual std::string getStrPkt(const u_char* packet) const;
+    //virtual std::string getStrPkt(const u_char* packet) const;
 	virtual void getBPFStr(char *, int) const;
 protected:
-    hash_t hash_key;
+    //hash_t hash_key;
 	uint16_t port;
 	static std::string pattern;
 	static RE2 re;
@@ -470,7 +510,7 @@ public:
 		return "srcport";
 	}
 
-    std::string getStrPkt(const u_char* packet) const;
+    //std::string getStrPkt(const u_char* packet) const;
 
 	void getBPFStr(char *, int) const;
 };
@@ -496,7 +536,7 @@ public:
 		return "dstport";
 	}
 
-    std::string getStrPkt(const u_char* packet) const;
+    //std::string getStrPkt(const u_char* packet) const;
 
 	void getBPFStr(char *, int) const;
 };
@@ -556,13 +596,16 @@ public:
 	std::string getStr() const {
 		return c_id.getStr();
 	}
+    
 	void getStr(char *c, int l) const  {
 		getStr().copy(c, l);
 	}
+    /* 
     std::string getStrPkt(const u_char* packet) const
     {
         return getStr();
     }
+    */
 	void getBPFStr(char *, int) const;
 
     void ip_to_str(const unsigned char* ip, char *str, int len) const;
@@ -635,17 +678,21 @@ public:
 			default: return NULL;
 		}
 	}
+    
 	std::string getStr() const {
 		return c_id.getStr();
 	}
+    
 	static IndexField* parseQuery(const char *query);
 	void getStr(char *c, int l) const  {
 		getStr().copy(c, l);
 	}
+    /*
     std::string getStrPkt(const u_char* packet) const
     {
         return getStr();
     }
+    */
 	void getBPFStr(char *, int) const;
 	ConnectionID3 *getCID() {
 		return &c_id;
@@ -717,16 +764,19 @@ public:
 			default: return NULL;
 		}
 	}
+    
 	std::string getStr() const {
 		return c_id.getStr();
 	}
 	void getStr(char *c, int l) const  {
 		getStr().copy(c, l);
 	}
+    /*
     std::string getStrPkt(const u_char* packet) const
     {
         return getStr();
     }
+    */
 	void getBPFStr(char *, int) const;
 
     void ip_to_str(const unsigned char* ip, char *str, int len) const;

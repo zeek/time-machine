@@ -258,11 +258,11 @@ tmexit() {
 	// the capture thread will quit.
 	// Deactivating storage will also destroy all indexes and will 
 	// thus cancel all index maintaining threads
-	tmlog(TM_LOG_DEBUG, "main", "deactivating storage... ");
+	//tmlog(TM_LOG_DEBUG, "main", "deactivating storage... ");
 	storage->cancelThread();
 	delete storage;
 
-	tmlog("main", "Storage deactivated");
+	//tmlog("main", "Storage deactivated");
 
 	/*
 	printf("deactivating log file...");
@@ -327,7 +327,7 @@ void *cli_console_thread(void *arg) {
 			lastline=strdup(line);
 			parse_cmd(line, stdout, storage, 0);
             // NOTE NOTE NOTE
-            tmlog(TM_LOG_NOTE, "cli console thread", "CLI console thread active");
+            //tmlog(TM_LOG_NOTE, "cli console thread", "CLI console thread active");
 			free(line);
 		}
 	} while (line != NULL);

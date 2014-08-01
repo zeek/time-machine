@@ -176,8 +176,8 @@ DynClass* DynClassTable::getNoLock(const IPAddress* k) {
     // collision list
 	next = table[k->hash()%numBuckets].colNext;
 
-    tmlog(TM_LOG_NOTE, "DynClassTable::getNoLock", "the k->hash() is %u", k->hash());
-    tmlog(TM_LOG_NOTE, "DynClassTable::getNoLock", "the k->hash()_numBuckets is %u and the numBuckets is %d", k->hash()%numBuckets, numBuckets);
+    //tmlog(TM_LOG_NOTE, "DynClassTable::getNoLock", "the k->hash() is %u", k->hash());
+    //tmlog(TM_LOG_NOTE, "DynClassTable::getNoLock", "the k->hash()_numBuckets is %u and the numBuckets is %d", k->hash()%numBuckets, numBuckets);
     // as long as the element we are on is not NULL
 	while(next!=NULL) {
         // check if the key matches the ip address key

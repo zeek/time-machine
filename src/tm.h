@@ -14,7 +14,7 @@
  * sanity-checks etc. is run. Only define it, if you need it, since it
  * may slow down the TM considerable. 
  * That's why we don't allow it to be set via configure */
-#define TM_HEAVY_DEBUG 1
+//#define TM_HEAVY_DEBUG 1
 
 class Storage;
 extern Storage *storage;
@@ -70,7 +70,7 @@ void cmd_parser_finish(void);
  */
 #define IDX_MIN_TIME_BETWEEN_WRITES 1.5
 
-#define IDX_MIN_TIME_BETWEEN_AGGREGATE 10
+#define IDX_MIN_TIME_BETWEEN_AGGREGATE 15
 
 
 #endif

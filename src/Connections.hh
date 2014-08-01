@@ -180,9 +180,9 @@ private:
 	// the hashtable containing the connections
 	hash_t* htable;
 
-	Connection* addedconn;
+	//Connection* addedconn;
 
-	Connection* addedpacket;
+	//Connection* addedpacket;
 
 	/* every connection is in the hashtable and in a de-queue, where newest is
 	 * the connection that has been accessed last. I.e. oldest it the connection
@@ -217,7 +217,7 @@ inline Connection* Connections::lookup(ConnectionID4 *c_id) {
  */
 inline Connection* Connections::addPkt(const struct pcap_pkthdr* header, const u_char* packet) {
 	ConnectionID4* c_id=new ConnectionID4(packet);
-	//Connection* c;
+	Connection* addedpacket;
 
 #ifdef TM_HEAVY_DEBUG
 	checkme(to_tm_time(&header->ts));

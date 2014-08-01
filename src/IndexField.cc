@@ -58,7 +58,7 @@ static void ip_to_str(const unsigned char* ip, char *str, int len) {
 */
 /*
 IndexField::IndexField(void *p) {
-  memcpy(getConstKeyPtr(), p, getKeySize());
+  //memcpy(getConstKeyPtr(), p, getKeySize());
 }
 */
 
@@ -194,6 +194,8 @@ void IPAddress::Init(const std::string& s)
 
         hash_key = newHashKey->Hash();
 
+        delete newHashKey;
+
         //free_hash_function();
 		}
 
@@ -213,6 +215,8 @@ void IPAddress::Init(const std::string& s)
         HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
 
         hash_key = newHashKey->Hash();
+
+        delete newHashKey;
 
         //free_hash_function();
 	}
@@ -242,7 +246,7 @@ std::string IPAddress::getStr() const
 			return s;
 		}
 }
-
+/*
 std::string IPAddress::getStrPkt(const u_char* packet) const
 {
     #define UCP(x) ((unsigned char *)&x)
@@ -254,7 +258,7 @@ std::string IPAddress::getStrPkt(const u_char* packet) const
 
         unsigned char ip4[16];      
 
-        memcpy(ip4, ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
+        //memcpy(ip4, ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
 
 	    ss << " ip "
 	    << (UCP(ip4)[0] & 0xff) << "."
@@ -280,7 +284,7 @@ std::string IPAddress::getStrPkt(const u_char* packet) const
         }
 	}
 }
-
+*/
 
 void IPAddress::getBPFStr(char *str, int max_str_len) const {
 	int rc = snprintf(str, max_str_len, "host %s", getStr().c_str());
@@ -319,7 +323,7 @@ std::list<SrcIPAddress*> SrcIPAddress::genKeys(const u_char* packet) {
     	li.push_back(new SrcIPAddress(IP6(packet)->ip6_src.s6_addr));
 	return li;
 }
-
+/*
 std::string SrcIPAddress::getStrPkt(const u_char* packet) const
 {
 	std::stringstream ss;
@@ -353,7 +357,7 @@ std::string SrcIPAddress::getStrPkt(const u_char* packet) const
         }
 	}
 }
-
+*/
 void SrcIPAddress::getBPFStr(char *str, int max_str_len) const {
 	int rc = snprintf(str, max_str_len, "src host %s", getStr().c_str());
 	if ( rc >= max_str_len )
@@ -373,7 +377,7 @@ std::list<DstIPAddress*> DstIPAddress::genKeys(const u_char* packet) {
 	    li.push_back(new DstIPAddress(IP6(packet)->ip6_dst.s6_addr));
     return li;
 }
-
+/*
 std::string DstIPAddress::getStrPkt(const u_char* packet) const
 {
 	std::stringstream ss;
@@ -406,7 +410,7 @@ std::string DstIPAddress::getStrPkt(const u_char* packet) const
         }
 	}
 }
-
+*/
 
 void DstIPAddress::getBPFStr(char *str, int max_str_len) const {
 	int rc = snprintf(str, max_str_len, "dst host %s", getStr().c_str());
@@ -454,14 +458,14 @@ std::string Port::getStr() const {
 	ss << ntohs(port);
 	return ss.str();
 }
-
+/*
 std::string Port::getStrPkt(const u_char* packet) const
 {
 	std::stringstream ss;
 	ss << ntohs(port);
 	return ss.str();
 }
-
+*/
 void Port::getBPFStr(char *str, int max_str_len) const {
 	int rc = snprintf(str, max_str_len, "port %u", ntohs(port));
 	if ( rc >= max_str_len )
@@ -509,14 +513,14 @@ std::list<SrcPort*> SrcPort::genKeys(const u_char* packet) {
 	li.push_back(new SrcPort(packet));
 	return li;
 }
-
+/*
 std::string SrcPort::getStrPkt(const u_char* packet) const
 {
 	std::stringstream ss;
 	ss << ntohs(port);
 	return ss.str();
 }
-
+*/
 void SrcPort::getBPFStr(char *str, int max_str_len) const {
 	int rc = snprintf(str, max_str_len, "src port %s", getStr().c_str());
 	if ( rc >= max_str_len )
@@ -564,14 +568,14 @@ std::list<DstPort*> DstPort::genKeys(const u_char* packet) {
 	li.push_back(new DstPort(packet));
 	return li;
 }
-
+/*
 std::string DstPort::getStrPkt(const u_char* packet) const
 {
 	std::stringstream ss;
 	ss << ntohs(port);
 	return ss.str();
 }
-
+*/
 void DstPort::getBPFStr(char *str, int max_str_len) const {
 	int rc = snprintf(str, max_str_len, "dst port %s", getStr().c_str());
 	if ( rc >= max_str_len )

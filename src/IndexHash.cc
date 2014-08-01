@@ -23,14 +23,14 @@ int IndexHash::clear() {
 	for (unsigned i=0; i<numBuckets; i++) {
 		col_nextt = htable[i];
 		while (col_nextt) {
-            tmlog(TM_LOG_NOTE, "idxhash: clear()", "entering the while loop for deletion for bucket number %d", i);
+            //tmlog(TM_LOG_NOTE, "idxhash: clear()", "entering the while loop for deletion for bucket number %d", i);
 			col_cur = col_nextt;
-            IndexField *key_curr;
-            key_curr = col_nextt->getKey();
-            if (key_curr != NULL)
+            //IndexField *key_curr;
+            //key_curr = col_nextt->getKey();
+            //if (key_curr != NULL)
                 //tmlog(TM_LOG_NOTE, "idxhash: clear()", "the entry to delete has key with form %s", key_curr->getIndexName().c_str());
 			col_nextt = col_cur->col_next;
-            tmlog(TM_LOG_NOTE, "idxhash: clear()", "about to delete a collision list entry");
+            //tmlog(TM_LOG_NOTE, "idxhash: clear()", "about to delete a collision list entry");
 			delete col_cur;
 			count++;
 		}
@@ -102,23 +102,23 @@ IndexEntry* IndexHash::lookup( IndexField* key) {
     cur = htable[key->hash()%numBuckets];
 
     while (cur != NULL) {
-        tmlog(TM_LOG_NOTE, "idxhash", "going through the keys: %d", *cur->getKey()->getConstKeyPtr());
+        //tmlog(TM_LOG_NOTE, "idxhash", "going through the keys: %d", *cur->getKey()->getConstKeyPtr());
         if (*key == *cur->getKey()) {
         //if (*(key->getConstKeyPtr()) == *(cur->getKey()->getConstKeyPtr())) {
-            tmlog(TM_LOG_NOTE, "idxhash", "the same key was found. the key is %d", *(key->getConstKeyPtr()));
+            //tmlog(TM_LOG_NOTE, "idxhash", "the same key was found. the key is %d", *(key->getConstKeyPtr()));
             break;
         }
         cur = cur->col_next;
     }
-    tmlog(TM_LOG_NOTE, "idx_hash", "this entry has key: %d", *(key->getConstKeyPtr()));
-    if (cur == NULL)
-        tmlog(TM_LOG_NOTE, "idxhash", "cur is NULL, which means that this entry is allegedly unique");
+    //tmlog(TM_LOG_NOTE, "idx_hash", "this entry has key: %d", *(key->getConstKeyPtr()));
+    //if (cur == NULL)
+    //    tmlog(TM_LOG_NOTE, "idxhash", "cur is NULL, which means that this entry is allegedly unique");
     return cur;
 }
 
 void IndexHash::add(IndexField *key, IndexEntry *ie) {
 
-    tmlog(TM_LOG_NOTE, "idx_hash", "entering the add method");
+    //tmlog(TM_LOG_NOTE, "idx_hash", "entering the add method");
 
     /*
 	const void* old_val = Insert(ie, key);
@@ -149,9 +149,9 @@ void IndexHash::add(IndexField *key, IndexEntry *ie) {
 	    assert(ie->avlbal == 0);
     #endif
 	
-        tmlog(TM_LOG_NOTE, "idx_hash", "the entry to add has key: %d", *(key->getConstKeyPtr()));
+        //tmlog(TM_LOG_NOTE, "idx_hash", "the entry to add has key: %d", *(key->getConstKeyPtr()));
 
-        tmlog(TM_LOG_NOTE, "idx_hash", "the entry to add has timestampe: %f", key->ts);
+        //tmlog(TM_LOG_NOTE, "idx_hash", "the entry to add has timestampe: %f", key->ts);
 
 	    while (cur) {
     #ifdef TM_HEAVY_DEBUG
@@ -163,7 +163,7 @@ void IndexHash::add(IndexField *key, IndexEntry *ie) {
             // determines where current pointer to Index Entry should be (transversing through tree)
             // this compares the 16 bytes/128-bit char arrays
 		    cmp = memcmp(key->getConstKeyPtr(), cur->getKey()->getConstKeyPtr(), key->getKeySize());
-
+            /*
 	        if ( key->hash() == cur->getKey()->hash() &&
 	             cmp )
 		        {
@@ -176,6 +176,7 @@ void IndexHash::add(IndexField *key, IndexEntry *ie) {
 	                htable[hvalconflict] = ie;
                     return;
 		        }
+            */
 			/*
             if ( key->hash() == cur->getKey()->hash() &&
                  !cmp )
@@ -194,8 +195,8 @@ void IndexHash::add(IndexField *key, IndexEntry *ie) {
             {
                 delete ie; 
                 //tmlog(TM_LOG_NOTE, "idx_hash", "the already existing entry is: %d\n", *(cur->getKey()->getConstKeyPtr()));
-			    tmlog(TM_LOG_ERROR, "idx_hash",  "tried to insert an already existing entry into the tree. numEntries=%d\n",
-					    getNumEntries());
+			    //tmlog(TM_LOG_ERROR, "idx_hash",  "tried to insert an already existing entry into the tree. numEntries=%d\n",
+					    //getNumEntries());
 			    //h->add_or_update(key, ie);
                 //delete ie;
                  // delete key;
@@ -240,11 +241,11 @@ void IndexHash::add(IndexField *key, IndexEntry *ie) {
 	    ie->col_prev = NULL;
 	    htable[hval] = ie;
 
-        ie->key->hash_key = hval;
+        //ie->key->hash_key = hval;
 
-        tmlog(TM_LOG_NOTE, "idxhash", "this entry for which we have foudn the bucket value %d for has this timestamp %f and form %s", hval, key->ts, key->getStr().c_str());
+        //tmlog(TM_LOG_NOTE, "idxhash", "this entry for which we have foudn the bucket value %d for has this timestamp %f and form %s", hval, key->ts, key->getStr().c_str());
 
-        tmlog(TM_LOG_NOTE, "idx_hash", "setting an entry in the hash table at %d", hval);
+        //tmlog(TM_LOG_NOTE, "idx_hash", "setting an entry in the hash table at %d", hval);
 	
 	    if (ie->col_next != NULL) 
 		    ie->col_next->col_prev = ie;
@@ -464,11 +465,12 @@ void IndexHash::eraseEntry(IndexEntry *ie) {
 		 */
 		htable[ie->key->hash()%numBuckets] = ie->col_next;
 	}
-    tmlog(TM_LOG_NOTE, "IndexHash: eraseEntry", "we are trying to delete the entry at bucket number %d", ie->key->hash_key);
-    htable[ie->key->hash_key] = NULL;
+    //tmlog(TM_LOG_NOTE, "IndexHash: eraseEntry", "we are trying to delete the entry at bucket number %d", ie->key->hash_key);
+    //htable[ie->key->hash_key] = NULL;
 	delete ie;
 	numEntries--;
 }
+
 
 
 

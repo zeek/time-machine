@@ -18,7 +18,7 @@ Fifo::Fifo() {
 
 
 Fifo::~Fifo() {
-	tmlog(TM_LOG_DEBUG, "storage",  "Fifo::~Fifo");
+	//tmlog(TM_LOG_DEBUG, "storage",  "Fifo::~Fifo");
 	if (started) {
 		pcap_freecode(&fp);
 	}
@@ -77,7 +77,7 @@ void Fifo::start() {
     // setting eviction handler for FifoMem object
 	fm->setEvictionHandler(this);
 
-    tmlog(TM_LOG_DEBUG, "Fifo: Fifo.cc, ~line 69", "Fifo started");
+    //tmlog(TM_LOG_DEBUG, "Fifo: Fifo.cc, ~line 69", "Fifo started");
 
 	// compile BPF filter
 	char* cp=strdup(filter.c_str());
@@ -97,7 +97,7 @@ void Fifo::start() {
 
 bool Fifo::matchPkt(const struct pcap_pkthdr* header,
 					const unsigned char* packet) {
-    tmlog(TM_LOG_DEBUG, "Fifo: matchPkt", "The value of this bpffilter for packet %lu and %lu is %lu", header->ts.tv_sec, header->ts.tv_usec, bpf_filter(fp.bf_insns, (unsigned char*)packet, header->len, header->caplen));
+    //tmlog(TM_LOG_DEBUG, "Fifo: matchPkt", "The value of this bpffilter for packet %lu and %lu is %lu", header->ts.tv_sec, header->ts.tv_usec, bpf_filter(fp.bf_insns, (unsigned char*)packet, header->len, header->caplen));
 
 	return bpf_filter(fp.bf_insns, (unsigned char*)packet,
 					  header->len,
@@ -153,7 +153,7 @@ bool Fifo::addPkt(const struct pcap_pkthdr* header,
 	if (started) {
 		if (c && doCutoff() && c->getTotPktbytes()>getCutoff()) {
 			// cut-off
-            tmlog(TM_LOG_DEBUG, "addPkt: Fifo.cc, ~line 114", "Connection cut-off is occuring for packet %lu (cannot add to connection) ", header->ts.tv_usec);
+            //tmlog(TM_LOG_DEBUG, "addPkt: Fifo.cc, ~line 114", "Connection cut-off is occuring for packet %lu (cannot add to connection) ", header->ts.tv_usec);
             // increment the cutoff_pkts and cutoff_bytes
 			cutoff_pkts++;
 			cutoff_bytes+=header->len;

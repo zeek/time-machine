@@ -46,31 +46,15 @@ public:
         init6(proto, s_ip, d_ip, s_port, d_port);
     }
 	ConnectionID4(ConnectionID4 *c_id) {
-        memcpy(v6.ip1, c_id->v6.ip1, 16);
-        memcpy(v6.ip2, c_id->v6.ip2, 16);
-		v6.port1 = c_id->v6.port1;
-		v6.port2 = c_id->v6.port2;
+        memcpy(key.ip1.s6_addr, c_id->key.ip1.s6_addr, 16);
+        memcpy(key.ip2.s6_addr, c_id->key.ip2.s6_addr, 16);
+		key.port1 = c_id->key.port1;
+		key.port2 = c_id->key.port2;
 		v6.proto = c_id->v6.proto;
         v6.version = c_id->v6.version;
 	}
 	ConnectionID4(const u_char* packet);
 	ConnectionID4() {};
-
-	/**
-	 * Constructs an address instance from an IPv4 address.
-	 *
-	 * @param in6 The IPv6 address.
-	 */
-	explicit ConnectionID4(const in4_addr& in4_ip1, const in4_addr& in4_ip2)
-		{
-
-    	static uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
-		memcpy(v6.ip1, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-		memcpy(&v6.ip1[12], &in4_ip1.s_addr, sizeof(in4_ip1.s_addr));
-
-		memcpy(v6.ip2, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-		memcpy(&v6.ip2[12], &in4_ip2.s_addr, sizeof(in4_ip2.s_addr));
-		}
 
 	virtual ~ConnectionID4() {};
     /*
@@ -86,13 +70,38 @@ public:
         return BuildConnHashKey(v6.ip1, v6.ip2, v6.port1, v6.port2);
     }
     */
-	bool operator==(const ConnectionID& other) const { 
-		return (!memcmp(v6.ip1, ((ConnectionID4*)&other)->v6.ip1, 16))
-			   && (!memcmp(v6.ip2, ((ConnectionID4*)&other)->v6.ip2, 16))
-			   && (v6.port1 == ((ConnectionID4*)&other)->v6.port1)
-			   && (v6.port2 == ((ConnectionID4*)&other)->v6.port2)
+
+    /**
+     * Constructs an address instance from an IPv4 address.
+     *
+     * @param in6 The IPv6 address.
+     */
+    /*
+    void Convert4To6(const uint32_t s_ip, const uint32_t d_ip)
+        {
+        static uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
+        //memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        //memcpy(&key.ip1.s6_addr[12], &s_ip, sizeof(s_ip));
+
+        //memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        //memcpy(&key.ip2.s6_addr[12], &d_ip, sizeof(d_ip));
+        }
+    */
+
+	bool operator==(const ConnectionID& other) const {
+              /*
+               return (!memcmp(key, ((ConnectionID4*)&other)->key, sizeof(key_t)))
+                        && (v6.proto == ((ConnectionID4*)&other)->v6.proto);
+               */
+                 
+		return (!memcmp(&key.ip1, &((ConnectionID4*)&other)->key.ip1, sizeof(in6_addr)))
+			   && (!memcmp(&key.ip2, &((ConnectionID4*)&other)->key.ip2, sizeof(in6_addr)))
+			   && (key.port1 == ((ConnectionID4*)&other)->key.port1)
+			   && (key.port2 == ((ConnectionID4*)&other)->key.port2)
 			   && (v6.proto == ((ConnectionID4*)&other)->v6.proto);
+                
 	}
+
 
 	static ConnectionID4 *parse(const char *str);
 /*
@@ -116,16 +125,16 @@ public:
 		return v6.proto;
 	}
 	const unsigned char* get_ip1() const {
-		return v6.ip1;
+		return key.ip1.s6_addr;
 	}
 	const unsigned char* get_ip2() const {
-		return v6.ip2;
+		return key.ip2.s6_addr;
 	}
 	uint16_t get_port1() const {
-		return v6.port1;
+		return key.port1;
 	}
 	uint16_t get_port2() const {
-		return v6.port2;
+		return key.port2;
 	}
 
 	//  bool get_is_canonified() const { return v.is_canonified; }
@@ -158,10 +167,10 @@ public:
 	typedef struct {
 		//  time locality
 		//    uint32_t ts;
-		unsigned char ip1[16];
-		unsigned char ip2[16];
-		uint16_t port1;
-		uint16_t port2;
+		//unsigned char ip1[12];
+		//unsigned char ip2[12];
+		//uint16_t port1;
+		//uint16_t port2;
 		proto_t proto;
         int version;
 		//    bool is_canonified;
@@ -185,11 +194,11 @@ public:
 		return &v;
 	}
 */
-	v6_t* getV() {
-		return &v6;
+	key_t* getV() {
+		return &key;
 	}
-	const v6_t* getConstV() const {
-		return &v6;
+	const key_t* getConstV() const {
+		return &key;
 	}
 
 	void getStr(char* s, int maxsize) const;
@@ -233,20 +242,6 @@ public:
 	ConnectionID3(const u_char* packet, int wildcard_port);
 	ConnectionID3() {};
 
-	/**
-	 * Constructs an address instance from an IPv4 address.
-	 *
-	 * @param in6 The IPv6 address.
-	 */
-	explicit ConnectionID3(const in4_addr& in4_ip1, const in4_addr& in4_ip2)
-		{
-    	static uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
-		memcpy(v6.ip1, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-		memcpy(&v6.ip1[12], &in4_ip1.s_addr, sizeof(in4_ip1.s_addr));
-
-		memcpy(v6.ip2, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-		memcpy(&v6.ip2[12], &in4_ip2.s_addr, sizeof(in4_ip2.s_addr));
-		}
 
 	virtual ~ConnectionID3() {
     };
@@ -276,18 +271,36 @@ public:
 		return v.port2;
 	}
 */
+
+    /**
+     * Constructs an address instance from an IPv4 address.
+     *
+     * @param in6 The IPv6 address.
+     */
+    /*
+    void Convert4To6(const uint32_t s_ip, const uint32_t d_ip)
+        {
+        static uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
+        //memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        //memcpy(&key.ip1.s6_addr[12], &s_ip, sizeof(s_ip));
+
+        //memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        //memcpy(&key.ip2.s6_addr[12], &d_ip, sizeof(d_ip));
+        }
+    */
+
 	bool operator==(const ConnectionID& other) const;
 	proto_t get_proto() const {
 		return v6.proto;
 	}
 	const unsigned char* get_ip1() const {
-		return v6.ip1;
+		return key.ip1.s6_addr;
 	}
 	const unsigned char* get_ip2() const {
-		return v6.ip2;
+		return key.ip2.s6_addr;
 	}
 	uint16_t get_port() const {
-		return v6.port2;
+		return key.port2;
 	}
 	/*
 	bool get_is_canonified() const { return v.is_canonified; }
@@ -312,9 +325,9 @@ public:
 	typedef struct {
 		//  time locality
 		//    uint32_t ts;
-		unsigned char ip1[16];
-		unsigned char ip2[16];
-		uint16_t port2;
+		//unsigned char ip1[16];
+		//unsigned char ip2[16];
+		//uint16_t port2;
 		proto_t proto;
         int version;
 		//    bool is_canonified;
@@ -339,12 +352,12 @@ public:
 	}
 */
 
-	v6_t* getV() {
-		return &v6;
+	key_t* getV() {
+		return &key;
 	}
 
-	const v6_t* getConstV() const {
-		return &v6;
+	const key_t* getConstV() const {
+		return &key;
 	}
 
 
@@ -393,16 +406,17 @@ public:
 	 *
 	 * @param in6 The IPv6 address.
 	 */
-	explicit ConnectionID2(const in4_addr& in4_ip1, const in4_addr& in4_ip2)
+    /*
+	explicit ConnectionID2(const uint32_t s_ip, const uint32_t d_ip)
 		{
     	static uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
-		memcpy(v6.ip1, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-		memcpy(&v6.ip1[12], &in4_ip1.s_addr, sizeof(in4_ip1.s_addr));
+		//memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+		//memcpy(&key.ip1.s6_addr[12], &s_ip, sizeof(s_ip));
 
-		memcpy(v6.ip2, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-		memcpy(&v6.ip2[12], &in4_ip2.s_addr, sizeof(in4_ip2.s_addr));
+		//memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+		//memcpy(&key.ip2.s6_addr[12], &d_ip, sizeof(d_ip));
 		}
-
+    */
 	virtual ~ConnectionID2() {};
     /*
 	uint32_t hash() const {
@@ -417,6 +431,24 @@ public:
         return BuildConnHashKey(v6.ip1, v6.ip2, 0, 0);
     }
 */
+
+    /**
+     * Constructs an address instance from an IPv4 address.
+     *
+     * @param in6 The IPv6 address.
+     */
+    /*
+    void Convert4To6(const uint32_t s_ip, const uint32_t d_ip)
+        {
+        static uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
+        //memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        //memcpy(&key.ip1.s6_addr[12], &s_ip, sizeof(s_ip));
+
+        //memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        //memcpy(&key.ip2.s6_addr[12], &d_ip, sizeof(d_ip));
+        }
+    */
+
 	bool operator==(const ConnectionID& other) const;
 /*
 	uint32_t get_ip1() const {
@@ -428,10 +460,10 @@ public:
 */
 
 	const unsigned char* get_ip1() const {
-		return v6.ip1;
+		return key.ip1.s6_addr;
 	}
 	const unsigned char* get_ip2() const {
-		return v6.ip2;
+		return key.ip2.s6_addr;
 	}
 
 	/*
@@ -455,8 +487,8 @@ public:
 	typedef struct {
 		//  time locality
 		//    uint32_t ts;
-		unsigned char ip1[16];
-		unsigned char ip2[16];
+		//unsigned char ip1[16];
+		//unsigned char ip2[16];
         int version;
 		//    bool is_canonified;
 	}
@@ -478,11 +510,11 @@ public:
 		return &v;
 	}
 */
-	v6_t* getV() {
-		return &v6;
+	key_t* getV() {
+		return &key;
 	}
-	const v6_t* getConstV() const {
-		return &v6;
+	const key_t* getConstV() const {
+		return &key;
 	}
 
 	void getStr(char* s, int maxsize) const;

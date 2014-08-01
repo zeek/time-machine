@@ -11,7 +11,7 @@
 #include <sstream>
 #include <pthread.h>
 #include <time.h>
-#include <gperftools/profiler.h>
+//#include <gperftools/profiler.h>
 
 #include "types.h"
 #include "tm.h"
@@ -92,7 +92,7 @@ class MyQueue {
 			if (entries>0) {
 				rp++;
 				entries--;
-                tmlog(TM_LOG_NOTE, "idx_queue", "We pop the entry from back, decrement entry count to %d", entries);
+                //tmlog(TM_LOG_NOTE, "idx_queue", "We pop the entry from back, decrement entry count to %d", entries);
 				if (rp>=maxsize)
 					rp = 0;
 			}
@@ -104,7 +104,7 @@ class MyQueue {
 			if (entries>=maxsize) {
 				drops++;
 				delete elem;
-                tmlog(TM_LOG_NOTE, "idx_queue", "we do not add this to the number of entries. Number of entries is: %d", entries);
+                //tmlog(TM_LOG_NOTE, "idx_queue", "we do not add this to the number of entries. Number of entries is: %d", entries);
 				return;
 			}
 
@@ -115,7 +115,7 @@ class MyQueue {
 			q[wp] = elem;
 			wp++;
 			entries++;
-            tmlog(TM_LOG_NOTE, "idx_queue", "increment the number of entries to %d", entries);
+            //tmlog(TM_LOG_NOTE, "idx_queue", "increment the number of entries to %d", entries);
 			if (wp>=maxsize) 
 				wp = 0;
 		}
@@ -194,7 +194,7 @@ protected:
 	 * YOU MUST HOLD THE queue_lock WHEN CALLING THIS */
 	void cond_broadcast_queue() {
 		pthread_cond_broadcast(&queue_cond);
-	    tmlog(TM_LOG_DEBUG, "Mantainer IndexThread", "signaling to Maintainer IndexThread that we added something to the queue");
+	    //tmlog(TM_LOG_DEBUG, "Mantainer IndexThread", "signaling to Maintainer IndexThread that we added something to the queue");
 	}
 	/** 
 	 * Wait for signal, that data is availabe in the queue 
@@ -330,7 +330,7 @@ public:
 				i++)
 			if ((*i)->getIndexName()==name) 
             {
-                tmlog(TM_LOG_NOTE, "Indexes: getIndexByName", "we have a match with the index name %s", name.c_str());
+                //tmlog(TM_LOG_NOTE, "Indexes: getIndexByName", "we have a match with the index name %s", name.c_str());
                 return (*i);
             }
 		return NULL;
