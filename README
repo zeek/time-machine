@@ -37,3 +37,16 @@ Also note that to use pprof to read the .prof files, you will need to install
 perl5, gv, and dot. You can use apt-get install for the gv and dot (if on Ubuntu),
 and install perl5 from source.
 
+Note that to add the appropriate directories for gperftools, the file to look at is
+cmake/FindGooglePerftools.cmake
+
+Also, make sure to change the directory in the ProfilerStart function's argument in
+main.cc.in and/or reposition the ProfilerStart and ProfilerStop
+
+To enable cpu profiler debugging, add --enable-perftools-cpu to the configuring
+So, something like:
+
+./configure --enable-perftools-cpu --enable-debug --prefix=/home/lakers/tm
+
+will work.
+
