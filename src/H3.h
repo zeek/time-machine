@@ -79,7 +79,7 @@ public:
 
 	void Init(bool have_seed, T seed)
 		{
-        tmlog(TM_LOG_NOTE, "H3 has function", "Just making sure that initialization was attempted with seed %lu\n", seed);
+        //tmlog(TM_LOG_NOTE, "H3 has function", "Just making sure that initialization was attempted with seed %lu\n", seed);
 		T bit_lookup[N * CHAR_BIT];
 
 		for ( size_t bit = 0; bit < N * CHAR_BIT; bit++ )

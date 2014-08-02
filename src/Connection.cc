@@ -66,7 +66,7 @@ inline bool addr6_port_canon_lt(const unsigned char s6_ip[], const unsigned char
 
 
 
-void ConnectionID4::init(proto_t proto,
+void ConnectionID4::init(proto_t proto4,
 						 uint32_t s_ip, uint32_t d_ip,
 						 uint16_t s_port, uint16_t d_port) {
     // DEBUG DEBUG DEBUG
@@ -76,7 +76,7 @@ void ConnectionID4::init(proto_t proto,
     //in4_addr ipv4_s_address;
 
     v6.version = 4;
-	v6.proto=proto;
+	v6.proto=proto4;
 
     static uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
 
@@ -88,11 +88,14 @@ void ConnectionID4::init(proto_t proto,
 		//    v.is_canonified=true;
 
         // setting v6.ip1 to be  destination address and v6.ip2 to be source address
-        memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&key.ip1.s6_addr[12], &d_ip, sizeof(d_ip));
+        //key.ip1.s6_tm_addr = &v4_mapped_prefix[0];
+        //char *
 
-        memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&key.ip2.s6_addr[12], &s_ip, sizeof(s_ip));
+        memcpy(key.ip1, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip1[12], &d_ip, sizeof(d_ip));
+
+        memcpy(key.ip2, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip2[12], &s_ip, sizeof(s_ip));
 
 
 
@@ -132,11 +135,11 @@ void ConnectionID4::init(proto_t proto,
 
         // setting v6.ip1 to be source address and v6.ip2 to be destination address
 
-        memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&key.ip1.s6_addr[12], &s_ip, sizeof(s_ip));
+        memcpy(key.ip1, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip1[12], &s_ip, sizeof(s_ip));
 
-        memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&key.ip2.s6_addr[12], &d_ip, sizeof(d_ip));
+        memcpy(key.ip2, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip2[12], &d_ip, sizeof(d_ip));
 
 
         /*
@@ -190,14 +193,14 @@ void ConnectionID4::init(proto_t proto,
     //free_hash_function();
 }
 
-void ConnectionID4::init6(proto_t proto,
+void ConnectionID4::init6(proto_t proto6,
                   unsigned char s_ip[], unsigned char d_ip[],
                   uint16_t s_port, uint16_t d_port) {
     // DEBUG DEBUG DEBUG
 	//tmlog(TM_LOG_NOTE, "connection 4: Connection.cc, ~line 48", "connection 4 for ipv6 initialized");
 
     v6.version = 6;
-	v6.proto=proto;
+	v6.proto=proto6;
 
 	// Lookup up connection based on canonical ordering, which is
 	// the smaller of <src addr, src port> and <dst addr, dst port>
@@ -205,8 +208,8 @@ void ConnectionID4::init6(proto_t proto,
 	if (addr6_port_canon_lt(s_ip,d_ip,s_port,d_port)) {
 		//    v6.is_canonified=true;
         // memcpy(destination, source, size)
-        memcpy(key.ip1.s6_addr, d_ip, 16);
-        memcpy(key.ip2.s6_addr, s_ip, 16);
+        memcpy(key.ip1, d_ip, 16);
+        memcpy(key.ip2, s_ip, 16);
 		//v6.ip1=d_ip;
 		//v6.ip2=s_ip;
 		//v6.port1=d_port;
@@ -226,8 +229,8 @@ void ConnectionID4::init6(proto_t proto,
 
 	} else {
 		//    v6.is_canonified=false;
-        memcpy(key.ip1.s6_addr, s_ip, 16);
-        memcpy(key.ip2.s6_addr, d_ip, 16);
+        memcpy(key.ip1, s_ip, 16);
+        memcpy(key.ip2, d_ip, 16);
 		//v6.ip1=s_ip;
 		//v6.ip2=d_ip;
 		//v6.port1=s_port;
@@ -266,7 +269,7 @@ void ConnectionID4::init6(proto_t proto,
     //free_hash_function();
 }
 
-void ConnectionID3::init(proto_t proto,
+void ConnectionID3::init(proto_t proto4,
 						 uint32_t ip1, uint32_t ip2,
 						 uint16_t port2) {
 
@@ -278,7 +281,7 @@ void ConnectionID3::init(proto_t proto,
 
     v6.version = 4;
 
-	v6.proto=proto;
+	v6.proto=proto4;
 
     static uint8_t v4_mapped_prefix[12]; // top 96 bits of v4-mapped-addr
     
@@ -296,11 +299,11 @@ void ConnectionID3::init(proto_t proto,
 
     */
 
-    memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-    memcpy(&key.ip1.s6_addr[12], &ip1, sizeof(ip1));
+    memcpy(key.ip1, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+    memcpy(&key.ip1[12], &ip1, sizeof(ip1));
 
-    memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-    memcpy(&key.ip2.s6_addr[12], &ip2, sizeof(ip2));
+    memcpy(key.ip2, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+    memcpy(&key.ip2[12], &ip2, sizeof(ip2));
 
 
 	//key.port2=port2;
@@ -361,21 +364,21 @@ void ConnectionID3::init(proto_t proto,
     //free_hash_function();
 }
 
-void ConnectionID3::init6(proto_t proto,
+void ConnectionID3::init6(proto_t proto6,
 						 unsigned char ip1[], unsigned char ip2[],
 						 uint16_t port2) {
 
     // DEBUG DEBUG DEBUG
 	//tmlog(TM_LOG_DEBUG, "connection 3: Connection.cc, ~line 71", "connection 3 initialized");
 
-	v6.proto=proto;
+	v6.proto=proto6;
 
     v6.version = 6;
 
     // memcpy(destination, source, size)
     // setting v6.ip1 to be source address and v6.ip2 to be destination address 
-    memcpy(key.ip1.s6_addr, ip1, 16);
-    memcpy(key.ip2.s6_addr, ip2, 16);
+    memcpy(key.ip1, ip1, 16);
+    memcpy(key.ip2, ip2, 16);
 
 	//v.ip1=ip1;
 	//v.ip2=ip2;
@@ -471,11 +474,11 @@ void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
 
         // setting v6.ip1 to dest address and v6.ip2 to source address
 
-        memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&key.ip1.s6_addr[12], &d_ip, sizeof(d_ip));
+        memcpy(key.ip1, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip1[12], &d_ip, sizeof(d_ip));
 
-        memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&key.ip2.s6_addr[12], &s_ip, sizeof(s_ip));
+        memcpy(key.ip2, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip2[12], &s_ip, sizeof(s_ip));
 
         // this is for the hash key
         //in6_addr s6_ip;
@@ -503,11 +506,11 @@ void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
 
         // setting v6.ip1 to be source address and v6.ip2 to be dest address
 
-        memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&key.ip1.s6_addr[12], &s_ip, sizeof(s_ip));
+        memcpy(key.ip1, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip1[12], &s_ip, sizeof(s_ip));
 
-        memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&key.ip2.s6_addr[12], &d_ip, sizeof(d_ip));
+        memcpy(key.ip2, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip2[12], &d_ip, sizeof(d_ip));
 
 
         // this is for the hash key
@@ -548,8 +551,8 @@ void ConnectionID2::init6( unsigned char s_ip[], unsigned char d_ip[]) {
 	if (addr6_port_canon_lt(s_ip,d_ip,0,0)) {
 		//    v.is_canonified=true;
         // memcpy(destination, source, size)
-        memcpy(key.ip1.s6_addr, d_ip, 16);
-        memcpy(key.ip2.s6_addr, s_ip, 16);
+        memcpy(key.ip1, d_ip, 16);
+        memcpy(key.ip2, s_ip, 16);
 
 		//v6.ip1=d_ip;
 		//v6.ip2=s_ip;
@@ -568,8 +571,8 @@ void ConnectionID2::init6( unsigned char s_ip[], unsigned char d_ip[]) {
 
 	} else {
 		//    v.is_canonified=false;
-        memcpy(key.ip1.s6_addr, s_ip, 16);
-        memcpy(key.ip2.s6_addr, d_ip, 16);
+        memcpy(key.ip1, s_ip, 16);
+        memcpy(key.ip2, d_ip, 16);
 		//v.ip1=s_ip;
 		//v.ip2=d_ip;
 
@@ -786,9 +789,16 @@ ConnectionID2::ConnectionID2(const u_char* packet) {
 //TODO: MAke this inline (i.e. move to Connection.hh so that it is
 //consistent with ConnectionID4
 bool ConnectionID3::operator==(const ConnectionID& other) const {
+/*
+        return equal(key.ip1.s6_addr, ((ConnectionID3*)&other)->key.ip2.s6_addr)
+               && equal(key.ip2.s6_addr, ((ConnectionID3*)&other)->key.ip2.s6_addr)
+               && (key.port2 == ((ConnectionID3*)&other)->key.port2)
+               && (v6.proto == ((ConnectionID3*)&other)->v6.proto);
+*/
 
-        return (!memcmp(&key.ip1, &((ConnectionID3*)&other)->key.ip1, sizeof(in6_addr)))
-               && (!memcmp(&key.ip2, &((ConnectionID3*)&other)->key.ip2, sizeof(in6_addr)))
+
+        return (!memcmp(&key.ip1, &((ConnectionID3*)&other)->key.ip1, 16))
+               && (!memcmp(&key.ip2, &((ConnectionID3*)&other)->key.ip2, 16))
                && (key.port2 == ((ConnectionID3*)&other)->key.port2)
                && (v6.proto == ((ConnectionID3*)&other)->v6.proto);
 
@@ -797,9 +807,12 @@ bool ConnectionID3::operator==(const ConnectionID& other) const {
 //TODO: MAke this inline (i.e. move to Connection.hh so that it is
 //consistent with ConnectionID4
 bool ConnectionID2::operator==(const ConnectionID& other) const {
-
-        return (!memcmp(&key.ip1, &((ConnectionID2*)&other)->key.ip1, sizeof(in6_addr)))
-               && (!memcmp(&key.ip2, &((ConnectionID2*)&other)->key.ip2, sizeof(in6_addr)));
+/*
+        return equal(key.ip1.s6_addr, ((ConnectionID2*)&other)->key.ip2.s6_addr)
+               && equal(key.ip2.s6_addr, ((ConnectionID2*)&other)->key.ip2.s6_addr);
+*/
+       return (!memcmp(&key.ip1, &((ConnectionID2*)&other)->key.ip1, 16))
+               && (!memcmp(&key.ip2, &((ConnectionID2*)&other)->key.ip2, 16));
 
 }
 
@@ -875,17 +888,17 @@ std::string ConnectionID4::getStr() const {
 	    << (UCP(d_ip)[3] & 0xff)
 	    << ":"
 */
-        << (UCP(key.ip1.s6_addr)[0] & 0xff) << "."
-        << (UCP(key.ip1.s6_addr)[1] & 0xff) << "."
-        << (UCP(key.ip1.s6_addr)[2] & 0xff) << "."
-        << (UCP(key.ip1.s6_addr)[3] & 0xff)
+        << (UCP(key.ip1)[0] & 0xff) << "."
+        << (UCP(key.ip1)[1] & 0xff) << "."
+        << (UCP(key.ip1)[2] & 0xff) << "."
+        << (UCP(key.ip1)[3] & 0xff)
         << ":"
         << ntohs(get_port1())
         << " - "
-        << (UCP(key.ip2.s6_addr)[0] & 0xff) << "."
-        << (UCP(key.ip2.s6_addr)[1] & 0xff) << "."
-        << (UCP(key.ip2.s6_addr)[2] & 0xff) << "."
-        << (UCP(key.ip2.s6_addr)[3] & 0xff)
+        << (UCP(key.ip2)[0] & 0xff) << "."
+        << (UCP(key.ip2)[1] & 0xff) << "."
+        << (UCP(key.ip2)[2] & 0xff) << "."
+        << (UCP(key.ip2)[3] & 0xff)
         << ":"
 
 
@@ -908,11 +921,11 @@ std::string ConnectionID4::getStr() const {
 
         char str1[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(key.ip1.s6_addr), str1, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, key.ip1, str1, INET6_ADDRSTRLEN);
 
         char str2[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(key.ip2.s6_addr), str2, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, key.ip2, str2, INET6_ADDRSTRLEN);
 
 
         ss << " ConnectionID4 for IPv6"
@@ -953,15 +966,15 @@ std::string ConnectionID3::getStr() const {
         //memcpy(d_ip, key.ip2.s6_addr, 16);
 
 	    ss << " ConnectionID3 "
-	    << (UCP(key.ip1.s6_addr)[0] & 0xff) << "."
-	    << (UCP(key.ip1.s6_addr)[1] & 0xff) << "."
-	    << (UCP(key.ip1.s6_addr)[2] & 0xff) << "."
-	    << (UCP(key.ip1.s6_addr)[3] & 0xff)
+	    << (UCP(key.ip1)[0] & 0xff) << "."
+	    << (UCP(key.ip1)[1] & 0xff) << "."
+	    << (UCP(key.ip1)[2] & 0xff) << "."
+	    << (UCP(key.ip1)[3] & 0xff)
 	    << " - "
-	    << (UCP(key.ip2.s6_addr)[0] & 0xff) << "."
-	    << (UCP(key.ip2.s6_addr)[1] & 0xff) << "."
-	    << (UCP(key.ip2.s6_addr)[2] & 0xff) << "."
-	    << (UCP(key.ip2.s6_addr)[3] & 0xff)
+	    << (UCP(key.ip2)[0] & 0xff) << "."
+	    << (UCP(key.ip2)[1] & 0xff) << "."
+	    << (UCP(key.ip2)[2] & 0xff) << "."
+	    << (UCP(key.ip2)[3] & 0xff)
 	    << ":"
 	    << get_port();
 	    return ss.str();
@@ -983,11 +996,11 @@ std::string ConnectionID3::getStr() const {
 
         char str1[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(key.ip1.s6_addr), str1, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, &(key.ip1), str1, INET6_ADDRSTRLEN);
 
         char str2[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(key.ip2.s6_addr), str2, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, &(key.ip2), str2, INET6_ADDRSTRLEN);
 
         ss << " ConnectionID3 for IPv6"
 
@@ -1047,15 +1060,15 @@ std::string ConnectionID2::getStr() const {
         //memcpy(d_ip, key.ip2.s6_addr, 16);
 
 	    ss << " ConnectionID2 "
-	    << (UCP(key.ip1.s6_addr)[0] & 0xff) << "."
-	    << (UCP(key.ip1.s6_addr)[1] & 0xff) << "."
-	    << (UCP(key.ip1.s6_addr)[2] & 0xff) << "."
-	    << (UCP(key.ip1.s6_addr)[3] & 0xff)
+	    << (UCP(key.ip1)[0] & 0xff) << "."
+	    << (UCP(key.ip1)[1] & 0xff) << "."
+	    << (UCP(key.ip1)[2] & 0xff) << "."
+	    << (UCP(key.ip1)[3] & 0xff)
 	    << " - "
-	    << (UCP(key.ip2.s6_addr)[0] & 0xff) << "."
-	    << (UCP(key.ip2.s6_addr)[1] & 0xff) << "."
-	    << (UCP(key.ip2.s6_addr)[2] & 0xff) << "."
-	    << (UCP(key.ip2.s6_addr)[3] & 0xff);
+	    << (UCP(key.ip2)[0] & 0xff) << "."
+	    << (UCP(key.ip2)[1] & 0xff) << "."
+	    << (UCP(key.ip2)[2] & 0xff) << "."
+	    << (UCP(key.ip2)[3] & 0xff);
 	    return ss.str();
     }
 
@@ -1076,11 +1089,11 @@ std::string ConnectionID2::getStr() const {
 
         char str1[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(key.ip1.s6_addr), str1, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, &(key.ip1), str1, INET6_ADDRSTRLEN);
 
         char str2[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(key.ip2.s6_addr), str2, INET6_ADDRSTRLEN);
+        bro_inet_ntop(AF_INET6, &(key.ip2), str2, INET6_ADDRSTRLEN);
 
         ss << " ConnectionID2 for IPv6"
 

@@ -24,7 +24,17 @@ public:
 	//  virtual const void* getConstVPtr() const = 0;
 	virtual void getStr(char* s, int maxsize) const = 0;
 	virtual std::string getStr() const = 0;
-
+/*
+        int equal(const unsigned char* a, const unsigned char* b) const
+        {
+            for (int i = 0; i < 16; i++)
+            {
+                if (a[i] != b[i])
+                    return 0;
+            }
+            return 1;
+        }
+*/
     //virtual HashKey* hash() const = 0;
 
  /**
@@ -46,8 +56,8 @@ public:
         init6(proto, s_ip, d_ip, s_port, d_port);
     }
 	ConnectionID4(ConnectionID4 *c_id) {
-        memcpy(key.ip1.s6_addr, c_id->key.ip1.s6_addr, 16);
-        memcpy(key.ip2.s6_addr, c_id->key.ip2.s6_addr, 16);
+        memcpy(key.ip1, c_id->key.ip1, 16);
+        memcpy(key.ip2, c_id->key.ip2, 16);
 		key.port1 = c_id->key.port1;
 		key.port2 = c_id->key.port2;
 		v6.proto = c_id->v6.proto;
@@ -94,12 +104,19 @@ public:
                         && (v6.proto == ((ConnectionID4*)&other)->v6.proto);
                */
                  
-		return (!memcmp(&key.ip1, &((ConnectionID4*)&other)->key.ip1, sizeof(in6_addr)))
-			   && (!memcmp(&key.ip2, &((ConnectionID4*)&other)->key.ip2, sizeof(in6_addr)))
+		return (!memcmp(&key.ip1, &((ConnectionID4*)&other)->key.ip1, 16))
+			   && (!memcmp(&key.ip2, &((ConnectionID4*)&other)->key.ip2, 16))
 			   && (key.port1 == ((ConnectionID4*)&other)->key.port1)
 			   && (key.port2 == ((ConnectionID4*)&other)->key.port2)
 			   && (v6.proto == ((ConnectionID4*)&other)->v6.proto);
-                
+                /*
+                return equal(key.ip1.s6_addr, ((ConnectionID4*)&other)->key.ip2.s6_addr)
+                           && equal(key.ip2.s6_addr, ((ConnectionID4*)&other)->key.ip2.s6_addr)
+                           && (key.port1 == ((ConnectionID4*)&other)->key.port1)
+                           && (key.port2 == ((ConnectionID4*)&other)->key.port2)
+                           && (v6.proto == ((ConnectionID4*)&other)->v6.proto);
+                 */
+
 	}
 
 
@@ -125,10 +142,10 @@ public:
 		return v6.proto;
 	}
 	const unsigned char* get_ip1() const {
-		return key.ip1.s6_addr;
+		return key.ip1;
 	}
 	const unsigned char* get_ip2() const {
-		return key.ip2.s6_addr;
+		return key.ip2;
 	}
 	uint16_t get_port1() const {
 		return key.port1;
@@ -164,6 +181,13 @@ public:
 	__attribute__((packed)) v_t;
     */
 
+/*
+    struct in6_tm_addr
+    {
+        unsigned char *s6_tm_addr;
+    };
+*/
+    
 	typedef struct {
 		//  time locality
 		//    uint32_t ts;
@@ -171,18 +195,21 @@ public:
 		//unsigned char ip2[12];
 		//uint16_t port1;
 		//uint16_t port2;
-		proto_t proto;
         int version;
+		proto_t proto;
 		//    bool is_canonified;
 	}
     // have the structure fields align on one-byte boundaries
 	__attribute__((packed)) v6_t;
+    
+    //proto_t proto;
 
     typedef struct {
-        in6_addr ip1;
-        in6_addr ip2;
+        unsigned char ip1[16];
+        unsigned char ip2[16];
         uint16 port1;
         uint16 port2;
+        //int version;
     } 
     __attribute__((packed)) key_t;
 
@@ -294,10 +321,10 @@ public:
 		return v6.proto;
 	}
 	const unsigned char* get_ip1() const {
-		return key.ip1.s6_addr;
+		return key.ip1;
 	}
 	const unsigned char* get_ip2() const {
-		return key.ip2.s6_addr;
+		return key.ip2;
 	}
 	uint16_t get_port() const {
 		return key.port2;
@@ -322,6 +349,7 @@ public:
 	__attribute__((packed)) v_t;
     */
 
+    
 	typedef struct {
 		//  time locality
 		//    uint32_t ts;
@@ -333,12 +361,16 @@ public:
 		//    bool is_canonified;
 	}
 	__attribute__((packed)) v6_t;
+    
+
+    //proto_t proto;
 
     typedef struct {
-        in6_addr ip1;
-        in6_addr ip2;
+        unsigned char ip1[16];
+        unsigned char ip2[16];
         uint16 port1;
         uint16 port2;
+        //int version;
     }
     __attribute__((packed)) key_t;
 
@@ -460,10 +492,10 @@ public:
 */
 
 	const unsigned char* get_ip1() const {
-		return key.ip1.s6_addr;
+		return key.ip1;
 	}
 	const unsigned char* get_ip2() const {
-		return key.ip2.s6_addr;
+		return key.ip2;
 	}
 
 	/*
@@ -483,7 +515,7 @@ public:
 	}
 	__attribute__((packed)) v_t;
     */
-
+    
 	typedef struct {
 		//  time locality
 		//    uint32_t ts;
@@ -493,12 +525,14 @@ public:
 		//    bool is_canonified;
 	}
 	__attribute__((packed)) v6_t;
+    
 
     typedef struct {
-        in6_addr ip1;
-        in6_addr ip2;
+        unsigned char ip1[16];
+        unsigned char ip2[16];
         uint16 port1;
         uint16 port2;
+        //int version;
     }
     __attribute__((packed)) key_t;
 
