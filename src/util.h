@@ -72,7 +72,7 @@ typedef uint64 bro_uint_t;
 // pointer size. They can be cast safely to a pointer, e.g. in Lists,
 // which represent their entities as void* pointers.
 //
-#ifdef linux
+#if defined(linux) || defined(__APPLE__)
 #if SIZEOF_VOID_P == 8
 
 typedef uint64 ptr_compat_uint;

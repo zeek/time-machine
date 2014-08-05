@@ -99,7 +99,7 @@ public:
 
         //hash_key = newHashKey->Hash();
 
-        hash_key = HashKey::HashBytes(key, sizeof(key));
+        hash_key = HashKey::HashBytes(key, sizeof(ip));
  
         //delete newHashKey;
 
