@@ -168,11 +168,13 @@ Storage::Storage(StorageConfig& conf):
 		}
 		pcap_freecode(&fp);
 	}
+    /*
     // I added this in to help understand the code
     else
     {
         tmlog(TM_LOG_NOTE, "storage", "hmmm, filter is empty!");
     }
+    */
 	for (std::list<Fifo*>::iterator it=conf.fifos.begin(); it!=conf.fifos.end(); it++) {
         // A pcap_t is a handle used to read packets from a network interface, or from a pcap
         // here we are setting the handle (from Fifo.hh)
@@ -245,7 +247,7 @@ Storage::Storage(StorageConfig& conf):
 #endif
 	int i=pthread_create(&capture_thread_tid, &capture_thread_attr, capture_thread, (void *)this);
 
-    tmlog(TM_LOG_DEBUG, "capture thread: Storage.cc, ~line 195", "attempting to create capture thread");
+    //tmlog(TM_LOG_DEBUG, "capture thread: Storage.cc, ~line 195", "attempting to create capture thread");
 	if (i!=0) {
 		pcap_close(ph);
 		tmlog(TM_LOG_ERROR, "storage", "Could not create capture thread.");
@@ -254,24 +256,24 @@ Storage::Storage(StorageConfig& conf):
 }
 
 Storage::~Storage() {
-	tmlog(TM_LOG_DEBUG, "storage: Storage.cc, ~line 204", "Storage::~Storage");
+	//tmlog(TM_LOG_DEBUG, "storage: Storage.cc, ~line 204", "Storage::~Storage");
 	/*fprintf(stderr, "Breaking pcap_loop()\n");
 	pcap_breakloop(ph);
 	fprintf(stderr, "pcap_loop() is destroyed\n"); */
 	for (std::list<Fifo*>::iterator it=fifos.begin(); it!=fifos.end(); it++)
 		delete (*it);
-	tmlog(TM_LOG_DEBUG, "storage: Storage.cc, ~line 210", "Fifos deleted.");
+	//tmlog(TM_LOG_DEBUG, "storage: Storage.cc, ~line 210", "Fifos deleted.");
 	delete indexes;
-	tmlog(TM_LOG_DEBUG, "storage: Storage.cc, ~line 212", "pcap handle closed.");
+	//tmlog(TM_LOG_DEBUG, "storage: Storage.cc, ~line 212", "pcap handle closed.");
 	pcap_close(ph);
 }
 
 void Storage::cancelThread() {
 	//tmlog(TM_LOG_DEBUG, "storage: Storage.cc, ~line 217", "Canceling capture thread");
 	pthread_cancel(capture_thread_tid);
-	tmlog(TM_LOG_DEBUG, "storage: Storage.cc, ~line 219", "Joining capture thread.");
+	//tmlog(TM_LOG_DEBUG, "storage: Storage.cc, ~line 219", "Joining capture thread.");
 	pthread_join(capture_thread_tid, NULL);
-	tmlog(TM_LOG_DEBUG, "storage: Storage.cc, ~line 221", "Capture thread is gone.");
+	//tmlog(TM_LOG_DEBUG, "storage: Storage.cc, ~line 221", "Capture thread is gone.");
 	indexes->cancelThread();
 }
 
@@ -362,7 +364,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 	// Unfortunately some packets on the link might have MPLS labels
 	// while others don't. That means we need to ask the link-layer if
 	// labels are in place. TODO: Cannot handle MPLS labels just yet
-	//bool have_mpls = false;
+	bool have_mpls = false;
 
 	const unsigned char* idxpacket=packet;
 	// skip VLAN header (related to ethernet frame header) for indexing TODO: look at VLAN header more closely
@@ -375,10 +377,10 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 		// Check for MPLS in VLAN.
         
         // TODO: Cannot handle MPLS labels just yet
-        /*
+        
 		if ( ((idxpacket[2] << 8) + idxpacket[3]) == 0x8847 )
 			have_mpls = true;
-        */
+        
 
 		idxpacket += 4; // Skip the vlan header
 		//pkt_hdr_size = 0;
@@ -393,7 +395,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
     }
 
     // TODO: Cannot handle MPLS labels just yet
-    /*
+    
 	if ( have_mpls )
 		{
 		// Skip the MPLS label stack.
@@ -405,7 +407,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 			idxpacket += 4;
 			}
 		}
-    */
+    
     // DEBUG DEBUG DEBUG
     //tmlog(TM_LOG_NOTE, "addPkt: Storage.cc, ~line 246", "ethernet phase/physical layer complete for packet %lu", header->ts.tv_usec);
 
@@ -694,8 +696,22 @@ tm_time_t Storage::getOldestTimestampDisk() {
 
 
 void Storage::query(QueryRequest *query_req, QueryResult *query_res) {
-	struct timeval t_start, t_end;
-	gettimeofday(&t_start, NULL);
+	//struct timeval t_start, t_end;
+	//gettimeofday(&t_start, NULL);
+
+    #ifdef __APPLE__
+    struct tvalspec t_start, t_end;
+    clock_get_time(CLOCK_MONOTONIC_COARSE, &t_start);
+    #endif
+    #ifdef linux
+    struct timespec t_start, t_end;
+    clock_gettime(CLOCK_MONOTONIC_COARSE, &t_start);
+    #endif
+    #ifdef __FreeBSD__
+    struct timespec t_start, t_end;
+    clock_gettime(CLOCK_MONOTONIC_FAST, &t_start);
+    #endif
+
 	//fprintf(stderr, "Query ID: %d\n",  query_res->getQueryID());
 
     // getIndexByName is from Index.hh from class Indexes
@@ -746,9 +762,26 @@ void Storage::query(QueryRequest *query_req, QueryResult *query_res) {
 	} /* if (subscription requested) */
 
 
-	gettimeofday(&t_end, NULL);
-	tmlog(TM_LOG_NOTE, "query", "%d Done. It took %.2lf seconds", query_res->getQueryID(), 
-		to_tm_time(&t_end)-to_tm_time(&t_start));
+    #ifdef __APPLE__
+    clock_get_time(CLOCK_MONOTONIC_COARSE, &t_end);
+    tmlog(TM_LOG_NOTE, "query", "%d Done. It took %.2lf seconds", query_res->getQueryID(), 
+        valspec_to_tm(&t_end)-valspec_to_tm(&t_start));
+    #endif
+    #ifdef linux
+    clock_gettime(CLOCK_MONOTONIC_COARSE, &t_end);
+    tmlog(TM_LOG_NOTE, "query", "%d Done. It took %.2lf seconds", query_res->getQueryID(),  
+        spec_to_tm(&t_end)-spec_to_tm(&t_start));
+    #endif
+    #ifdef __FreeBSD__
+    clock_gettime(CLOCK_MONOTONIC_FAST, &t_end);
+    tmlog(TM_LOG_NOTE, "query", "%d Done. It took %.2lf seconds", query_res->getQueryID(),  
+        spec_to_tm(&t_end)-spec_to_tm(&t_start));
+    #endif
+
+
+	//gettimeofday(&t_end, NULL);
+	//tmlog(TM_LOG_NOTE, "query", "%d Done. It took %.2lf seconds", query_res->getQueryID(), 
+		//to_tm_time(&t_end)-to_tm_time(&t_start));
 	if (query_res->getUsage() == 0) {
 		/* haven't passed it on to a subscription, delete it */
 		delete query_res;
@@ -756,7 +789,7 @@ void Storage::query(QueryRequest *query_req, QueryResult *query_res) {
 	delete query_req;
 
 	tot_queries_duration+=(uint64_t) ( (t_end.tv_sec-t_start.tv_sec)*1e6
-										+(t_end.tv_usec-t_start.tv_usec) );
+										+(t_end.tv_nsec-t_start.tv_nsec)/1000 );
 	tot_num_queries++;
 }
 
@@ -793,13 +826,29 @@ bool Storage::suspendTimeout(ConnectionID4 cid, bool b) {
 }
 
 bool Storage::setDynClass(IPAddress *ip, int dir, const char *classname) {
-	struct timeval tv;
+	//struct timeval tv;
 	tm_time_t now;
 	Fifo *f;
 	bool retval = true;
 
-	gettimeofday(&tv, NULL);
-	now = to_tm_time(&tv);
+	//gettimeofday(&tv, NULL);
+	//now = to_tm_time(&tv);
+
+        #ifdef __APPLE__
+        struct tvalspec tmptv;
+        clock_get_time(CLOCK_MONOTONIC_COARSE, &tmptv)i;
+        now = valspec_to_tm(&tmptv);
+        #endif
+        #ifdef linux
+        struct timespec tmptv;
+        clock_gettime(CLOCK_MONOTONIC_COARSE, &tmptv);
+        now = spec_to_tm(&tmptv);
+        #endif
+        #ifdef __FreeBSD__
+        struct timespec tmptv;
+        clock_gettime(CLOCK_MONOTONIC_FAST, &tmptv);
+        now = spec_to_tm(&tmptv);
+        #endif
 
 	//tmlog(TM_LOG_DEBUG, "dyn_class", "Setting IP %s to class %s, direction %d",
 			//ip->getStr().c_str(), classname, dir);

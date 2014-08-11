@@ -241,7 +241,7 @@ template <class T>
 // This function writes the key, the time interval of the IndexEntry, the overall time interval of the index,
 // and the keysize in network byte order
 void IndexFiles<T>::writeIndex( IndexHash *ih) {
-	tmlog(TM_LOG_DEBUG, "writeIndex", "beginning to write index");
+	//tmlog(TM_LOG_DEBUG, "writeIndex", "beginning to write index");
     // Object type that identifies a stream and contains the information needed to control 
     // it, including a pointer to its buffer, its position indicator and all its state indicators.
     // It will be used to write index files
@@ -409,7 +409,7 @@ void IndexFiles<T>::aggregate_internal(int level) {
     // vector of IndexFileReader pointers
 	std::vector<IndexFileReader *> ifr_vec;
 	std::vector<IndexFileReader *>::iterator it;
-	struct timeval tv1, tv2, tvtmp;
+	//struct timeval tv1, tvtmp; //tv2, tvtmp;
 	IndexFileReader *greatest;
 	FILE *ofp;
 
@@ -442,7 +442,7 @@ void IndexFiles<T>::aggregate_internal(int level) {
 	ofp = fopen(of_name, "wb");
 
 	//XXX MAybe change to DEUBG level
-	tmlog(TM_LOG_NOTE, "aggregate", "New file is %s\n", of_name);
+	//tmlog(TM_LOG_NOTE, "aggregate", "New file is %s\n", of_name);
 
     // go through the ten files to aggregate
 	for (int i=fn_min; i<fn_min+count; i++) {
@@ -491,8 +491,25 @@ void IndexFiles<T>::aggregate_internal(int level) {
 
 	int i=0;
 	//unsigned int usec = 500*1000; // 500 ms
-	gettimeofday(&tv1, NULL);
-	tvtmp = tv1;
+	//gettimeofday(&tv1, NULL);
+    /*
+    #ifdef __APPLE__
+    struct tvalspec tv1, tvtmp;
+    clock_get_time(CLOCK_MONOTONIC_COARSE, &tv1);
+    tvtmp = tv1;
+    #endif
+    #ifdef linux
+    struct timespec tv1, tvtmp;;
+    clock_gettime(CLOCK_MONOTONIC_COARSE, &tv1);
+    tvtmp = tv1;
+    #endif
+    #ifdef __FreeBSD__
+    struct timespec tv1, tvtmp;
+    clock_gettime(CLOCK_MONOTONIC_FAST, &tv1);
+    tvtmp = tv1;
+    #endif
+    */
+	//tvtmp = tv1;
 	while (!ifr_vec.empty()) {
 		greatest = NULL;
 		for (it = ifr_vec.begin(); it!=ifr_vec.end(); it++) {
@@ -519,18 +536,18 @@ void IndexFiles<T>::aggregate_internal(int level) {
 		/* Give the rest of the tm time to breath */
 		/*
 		if (i%50000 == 0) {
-			gettimeofday(&tv2, NULL);
+			//gettimeofday(&tv2, NULL);
 			if (to_tm_time(&tv2)-to_tm_time(&tv1)<2.5) {
 				log_file->log("aggregate", "Sleeping for file  %s \n", of_name);
 				usleep(usec);
-				gettimeofday(&tv1, NULL);
+				//gettimeofday(&tv1, NULL);
 			}
 		}
 		*/
 	}
-	gettimeofday(&tv2, NULL);
+	//gettimeofday(&tv2, NULL);
 	fclose(ofp);
-	tmlog(TM_LOG_DEBUG, "aggregate", "File %s done. It took %lf sec", of_name, to_tm_time(&tv2)-to_tm_time(&tvtmp));
+	//tmlog(TM_LOG_DEBUG, "aggregate", "File %s done. It took %lf sec", of_name, to_tm_time(&tv2)-to_tm_time(&tvtmp));
 	free(of_name);
 	lock_file_numbers();
 	file_number[level+1]++;

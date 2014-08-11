@@ -121,13 +121,30 @@ void DynClassTable::remove_from_q(DynClass *dc) {
 
 
 void DynClassTable::removeOld() {
-	struct timeval tv;
+	//struct timeval tv;
 	tm_time_t now;
 	DynClass *next, *cur;
 
 	lock();
-	gettimeofday(&tv, NULL);
-	now = to_tm_time(&tv);
+	//gettimeofday(&tv, NULL);
+
+    #ifdef __APPLE__
+    struct tvalspec tmptv;
+    clock_get_time(CLOCK_MONOTONIC_COARSE, &tmptv)i;
+    now = valspec_to_tm(&tmptv);
+    #endif
+    #ifdef linux
+    struct timespec tmptv;
+    clock_gettime(CLOCK_MONOTONIC_COARSE, &tmptv);
+    now = spec_to_tm(&tmptv);
+    #endif
+    #ifdef __FreeBSD__
+    struct timespec tmptv;
+    clock_gettime(CLOCK_MONOTONIC_FAST, &tmptv);
+    now = spec_to_tm(&tmptv);
+    #endif
+
+	//now = to_tm_time(&tv);
 
     // set next to pointer to the entry with the lowest timeout (timeouts are sorted)
 	next = qhead;

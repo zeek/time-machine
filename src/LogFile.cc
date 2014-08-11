@@ -43,6 +43,28 @@ void LogFile::log(const char* ident, const char* fmt, ...) {
 	vsnprintf(msg, MAX_MSG_LEN, fmt, ap);
 	*fs << to_tm_time(&now) << " "
 	<< ident << ": " << msg << std::endl;
+
+        /*
+        #ifdef __APPLE__
+        struct tvalspec tmptv;
+        clock_get_time(CLOCK_MONOTONIC_COARSE, &tmptv)i;
+        *fs << valspec_to_tm(&tmptv) << " "
+        << ident << ": " << msg << std::endl;
+        #endif
+        #ifdef linux
+        struct timespec tmptv;
+        clock_gettime(CLOCK_MONOTONIC_COARSE, &tmptv);
+        *fs << spec_to_tm(&tmptv) << " "
+        << ident << ": " << msg << std::endl;
+        #endif
+        #ifdef __FreeBSD__
+        struct timespec tmptv;
+        clock_gettime(CLOCK_MONOTONIC_FAST, &tmptv);
+        *fs << spec_to_tm(&tmptv) << " "
+        << ident << ": " << msg << std::endl;
+        #endif
+        */
+
 	if (fs->fail()) {
 		fprintf(stderr, "failure writing to log file %s\n", filename.c_str());
 	}

@@ -28,30 +28,74 @@
  */
 
 template <class T>
-Index<T>::Index(tm_time_t d_t, uint64_t hash_size, bool do_disk_index, Storage *storage):
-		input_q(MyQueue(500000)),
+Index<T>::Index(tm_time_t d_t, int hash_size_index, bool do_disk_index, Storage *storage):
+		input_q(MyQueue(1000000)),
 		cap_thread_iat(0), idx_thread_iat(0),
 		d_t(d_t),
 		last_rotated(0),
 		last_updated(0),
 		num_entries_disk(0),
 		storage(storage),
-		rotate_count(0){
-	cur = new IndexHash(hash_size);
-	old = new IndexHash(hash_size);
-	if (do_disk_index)
-		disk_index = new IndexFiles<T>((std::string)conf_main_indexdir, "index_"+T::getIndexNameStatic());
-	else
-		disk_index = NULL;
-	pthread_mutex_init(&hash_lock_mutex, NULL);
-	pthread_mutex_init(&queue_lock_mutex, NULL);
-	pthread_cond_init(&queue_cond, NULL);
+		rotate_count(0) 
+        {
+        /*
+            primes[0] = 1;
+            primes[1] = 2;
+            primes[2] = 3;
+            primes[4] = 7;
+            primes[5] = 13;
+            primes[6] = 29;
+            primes[7] = 53;
+            primes[8] = 97;
+            primes[9] = 193;
+            primes[10] = 389;
+            primes[11] = 769;
+            primes[12] = 1543;
+            primes[13] = 3079;
+            primes[14] = 6151;
+            primes[15] = 12289;
+            primes[16] = 24593;
+            primes[17] = 49157;
+            primes[18] = 98317;
+            primes[19] = 196613;
+            primes[20] = 393241;
+            primes[21] = 786433;
+            primes[22] = 1572869;
+            primes[23] = 3145739;
+            primes[24] = 6291469;
+            primes[25] = 12582917;
+            primes[26] = 25165843;
+            primes[27] = 50331653;
+            primes[28] = 100663319;
+            primes[29] = 201326611;
+            primes[30] = 402653189;
+            primes[31] = 805306457;
+            primes[32] = 1610612741;
+            primes[33] = 3221225479;
+            primes[34] = 6442450967;
+            primes[35] = 12884901947;
+        */
+        /*        
+        primes = {1, 2, 3, 7, 13, 29, 53, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157, \
+                             98317, 196613, 393241, 786433, 1572869, 3145739, 6291469, \
+                             12582917, 25165843, 50331653, 100663319, 201326611, 402653189, \
+                             805306457, 1610612741, 3221225479, 6442450967, 12884901947};
+        */
+	    cur = new IndexHash(hash_size_index);
+	    old = new IndexHash(hash_size_index);
+	    if (do_disk_index)
+		    disk_index = new IndexFiles<T>((std::string)conf_main_indexdir, "index_"+T::getIndexNameStatic());
+	    else
+		    disk_index = NULL;
+	    pthread_mutex_init(&hash_lock_mutex, NULL);
+	    pthread_mutex_init(&queue_lock_mutex, NULL);
+	    pthread_cond_init(&queue_cond, NULL);
 //--- Now done by Storage	pthread_create(&maintainer_thread, NULL, start_index_thread, this);
 }
 
 template <class T>
 Index<T>::~Index() {
-	tmlog(TM_LOG_DEBUG, T::getIndexNameStatic().c_str(), "Index<T>::~Index");
+	//tmlog(TM_LOG_DEBUG, T::getIndexNameStatic().c_str(), "Index<T>::~Index");
 
 	pthread_mutex_destroy(&hash_lock_mutex);
 	pthread_mutex_destroy(&queue_lock_mutex);
@@ -75,11 +119,11 @@ Index<T>::~Index() {
 
 template <class T>
 void Index<T>::cancelThread() {
-	tmlog(TM_LOG_DEBUG, T::getIndexNameStatic().c_str(), "Canceling Index Thread.");
+	//tmlog(TM_LOG_DEBUG, T::getIndexNameStatic().c_str(), "Canceling Index Thread.");
 	pthread_cancel(maintainer_thread);
-	tmlog(TM_LOG_DEBUG, T::getIndexNameStatic().c_str(), "   Canceled. Now Joining.");
+	//tmlog(TM_LOG_DEBUG, T::getIndexNameStatic().c_str(), "   Canceled. Now Joining.");
 	pthread_join(maintainer_thread, NULL);
-	tmlog(TM_LOG_DEBUG, T::getIndexNameStatic().c_str(), "   Joined.");
+	//tmlog(TM_LOG_DEBUG, T::getIndexNameStatic().c_str(), "   Joined.");
 }
 
 /* Called by the capture thread */
@@ -88,7 +132,7 @@ void Index<T>::addPkt(const pcap_pkthdr* header, const u_char* packet) {
 
     // set the last and now to the timestamp of the pcap packet header
 	static tm_time_t last = to_tm_time(&header->ts);
-	tm_time_t now=to_tm_time(&header->ts);
+	tm_time_t now = last; //to_tm_time(&header->ts);
 
     // IndexField pointer
 	T* curentry;
@@ -147,7 +191,8 @@ void Index<T>::addPkt(const pcap_pkthdr* header, const u_char* packet) {
  */
 template <class T>
 void Index<T>::addEntry(IndexField *iqe) {
-	int hash_size;
+	uint64_t hash_size; 
+    int hash_size_index;
 	IndexHash *tmp;
     // if last_rotated is less than a milisecond
 	if (last_rotated<1e-3)
@@ -240,7 +285,8 @@ void Index<T>::addEntry(IndexField *iqe) {
             // the number of entries are like the actual number of entries, including the entries in the collisions lists
             // However, the number of buckets, I guess like the infrastructure of the Hash table without collision lists
             // still remains.
-			hash_size = cur->getNumBuckets();
+			hash_size_index = cur->getNumBucketsIndex();
+            hash_size = cur->getNumBuckets();
             // cur currently has 0 entries
             //tmlog(TM_LOG_NOTE, "Index.cc", "the number of buckets in the current (formerly old) hash table is: %d", hash_size);
             //tmlog(TM_LOG_NOTE, "Index.cc", "the number of entries in the current (formerly old) hash table is: %d", cur->getNumEntries());
@@ -248,19 +294,37 @@ void Index<T>::addEntry(IndexField *iqe) {
 			/* Balance number of hash buckets */
 			/* Hash has twice as many buckets as entries. shrink.
 			 * yes, we want to compare the size of cur with the # entries of old (formerly new hash table) */
-            // 
-			if (hash_size > 2*old->getNumEntries()) { 
+           
+		    if (hash_size > 2.05*old->getNumEntries()) {
+              //if (hash_size < old->getNumEntries()) { 
                 // Note that we delete cur - this means we delete the formerly old hash table, which has been written to disk
                 //tmlog(TM_LOG_NOTE, "Index.cc", "we are about to delete the current (formerly old) hash table");
 				delete cur;
-				cur = new IndexHash(hash_size/2);
+                if (hash_size_index > 1)
+                {
+                    //tmlog(TM_LOG_ERROR, "Index.cc:addEntry", "we are decreasing hash table size to %d and the number of entries in old hash is %d with %d buckets", hash_size_index - 1, old->getNumEntries(), old->getNumBuckets()); 
+				    cur = new IndexHash(hash_size_index - 1);
+                }
 			}
+            
 			/* Hash has half as many buckets than entries. enlarge */
-			else if (2*hash_size < old->getNumEntries()) {
+            else if (1.95 * hash_size < old->getNumEntries()) {
+	    	//else if (1.9*hash_size < old->getNumEntries()) {
+            //else if (hash_size > old->getNumEntries()) {
                 // Note that we delete cur - this means we delete the formerly old hash table, which has been written to disk
                 // for notes about the formerly current, now old hash table, look at the the end of this function defintion for the comments
 				delete cur;
-				cur = new IndexHash(2*hash_size);
+                if (hash_size_index < 41)
+                {
+                    //tmlog(TM_LOG_ERROR, "Index.cc:addEntry", "we are increasing hash table size to %d and the number of entries is %d with %d buckets ", hash_size_index + 2, old->getNumEntries(), old->getNumBuckets());
+				    cur = new IndexHash(hash_size_index + 2);
+                }
+                /*
+                else
+                {
+                    cur = new IndexHash(
+                }
+                */
 			}
             
             // set last_rotated to be equal to the (from run() ) popped IndexField pointer last element's time stamp

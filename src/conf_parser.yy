@@ -335,23 +335,33 @@ void conf_add_index(const char* name, bool do_disk_index) {
 		conferror(msg);
 		return;
 	}
+        /*
+        uint64_t primes[] = {53, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157, /
+                             98317, 196613, 393241, 786433, 1572869, 3145739, 6291469, /
+                             12582917, 25165843, 50331653, 100663319, 201326611, 402653189, /
+                             805306457, 1610612741, 3221225479, 6442450967, 12884901947};
+        */
 	/* TODO: We really should do index configuration with a regitry that knows 
 	   of all potential IndexTypes .... */
 	if (ConnectionIF4::getIndexNameStatic() == name) {
-		IndexType *idx = new Index<ConnectionIF4>(30, int(250000), do_disk_index, NULL);
+		//IndexType *idx = new Index<ConnectionIF4>(30, int(250000), do_disk_index, NULL);
+        IndexType *idx = new Index<ConnectionIF4>(30, 15, do_disk_index, NULL);
 		conf_parser_storageConf->indexes->addIndex(idx);
 	}
 	else if (ConnectionIF3::getIndexNameStatic() == name) {
-		IndexType *idx = new Index<ConnectionIF3>(30, int(250000), do_disk_index, NULL);
+		//IndexType *idx = new Index<ConnectionIF3>(30, int(250000), do_disk_index, NULL);
+        IndexType *idx = new Index<ConnectionIF3>(30, 15, do_disk_index, NULL);
 		conf_parser_storageConf->indexes->addIndex(idx);
 	}
 
 	else if (ConnectionIF2::getIndexNameStatic() == name) {
-		IndexType *idx = new Index<ConnectionIF2>(30, int(250000), do_disk_index, NULL);
+		//IndexType *idx = new Index<ConnectionIF2>(30, int(250000), do_disk_index, NULL);
+        IndexType *idx = new Index<ConnectionIF2>(30, 15, do_disk_index, NULL);
 		conf_parser_storageConf->indexes->addIndex(idx);
 	}
 	else if (IPAddress::getIndexNameStatic() == name) {
-		IndexType *idx = new Index<IPAddress>(30, int(250000), do_disk_index, NULL);
+		//IndexType *idx = new Index<IPAddress>(30, int(250000), do_disk_index, NULL);
+        IndexType *idx = new Index<IPAddress>(30, 15, do_disk_index, NULL);
 		conf_parser_storageConf->indexes->addIndex(idx);
 	}
 	else {

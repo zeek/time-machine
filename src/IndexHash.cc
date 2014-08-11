@@ -1,11 +1,60 @@
 #include "IndexHash.hh"
 #include <iostream>
 
-IndexHash::IndexHash(size_t size) {
-	htable = new hash_t[size];
+static const uint64_t IndexHash_primes[] = {1, 2, 3, 7, 13, 29, 53, 97, 193, 389, 769, 1543, 3079, 6151, \
+                                            12289, 24593, 49517, 98317, 196613, 393241, 786433, 1572869, \
+                                            3145739, 6291469, 12582917, 25165843, 50331653, 100663319, \
+                                            201326611, 402653189, 805306457, 1610612741, 3221225479, \
+                                            6442450967, 12884901947, 25769803897, 51539607793, 103079215583, \
+                                            206158431161, 412316862319, 824633724619, 1649267449241};
+
+const uint64_t* IndexHash::Primes = IndexHash_primes; 
+
+IndexHash::IndexHash(int size_index) {
+    /*
+    primes[0] = 1;
+    primes[1] = 2;
+    primes[2] = 3;
+    primes[3] = 7;
+    primes[4] = 13;
+    primes[5] = 29;
+    primes[6] = 53;
+    primes[7] = 97;
+    primes[8]] = 193;
+    primes[9] = 389;
+    primes[10] = 769;
+    primes[11] = 1543;
+    primes[12] = 3079;
+    primes[13] = 6151;
+    primes[14] = 12289;
+    primes[15] = 24593;
+    primes[16] = 49157;
+    primes[17] = 98317;
+    primes[18] = 196613;
+    primes[19] = 393241;
+    primes[20] = 786433;
+    primes[21] = 1572869;
+    primes[22] = 3145739;
+    primes[23] = 6291469;
+    primes[24] = 12582917;
+    primes[25] = 25165843;
+    primes[26] = 50331653;
+    primes[27] = 100663319;
+    primes[28] = 201326611;
+    //primes[29] = 402653189;
+    //primes[30] = 805306457;
+    //primes[31] = 1610612741;
+    //primes[32] = 3221225479;
+    //primes[33] = 6442450967;
+    //primes[34] = 12884901947;
+    */
 	numEntries = 0;
-	numBuckets = size;
-	for (unsigned i=0; i<size; i++)
+	numBucketsIndex = size_index;
+    numBuckets = Primes[size_index];
+
+    htable = new hash_t[numBuckets];
+
+	for (unsigned i=0; i<numBuckets; i++)
 		htable[i] = NULL;
 	troot = tnext = tprev = tcur = NULL;
 }
@@ -101,6 +150,38 @@ IndexEntry* IndexHash::lookup( IndexField* key) {
 
     cur = htable[key->hash()%numBuckets];
 
+    /*
+    tmlog(TM_LOG_NOTE, "IndexHash:Lookup", "huh, number of buckets is shit %d and the key is %d", numBuckets, key->hash());
+
+    if (numBuckets > 0)
+    {
+
+        tmlog(TM_LOG_NOTE, "IndexHash:Lookup", "huh, can we do modular shit, %d", key->hash()%numBuckets);
+
+        cur = htable[key->hash()%numBuckets];
+
+        while (cur != NULL) {
+            //tmlog(TM_LOG_NOTE, "idxhash", "going through the keys: %d", *cur->getKey()->getConstKeyPtr());
+            if (*key == *cur->getKey()) {
+            //if (*(key->getConstKeyPtr()) == *(cur->getKey()->getConstKeyPtr())) {
+                //tmlog(TM_LOG_NOTE, "idxhash", "the same key was found. the key is %d", *(key->getConstKeyPtr()));
+                break;
+            }
+            cur = cur->col_next;
+        }
+        //tmlog(TM_LOG_NOTE, "idx_hash", "this entry has key: %d", *(key->getConstKeyPtr()));
+        //if (cur == NULL)
+        //    tmlog(TM_LOG_NOTE, "idxhash", "cur is NULL, which means that this entry is allegedly unique");
+        return cur;
+
+    }
+    else
+    {
+        tmlog(TM_LOG_ERROR, "IndexHash:Lookup", "numBuckets <= 0 and is %d", numBuckets);
+        return NULL;
+    }
+    */
+   
     while (cur != NULL) {
         //tmlog(TM_LOG_NOTE, "idxhash", "going through the keys: %d", *cur->getKey()->getConstKeyPtr());
         if (*key == *cur->getKey()) {
@@ -114,6 +195,7 @@ IndexEntry* IndexHash::lookup( IndexField* key) {
     //if (cur == NULL)
     //    tmlog(TM_LOG_NOTE, "idxhash", "cur is NULL, which means that this entry is allegedly unique");
     return cur;
+    
 }
 
 void IndexHash::add(IndexField *key, IndexEntry *ie) {
@@ -235,12 +317,15 @@ void IndexHash::add(IndexField *key, IndexEntry *ie) {
 
 	    unsigned hval;
 
+        //if (numBuckets > 0)
+        //{
+
 	    hval = key->hash()%numBuckets;
 
 	    ie->col_next = htable[hval];
 	    ie->col_prev = NULL;
 	    htable[hval] = ie;
-
+        //}
         //ie->key->hash_key = hval;
 
         //tmlog(TM_LOG_NOTE, "idxhash", "this entry for which we have foudn the bucket value %d for has this timestamp %f and form %s", hval, key->ts, key->getStr().c_str());

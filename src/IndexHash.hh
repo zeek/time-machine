@@ -37,11 +37,12 @@ class IndexHash {
 	public:
 		//typedef Hash<IndexField *, IndexEntry *> hash_t;
 		typedef IndexEntry* hash_t;
-		IndexHash(size_t size);
+		IndexHash(int size);
 		~IndexHash();
 
 		int clear();
 		
+        int getNumBucketsIndex() {return numBucketsIndex; };
 		int getNumEntries() { return numEntries; };
 		int getNumBuckets() { return numBuckets; };
 
@@ -62,8 +63,11 @@ class IndexHash {
 
 	protected:
 		hash_t *htable;
-		unsigned numBuckets;
+        int numBucketsIndex;
+		uint64 numBuckets; //unsigned numBuckets; //uint64_t numBuckets;
 		unsigned numEntries;
+
+        static const uint64_t* Primes; //uint64_t primes[35];
 
 		IndexEntry *troot; // root of the tree
 		IndexEntry *tnext, *tprev, *tcur; // for tree traversal

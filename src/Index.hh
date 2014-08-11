@@ -221,7 +221,7 @@ template <class T> class Index: public IndexType {
 public:
 	// rot_offset is a (small) offset to delay the rotation and thus the writing of
 	// the index to disk. This should be used 
-	Index(tm_time_t d_t, uint64_t hash_size, bool do_disk_index, Storage * storage);
+	Index(tm_time_t d_t, int hash_size, bool do_disk_index, Storage * storage);
 	~Index();
 	void cancelThread();
 	void lookupMem(IntervalSet* set, IndexField* key);
@@ -285,6 +285,11 @@ protected:
 
 	int qlen;
 
+    //uint64_t primes[35]; // = {1, 2, 3, 7, 13, 29, 53, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157, \
+                             98317, 196613, 393241, 786433, 1572869, 3145739, 6291469, \
+                             12582917, 25165843, 50331653, 100663319, 201326611, 402653189, \
+                             805306457, 1610612741, 3221225479, 6442450967, 12884901947};
+
 };
 
 
@@ -295,11 +300,13 @@ protected:
  * I.e. Indexes will take care of deallocation the storage for
  * Index.
  */
-extern unsigned had_to_wait;
+//extern unsigned had_to_wait;
+extern unsigned num_of_entries;
+
 class Indexes {
 public:
 	Indexes() {
-		last_write_ts = 0;
+		//last_write_ts = 0;
 		pthread_mutex_init(&disk_write_mutex, NULL);
 	}
 	~Indexes() {
@@ -336,19 +343,91 @@ public:
 		return NULL;
 	};
 	int trylockDiskWrite() {
-		struct timeval tmptv;
-		gettimeofday(&tmptv, NULL);
+		//struct timeval tmptv;
+        /*
+        #ifdef __APPLE__
+        struct tvalspec tmptv;
+        clock_get_time(CLOCK_MONOTONIC_COARSE, &tmptv)i;
+        if (valspec_to_tm(&tmptv) - last_write_ts < IDX_MIN_TIME_BETWEEN_WRITES) {
+                had_to_wait++;
+                num_of_entries++;
+                return EBUSY;
+        }
+        #endif
+        #ifdef linux
+        struct timespec tmptv;
+        clock_gettime(CLOCK_MONOTONIC_COARSE, &tmptv);
+        if (spec_to_tm(&tmptv) - last_write_ts < IDX_MIN_TIME_BETWEEN_WRITES) {
+        */
+                /*
+                printf("The time part in nanosecods is: %ld\n", tmptv.tv_nsec);
+                int rc;
+
+                rc = clock_getres(CLOCK_MONOTONIC, &tmptv);
+                if (!rc)
+                    tmlog(TM_LOG_ERROR, "trylockDiskWrite", "CLOCK_MONOTONIC: %ldns", tmptv.tv_nsec);
+
+                rc = clock_getres(CLOCK_MONOTONIC_COARSE, &tmptv);
+                if (!rc)
+                    tmlog(TM_LOG_ERROR, "trylockDiskWrite", "CLOCK_MONOTONIC_COARSE: %ldns", tmptv.tv_nsec);
+                //printf("The time part in nanosecods is: %ld", tmptv.tv_nsec);
+                */
+                /*
+                had_to_wait++;
+                num_of_entries++;
+                return EBUSY;
+        }
+        #endif
+        #ifdef __FreeBSD__
+        struct timespec tmptv;
+        clock_gettime(CLOCK_MONOTONIC_FAST, &tmptv);
+        if (spec_to_tm(&tmptv) - last_write_ts < IDX_MIN_TIME_BETWEEN_WRITES) {
+                had_to_wait++;
+                num_of_entries++;
+                return EBUSY;
+        }
+        #endif
+        */ 
+		//gettimeofday(&tmptv, NULL);
+                /*
 		if (to_tm_time(&tmptv) - last_write_ts < IDX_MIN_TIME_BETWEEN_WRITES) {
 			had_to_wait++;
 			return EBUSY;
 		}
+                */
         // returns 0 if lock was successfully achieved
+
+        if (num_of_entries < 500000)
+        {
+            num_of_entries++;
+            return EBUSY;
+        }
+
+        //tmlog(TM_LOG_ERROR, "trylockDiskWrite", "the number of entries befor the attempt to lock is %ld", num_of_entries);
+        num_of_entries = 0;
 		return pthread_mutex_trylock(&disk_write_mutex);
 	}
 	void unlockDiskWrite() {
-		struct timeval tmptv;
-		gettimeofday(&tmptv, NULL);
-		last_write_ts = to_tm_time(&tmptv);
+		//struct timeval tmptv;
+		//gettimeofday(&tmptv, NULL);
+		//last_write_ts = to_tm_time(&tmptv);
+        /*
+        #ifdef __APPLE__
+        struct tvalspec tmptv;
+        clock_get_time(CLOCK_MONOTONIC_COARSE, &tmptv)i;
+        last_write_ts = valspec_to_tm(&tmptv);
+        #endif
+        #ifdef linux
+        struct timespec tmptv;
+        clock_gettime(CLOCK_MONOTONIC_COARSE, &tmptv);
+        last_write_ts = spec_to_tm(&tmptv);
+        #endif
+        #ifdef __FreeBSD__
+        struct timespec tmptv;
+        clock_gettime(CLOCK_MONOTONIC_FAST, &tmptv);
+        last_write_ts = spec_to_tm(&tmptv);
+        #endif
+        */
 		pthread_mutex_unlock(&disk_write_mutex);
 	}
 	std::list<IndexType*>::iterator begin() {
@@ -360,7 +439,7 @@ public:
 protected:
 	std::list<IndexType*> indexes;
 	pthread_mutex_t disk_write_mutex;
-	tm_time_t last_write_ts;
+	//tm_time_t last_write_ts;
 };
 
 
