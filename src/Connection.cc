@@ -888,17 +888,17 @@ std::string ConnectionID4::getStr() const {
 	    << (UCP(d_ip)[3] & 0xff)
 	    << ":"
 */
-        << (UCP(key.ip1)[0] & 0xff) << "."
-        << (UCP(key.ip1)[1] & 0xff) << "."
-        << (UCP(key.ip1)[2] & 0xff) << "."
-        << (UCP(key.ip1)[3] & 0xff)
+        << (UCP(key.ip1)[12] & 0xff) << "."
+        << (UCP(key.ip1)[13] & 0xff) << "."
+        << (UCP(key.ip1)[14] & 0xff) << "."
+        << (UCP(key.ip1)[15] & 0xff)
         << ":"
         << ntohs(get_port1())
         << " - "
-        << (UCP(key.ip2)[0] & 0xff) << "."
-        << (UCP(key.ip2)[1] & 0xff) << "."
-        << (UCP(key.ip2)[2] & 0xff) << "."
-        << (UCP(key.ip2)[3] & 0xff)
+        << (UCP(key.ip2)[12] & 0xff) << "."
+        << (UCP(key.ip2)[13] & 0xff) << "."
+        << (UCP(key.ip2)[14] & 0xff) << "."
+        << (UCP(key.ip2)[15] & 0xff)
         << ":"
 
 
@@ -966,15 +966,15 @@ std::string ConnectionID3::getStr() const {
         //memcpy(d_ip, key.ip2.s6_addr, 16);
 
 	    ss << " ConnectionID3 "
-	    << (UCP(key.ip1)[0] & 0xff) << "."
-	    << (UCP(key.ip1)[1] & 0xff) << "."
-	    << (UCP(key.ip1)[2] & 0xff) << "."
-	    << (UCP(key.ip1)[3] & 0xff)
+	    << (UCP(key.ip1)[12] & 0xff) << "."
+	    << (UCP(key.ip1)[13] & 0xff) << "."
+	    << (UCP(key.ip1)[14] & 0xff) << "."
+	    << (UCP(key.ip1)[15] & 0xff)
 	    << " - "
-	    << (UCP(key.ip2)[0] & 0xff) << "."
-	    << (UCP(key.ip2)[1] & 0xff) << "."
-	    << (UCP(key.ip2)[2] & 0xff) << "."
-	    << (UCP(key.ip2)[3] & 0xff)
+	    << (UCP(key.ip2)[12] & 0xff) << "."
+	    << (UCP(key.ip2)[13] & 0xff) << "."
+	    << (UCP(key.ip2)[14] & 0xff) << "."
+	    << (UCP(key.ip2)[15] & 0xff)
 	    << ":"
 	    << get_port();
 	    return ss.str();
@@ -1060,15 +1060,15 @@ std::string ConnectionID2::getStr() const {
         //memcpy(d_ip, key.ip2.s6_addr, 16);
 
 	    ss << " ConnectionID2 "
-	    << (UCP(key.ip1)[0] & 0xff) << "."
-	    << (UCP(key.ip1)[1] & 0xff) << "."
-	    << (UCP(key.ip1)[2] & 0xff) << "."
-	    << (UCP(key.ip1)[3] & 0xff)
+	    << (UCP(key.ip1)[12] & 0xff) << "."
+	    << (UCP(key.ip1)[13] & 0xff) << "."
+	    << (UCP(key.ip1)[14] & 0xff) << "."
+	    << (UCP(key.ip1)[15] & 0xff)
 	    << " - "
-	    << (UCP(key.ip2)[0] & 0xff) << "."
-	    << (UCP(key.ip2)[1] & 0xff) << "."
-	    << (UCP(key.ip2)[2] & 0xff) << "."
-	    << (UCP(key.ip2)[3] & 0xff);
+	    << (UCP(key.ip2)[12] & 0xff) << "."
+	    << (UCP(key.ip2)[13] & 0xff) << "."
+	    << (UCP(key.ip2)[14] & 0xff) << "."
+	    << (UCP(key.ip2)[15] & 0xff);
 	    return ss.str();
     }
 

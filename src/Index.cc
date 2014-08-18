@@ -83,6 +83,12 @@ Index<T>::Index(tm_time_t d_t, int hash_size_index, bool do_disk_index, Storage 
         */
 	    cur = new IndexHash(hash_size_index);
 	    old = new IndexHash(hash_size_index);
+        
+        if (chdir(conf_main_workdir)) {
+            fprintf(stderr, "cannot chdir to %s\n", conf_main_workdir);
+            //return(1);
+        }
+        
 	    if (do_disk_index)
 		    disk_index = new IndexFiles<T>((std::string)conf_main_indexdir, "index_"+T::getIndexNameStatic());
 	    else

@@ -82,7 +82,9 @@ set(timemachine_SRCS
 
 set(CMAKE_CXX_FLAGS "-g -Wall")
 
-set (EXTRA_LIBS ${EXTRA_LIBS} -lssl -lcrypto)
+set(CMAKE_C_FLAGS "-DPCAPNAV_DEBUG")
+
+set (EXTRA_LIBS ${EXTRA_LIBS} -lssl -lcrypto -DPCAPNAV_DEBUG)
 
 set(tm_query_benchmark_SRCS
     tm_query_benchmark.cc

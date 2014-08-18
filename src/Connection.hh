@@ -153,6 +153,9 @@ public:
 	uint16_t get_port2() const {
 		return key.port2;
 	}
+    int get_version() const {
+        return v6.version;
+    }
 
 	//  bool get_is_canonified() const { return v.is_canonified; }
 	/*
@@ -329,6 +332,11 @@ public:
 	uint16_t get_port() const {
 		return key.port2;
 	}
+
+    int get_version() const {
+        return v6.version;
+    }
+
 	/*
 	bool get_is_canonified() const { return v.is_canonified; }
 	uint32_t get_s_ip() const {
@@ -497,6 +505,10 @@ public:
 	const unsigned char* get_ip2() const {
 		return key.ip2;
 	}
+    int get_version() const {
+        return v6.version;
+    }
+
 
 	/*
 	bool get_is_canonified() const { return v.is_canonified; }

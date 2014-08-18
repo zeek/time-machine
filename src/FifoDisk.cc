@@ -45,8 +45,8 @@
  */
 
 FifoDisk::FifoDisk(const std::string& classname, uint64_t size,
-				   uint64_t file_size, pcap_t* pcap_handle):
-		classname(classname), size(size), file_size(file_size),
+				   uint64_t file_size, pcap_t* pcap_handle, const char* classdir):
+		classname(classname), classdir(classdir), size(size), file_size(file_size),
 		tot_bytes(0), tot_pkts(0),
 		file_number(0), pcap_handle(pcap_handle),
 held_bytes(0), held_pkts(0), oldestTimestamp(0), newestTimestamp(0), queries(0) {
@@ -120,6 +120,13 @@ void FifoDisk::addPkt(const pkt_ptr p) {
                 // do a safe sprintf to create new_file_name
 				snprintf(new_file_name, strsz, "%s_%.6f",
 						 classname.c_str(), newestTimestamp);
+
+                if (chdir(classdir)) {
+                    fprintf(stderr, "cannot class chdir to %s\n", classdir);
+                    //return;
+                }
+
+
                 // push back the newest disk file into the list of files
 				files.push_back(new FifoDiskFile(new_file_name, pcap_handle));
 
@@ -246,7 +253,7 @@ void FifoDiskFile::addPkt(pkt_ptr p) {
 		   p+sizeof(struct pcap_pkthdr));  // packet
 }
 
-uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet *set) {
+uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet *set, const char* classdirectory) {
 	uint64_t matches = 0;
 	uint64_t scanned_packets=0;
 	ConnectionID4 *c_id;
@@ -255,19 +262,68 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
 	int res;
 	int intcnt=0;
 	int first_pkt_for_this_int;
+    //pcapnav_t *ph;
 
+
+    /*
+        if (chdir(conf_main_workdir)) {
+                fprintf(stderr, "cannot class chdir to %s\n", conf_main_workdir);
+                return(1);
+        }
+    */
 	// FIXME: Protect the pcap_dumper_handle from capture thread!!
 	if (is_open)
 		flush();
 
-	//char errbuf[PCAP_ERRBUF_SIZE];
+	char errbuf[PCAP_ERRBUF_SIZE];
 
-	pcapnav_t *ph=pcapnav_open_offline(filename.c_str());
+    printf("The file name we are querying in is %s\n", filename.c_str());
+
+    if (chdir(classdirectory)) {
+        fprintf(stderr, "cannot class(Fifo:query) chdir to %s\n", classdirectory);
+        //return;
+    }
+
+    char path[70];
+
+    char errbufnav[PCAP_ERRBUF_SIZE];
+
+    printf("The directory that we are in is %s\n", getcwd(path, 70));
+/*
+    if (chdir(classdirectory)) {
+        fprintf(stderr, "cannot class(Fifo:query) chdir to %s\n", classdirectory);
+        //return;
+    }
+*/
+
+    /*
+
+    pcap_t *ph_debug = pcap_open_offline(filename.c_str(), errbuf);
+
+    if (ph_debug == NULL) {
+        fprintf(stderr, "Couldn't open file %s: %s\n", filename.c_str(), errbuf);
+        //exit(EXIT_FAILURE);
+    }
+
+    pcap_close(ph_debug);
+    */
+
+	//ph->pcap=pcap_open_offline(filename.c_str(), errbufnav);
+
+    pcapnav_t *ph = pcapnav_open_offline_tm(filename.c_str(), classdirectory);    
+
 	if (!ph) {
+        /*
 		char *pcap_errstr = pcapnav_geterr(ph);
 		tmlog(TM_LOG_ERROR, "query", "%d FifoDiskFile::query: could not open file %s: %s",
 				qres->getQueryID(), filename.c_str(), pcap_errstr);
+        */
+        
+        tmlog(TM_LOG_ERROR, "query", "%d FifoDiskFile::query: could not open file %s",
+                qres->getQueryID(), filename.c_str());
+
 	} else {
+    
 		struct pcap_pkthdr hdr;
 		const u_char *pkt;
 
@@ -373,10 +429,12 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
                     tmlog(TM_LOG_ERROR, "Bad IP address: %s", s2);
                     }
                 */
-                //tmlog(TM_LOG_NOTE, "FifoDisk.cc: query", "the query packet has source ip address: %s and dst ip address %s and header time stamp %lu and %lu", \
+
+                
+                //tmlog(TM_LOG_ERROR, "FifoDisk.cc: query", "the query packet has source ip address: %s and dst ip address %s and header time stamp %lu and %lu", \
                 str1, str2, hdr.ts.tv_sec, hdr.ts.tv_usec);
-                //tmlog(TM_LOG_NOTE, "FifoDisk.cc:query", "the query parameters are that it has a time interval from %f to %f, a hash of %lu, a timestamp of %f, and a form of %s", \
-                //qreq->getT0(), qreq->getT1(), qreq->getField()->hash(), qreq->getField()->ts, qreq->getField()->getStr().c_str());
+                //tmlog(TM_LOG_ERROR, "FifoDisk.cc:query", "the query parameters are that it has a time interval from %f to %f, a hash of %lu, a timestamp of %f, and a form of %s", \
+                qreq->getT0(), qreq->getT1(), qreq->getField()->hash(), qreq->getField()->ts, qreq->getField()->getStr().c_str());
 				if (qreq->matchPkt(&hdr, pkt))  {
 					matches++;
 					qres->sendPkt(&hdr, pkt);

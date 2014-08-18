@@ -28,7 +28,7 @@
 #define USE_MALLINFO
 #endif
 #include <sys/ioctl.h>
-#include <gperftools/profiler.h>
+//#include <gperftools/profiler.h>
 
 
 #ifdef USE_BROCCOLI
@@ -117,6 +117,7 @@ int conf_main_log_interval=60;
 int conf_main_log_level=20;
 const char* conf_main_workdir="./";
 const char* conf_main_indexdir="./";
+//const char* conf_classdir = "./";
 const char* conf_main_queryfiledir="./";
 const char* conf_main_logfile_name="timemachine.log";
 const char* conf_main_bro_connect_str=NULL;
@@ -673,6 +674,12 @@ void *statisticslog_thread(void* arg)
 		fifos = storage->getFifos();
 		for(std::list<Fifo*>::iterator i=fifos.begin(); i!=fifos.end(); i++) 
         {
+            /*
+            if (chdir((*i)->getClassdir())) {
+                fprintf(stderr, "cannot class chdir to %s\n", (*i)->getClassdir());
+                //return;
+            }
+            */
             
 			snprintf(s, LOG_STRING_SIZE, "%.2lf %s %s", to_tm_time(&now),  (*i)->getClassname().c_str(), (*i)->getStatsStr().c_str());
             /*
@@ -685,7 +692,12 @@ void *statisticslog_thread(void* arg)
             */
 			classes_log_file->logPlain(s);
 		}
-
+        /*
+        if (chdir(conf_main_workdir)) {
+                fprintf(stderr, "cannot chdir to %s\n", conf_main_workdir);
+                //return(1);
+        }
+        */
 		indexes = storage->getIndexes();
 		for (std::list<IndexType*>::iterator i=indexes->begin(); i!=indexes->end(); i++) 
         {
@@ -808,7 +820,7 @@ void usage() {
 int
 main(int argc, char** argv) {
 
-        ProfilerStart("/home/neto/development-tmV2-naoki/timemachine_results/profile/blah.prof");
+        //ProfilerStart("/home/neto/data/profile/blah.prof");
 	const char *conffile="@BRO_ETC_INSTALL_DIR@/timemachine.cfg";
 	struct sigaction exit_action;
 	int i;
@@ -1046,7 +1058,7 @@ main(int argc, char** argv) {
 				pause();
 		}
 
-        ProfilerStop();
+        //ProfilerStop();
         delete stats_log_file;
         delete classes_log_file;
         delete index_log_file; 

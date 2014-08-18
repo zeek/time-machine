@@ -30,18 +30,20 @@ Fifo::~Fifo() {
 }
 
 
-Fifo::Fifo(const std::string& classname, uint64_t fifo_mem_sz, uint64_t fifo_disk_sz, pcap_t* pcap_handle) {
+Fifo::Fifo(const std::string& classname, uint64_t fifo_mem_sz, uint64_t fifo_disk_sz, pcap_t* pcap_handle, const char* classdir) {
 	init();
 	this->classname=classname;
 	this->fifo_mem_sz=fifo_mem_sz;
 	this->fifo_disk_sz=fifo_disk_sz;
 	this->ph=pcap_handle;
+    this->classdir = classdir;
 	this->started=false;
 }
 
 
 void Fifo::init() {
 	classname="default";
+        classdir=conf_main_workdir;
 	filter="";
 	fifo_mem_sz=5000000;
 	fifo_disk_sz=50000000;
@@ -72,7 +74,7 @@ void Fifo::start() {
     // fifo_disk_sz is the size of buffer block in bytes
     // fifo_disk_filesz is the size of the file
     // ph is the handler
-	fd=new FifoDisk(classname, fifo_disk_sz, fifo_disk_filesz, ph);
+	fd=new FifoDisk(classname, fifo_disk_sz, fifo_disk_filesz, ph, classdir);
     
     // setting eviction handler for FifoMem object
 	fm->setEvictionHandler(this);
@@ -250,6 +252,15 @@ const FifoDisk* Fifo::getFd() {
 uint64_t Fifo::query(QueryRequest *qreq, QueryResult *qres,
 				 IntervalSet *interval_set) {
 	uint64_t matches = 0;
+    /*
+        if (chdir(classdir)) {
+            fprintf(stderr, "cannot class(Fifo:query) chdir to %s\n", classdir);
+            //return;
+        }
+    */ 
+
+    printf("The class name is: %s\n", classname.c_str());
+    printf("The directory the classes are in is: %s\n", classdir); 
 	FifoDiskFile *cur_file;
 
 	if (!qreq->isMemOnly()) {
@@ -270,7 +281,20 @@ uint64_t Fifo::query(QueryRequest *qreq, QueryResult *qres,
 					cur_file->getFilename().c_str());
 			if ( (qreq->getT1()+1e-3 >= cur_file->getOldestTimestamp()) &&
 					(qreq->getT0()-1e-3 <= cur_file->getNewestTimestamp()) ) {
-				matches+= cur_file->query(qreq, qres, interval_set);
+ 
+                if (chdir(classdir)) {
+                    fprintf(stderr, "cannot class(Fifo:query) chdir to %s\n", classdir);
+                    //return;
+                }
+
+                char path[70];
+
+                char errbufnav[PCAP_ERRBUF_SIZE];
+
+                printf("The directory for Fifo that we are in is %s\n", getcwd(path, 70));
+
+
+				matches+= cur_file->query(qreq, qres, interval_set, classdir);
 			}
 		}
 		fd->decQueryInProgress();

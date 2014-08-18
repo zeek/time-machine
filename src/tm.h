@@ -7,7 +7,7 @@
 
 #include "types.h"
 
-// #define QUERY_RACE_PROTECT
+//#define QUERY_RACE_PROTECT 1
 
 
 /* If TM_HEAVY_DEBUG is defined, quite some expensive code with asserts,

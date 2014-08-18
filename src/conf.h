@@ -13,6 +13,7 @@ extern int conf_main_log_interval;
 extern int conf_main_log_level;
 extern const char* conf_main_workdir;
 extern const char* conf_main_indexdir;
+//extern const char* conf_classdir;
 extern const char* conf_main_logfile_name;
 extern const char* conf_main_bro_connect_str;
 extern int conf_main_console;

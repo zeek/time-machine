@@ -67,6 +67,7 @@
 %token <s> TOK_ID
 %token <ipaddr> TOK_IPADDRESS;
 %token TOK_CLASS TOK_FILTER TOK_MAIN TOK_LOG_INTERVAL TOK_LOG_LEVEL TOK_DEVICE
+%token TOK_CLASSDIR
 %token TOK_LOGFILE TOK_WORKDIR TOK_QUERYFILEDIR TOK_INDEXDIR
 %token TOK_READ_TRACEFILE TOK_BRO_CONNECT_STR
 %token TOK_MEM TOK_DISK TOK_K TOK_M TOK_G TOK_CUTOFF TOK_PRECEDENCE
@@ -185,6 +186,12 @@ classoption:
 		new_class();
 		newclass->setDynTimeout($2);
 		$$=newclass;
+	}
+    | TOK_CLASSDIR TOK_STRING {
+		new_class();
+        //conf_classdir = ($2);
+        newclass->setClassdir($2);
+        $$=newclass;
 	}
 	;
 size:

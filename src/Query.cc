@@ -41,8 +41,12 @@ bool QueryRequest::matchPkt(const pkt_ptr p) {
 }
 
 bool QueryRequest::matchPkt(struct pcap_pkthdr *hdr, const u_char *pkt) {
-	tmlog(TM_LOG_NOTE, "QueryRequest: matchPkt(struct pcap_pkthdr, u_char pkt)", "determine if a packet matches");
+	//tmlog(TM_LOG_ERROR, "QueryRequest: matchPkt(struct pcap_pkthdr, u_char pkt)", "determine if a packet matches");
+        //printf("QueryRequest:matchPkt, determine if a packet matches");
 	if (!have_bpf) compileBPF();
+
+
+        //printf("QueryRequest:matchPkt, determine if a packet matchesi after compileBPF()\n");
 
     uint16_t ether_type=ntohs(ETHERNET(pkt)->ether_type);
     // ETHERTYPE_IP is EtherType 0x800, for IPv4 addresses
@@ -110,15 +114,16 @@ bool QueryRequest::matchPkt(struct pcap_pkthdr *hdr, const u_char *pkt) {
 		}
     */
 
-
-    tmlog(TM_LOG_NOTE, "QueryRequest: matchPkt(2 args)", "The value of the bpf_filter in query request  for packet %lu and %lu is %lu", hdr->ts.tv_sec, hdr->ts.tv_usec, bpf_filter(fp.bf_insns, (unsigned char*)(pkt), hdr->len, hdr->caplen));
+    //printf("QueryRequest: matchPkt, the value of the bpf_filter in query request for packet %lu and %lu is%lu", hdr->ts.tv_sec, hdr->ts.tv_usec, bpf_filter(fp.bf_insns, (unsigned char*)(pkt), hdr->len, hdr->caplen));
+    //tmlog(TM_LOG_ERROR, "QueryRequest: matchPkt(2 args)", "The value of the bpf_filter in query request  for packet %lu and %lu is %lu", hdr->ts.tv_sec, hdr->ts.tv_usec, bpf_filter(fp.bf_insns, (unsigned char*)(pkt), hdr->len, hdr->caplen));
+    
 	return bpf_filter(fp.bf_insns, (u_char *)(pkt),
 					  hdr->len,
 					  hdr->caplen);
 }
 
 void QueryRequest::compileBPF() {
-#define MAX_BPF_STR_LEN 2048 
+#define MAX_BPF_STR_LEN 2048 //8192 
 	/*
 	how long?
 	 
@@ -142,6 +147,11 @@ void QueryRequest::compileBPF() {
 QueryResultFile::QueryResultFile(int queryID, const std::string& filename, int linktype, int snaplen) 
 	: QueryResult(queryID)
 {
+       if (chdir(conf_main_workdir)) {
+           fprintf(stderr, "cannot chdir to %s\n", conf_main_workdir);
+           //return(1);
+        }
+
 	ph = pcap_open_dead(linktype, snaplen);
 	f = new FifoDiskFile(conf_main_queryfiledir+std::string("/")+filename, ph);
 }

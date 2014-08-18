@@ -38,6 +38,7 @@ NEWLINE \n
 "]"		 return RBRACK;
 ";"		 return SEMICOLON;
 "class"		 return TOK_CLASS;
+"classdir"	 return TOK_CLASSDIR;
 "mem"		 return TOK_MEM;
 "disk"		 return TOK_DISK;
 "filesize"	 return TOK_FILESIZE;

@@ -47,6 +47,12 @@ my_fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
  * class IndexFilesReader
  */
 inline IndexFileReader::IndexFileReader(char *fn) : fp(NULL), fname(fn), eof(false) {
+
+        if (chdir(conf_main_workdir)) {
+            fprintf(stderr, "cannot chdir to %s\n", conf_main_workdir);
+            //return(1);
+        }
+
 	fp = fopen(fn, "rb"); // read as binary 
 	if (fp == NULL) {
 		//TODO: Decent error handling
@@ -245,6 +251,14 @@ void IndexFiles<T>::writeIndex( IndexHash *ih) {
     // Object type that identifies a stream and contains the information needed to control 
     // it, including a pointer to its buffer, its position indicator and all its state indicators.
     // It will be used to write index files
+
+    /*
+    if (chdir(conf_main_workdir)) {
+        fprintf(stderr, "cannot chdir to %s\n", conf_main_workdir);
+        //return(1);
+    }
+    */
+
 	FILE *fp;
 	char *new_file_name;
 	IndexEntry *ie; // Hash table is made up of IndexEntry's, an IndexEntry is the data object containing 
@@ -262,6 +276,12 @@ void IndexFiles<T>::writeIndex( IndexHash *ih) {
 	unlock_file_numbers();
     // open the file as a binary file containing that file name with writing privileges
     // w = writing, b = open as binary file
+    if (chdir(conf_main_workdir)) {
+        fprintf(stderr, "cannot chdir to %s\n", conf_main_workdir);
+        //return(1);
+    }
+
+
 	fp = fopen(new_file_name, "wb");
     // if the file could not be opened, log error and return
 	if (fp == NULL) {
@@ -406,6 +426,11 @@ void IndexFiles<T>::aggregate(tm_time_t oldestTimestampDisk) {
  */
 template <class T>
 void IndexFiles<T>::aggregate_internal(int level) {
+    if (chdir(conf_main_workdir)) {
+            fprintf(stderr, "cannot chdir to %s\n", conf_main_workdir);
+            //return(1);
+    }    
+
     // vector of IndexFileReader pointers
 	std::vector<IndexFileReader *> ifr_vec;
 	std::vector<IndexFileReader *>::iterator it;

@@ -37,7 +37,7 @@ class Fifo: FifoMemEvictionHandler {
 public:
 	Fifo();
 	Fifo(const std::string& classname, uint64_t fifo_mem_sz,
-		 uint64_t fifo_disk_sz, pcap_t*);
+		 uint64_t fifo_disk_sz, pcap_t*, const char* classdir);
 	void start();
 	virtual ~Fifo();
 	uint64_t pktEviction();
@@ -66,6 +66,12 @@ public:
 	std::string getClassname() {
 		return classname;
 	}
+    void setClassdir(const char* s) {
+        classdir=s;
+    }
+    const char* getClassdir() {
+        return classdir;
+    }
 	void setFifoMemSz(uint64_t s) {
 		fifo_mem_sz=s;
 	}
@@ -117,6 +123,7 @@ protected:
 	uint64_t cutoff;
 	std::string classname;
 	std::string filter;
+    const char* classdir; 
 	uint64_t fifo_mem_sz;
 	uint64_t fifo_disk_sz;
 	uint64_t fifo_disk_filesz;

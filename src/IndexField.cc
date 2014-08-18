@@ -226,7 +226,7 @@ std::string IPAddress::getStr() const
     
 	if ( GetFamily() == IPv4 )
 		{
-        tmlog(TM_LOG_NOTE, "IPAddress: getStr()", "IPAddress, IPv4");
+        tmlog(TM_LOG_ERROR, "IPAddress: getStr()", "IPAddress, IPv4");
 		char s[INET_ADDRSTRLEN];
 
 		if ( ! bro_inet_ntop(AF_INET, &ipv6_address.s6_addr[12], s, INET_ADDRSTRLEN) ) //bro_inet_ntop(AF_INET, &ipv6_address.s6_addr[12], s, INET_ADDRSTRLEN) )
@@ -237,7 +237,7 @@ std::string IPAddress::getStr() const
 	else
 		{
         
-        tmlog(TM_LOG_NOTE, "IPAddress: getStr()", "IPAddress, IPv6");
+        tmlog(TM_LOG_ERROR, "IPAddress: getStr()", "IPAddress, IPv6");
 		char s[INET6_ADDRSTRLEN];
 
 		if ( ! bro_inet_ntop(AF_INET6, ipv6_address.s6_addr, s, INET6_ADDRSTRLEN) ) //bro_inet_ntop(AF_INET6, ipv6_address.s6_addr, s, INET6_ADDRSTRLEN) )
@@ -654,44 +654,88 @@ IndexField* ConnectionIF4::parseQuery(const char *query) {
 
 void ConnectionIF4:: ip_to_str(const unsigned char* ip, char *str, int len) const {
 //#define UCP(x) ((unsigned char *)&(x))
-	str[0] = '\0';
+        str[0] = '\0';
     /*
-	snprintf(str, len, "%d.%d.%d.%d",
-			 UCP(ip)[0] & 0xff,
-			 UCP(ip)[1] & 0xff,
-			 UCP(ip)[2] & 0xff,
-			 UCP(ip)[3] & 0xff);
+        snprintf(str, len, "%d.%d.%d.%d",
+                         UCP(ip)[0] & 0xff,
+                         UCP(ip)[1] & 0xff,
+                         UCP(ip)[2] & 0xff,
+                         UCP(ip)[3] & 0xff);
     */
+    if (c_id.get_version() == 4)
+    {
+        snprintf(str, len, "%d.%d.%d.%d", ip[12] & 0xff, ip[13] & 0xff, ip[14] & 0xff, ip[15] & 0xff);
+        //printf("The string is %s\n", str);
+        //printf("All of the elements of ip are: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n", ip[0], ip[1], ip[2], ip[3], ip[4], ip[5], ip[6], ip[7], ip[8], ip[9], ip[10], ip[11], ip[12], ip[13], ip[14], ip[15]);
+    }
 
-    snprintf(str, len, "%s", ip);
+    else
+    {
+        snprintf(str, len, "%s", ip);
+    }
+
 }
 
 void ConnectionIF4::getBPFStr(char *str, int max_str_len) const {
 
-	char s_ip_str[TM_IP_STR_SIZE];
-	char d_ip_str[TM_IP_STR_SIZE];
-	uint32_t s_port;
-	uint32_t d_port;
-	/*
-	if (c_id.get_is_canonified()) {
-	  s_ip=c_id.get_ip2();
-	  d_ip=c_id.get_ip1();
-	  s_port=c_id.get_port2();
-	  d_port=c_id.get_port1();
-	} else {
-	*/
-	ip_to_str(c_id.get_ip1(), s_ip_str, sizeof(s_ip_str));
-	ip_to_str(c_id.get_ip2(), d_ip_str, sizeof(d_ip_str));
-	s_port=c_id.get_port1();
-	d_port=c_id.get_port2();
-	/*  }  */
+    if (c_id.get_version() == 4)
+    {
+	    char s_ip_str[TM_IP_STR_SIZE];
+	    char d_ip_str[TM_IP_STR_SIZE];
+	    uint32_t s_port;
+	    uint32_t d_port;
+	    /*
+	    if (c_id.get_is_canonified()) {
+	      s_ip=c_id.get_ip2();
+	      d_ip=c_id.get_ip1();
+	      s_port=c_id.get_port2();
+	      d_port=c_id.get_port1();
+	      } else {
+	      */
+	    ip_to_str(c_id.get_ip1(), s_ip_str, sizeof(s_ip_str));
+	    ip_to_str(c_id.get_ip2(), d_ip_str, sizeof(d_ip_str));
+	    s_port=c_id.get_port1();
+	    d_port=c_id.get_port2();
+	      /*  }  */
 
-	snprintf(str, max_str_len,
-			 "host %s and port %d and host %s and port %d",
-			 s_ip_str, 
-			 ntohs(s_port),
-			 d_ip_str,
-			 ntohs(d_port));
+        //printf("The host %s and pord %d and host %s and port %d", s_ip_str, ntohs(s_port), d_ip_str, ntohs(d_port)); 
+
+	    snprintf(str, max_str_len,
+		      	 "host %s and port %d and host %s and port %d",
+			     s_ip_str, 
+			     ntohs(s_port),
+			     d_ip_str,
+			     ntohs(d_port));
+    }
+
+    else
+    {
+        char s_ip6_str[TM_IP_STR_SIZE];
+        char d_ip6_str[TM_IP_STR_SIZE];
+        uint32_t s6_port;
+        uint32_t d6_port;
+        /*
+        if (c_id.get_is_canonified()) {
+          s_ip=c_id.get_ip2();
+          d_ip=c_id.get_ip1();
+          s_port=c_id.get_port2();
+          d_port=c_id.get_port1();
+          } else {
+          */
+        ip_to_str(c_id.get_ip1(), s_ip6_str, sizeof(s_ip6_str));
+        ip_to_str(c_id.get_ip2(), d_ip6_str, sizeof(d_ip6_str));
+        s6_port=c_id.get_port1();
+        d6_port=c_id.get_port2();
+          /*  }  */
+
+        snprintf(str, max_str_len,
+                 "host %s and port %d and host %s and port %d",
+                 s_ip6_str,
+                 ntohs(s6_port),
+                 d_ip6_str,
+                 ntohs(d6_port));
+
+    }
 }
 
 
@@ -762,32 +806,63 @@ IndexField* ConnectionIF3::parseQuery(const char *query) {
 
 void ConnectionIF3:: ip_to_str(const unsigned char* ip, char *str, int len) const {
 //#define UCP(x) ((unsigned char *)&(x))
-	str[0] = '\0';
+        str[0] = '\0';
     /*
-	snprintf(str, len, "%d.%d.%d.%d",
-			 UCP(ip)[0] & 0xff,
-			 UCP(ip)[1] & 0xff,
-			 UCP(ip)[2] & 0xff,
-			 UCP(ip)[3] & 0xff);
+        snprintf(str, len, "%d.%d.%d.%d",
+                         UCP(ip)[0] & 0xff,
+                         UCP(ip)[1] & 0xff,
+                         UCP(ip)[2] & 0xff,
+                         UCP(ip)[3] & 0xff);
     */
+    if (c_id.get_version() == 4)
+    {
+        snprintf(str, len, "%d.%d.%d.%d", ip[12] & 0xff, ip[13] & 0xff, ip[14] & 0xff, ip[15] & 0xff);
+        //printf("The string is %s\n", str);
+        //printf("All of the elements of ip are: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n", ip[0], ip[1], ip[2], ip[3], ip[4], ip[5], ip[6], ip[7], ip[8], ip[9], ip[10], ip[11], ip[12], ip[13], ip[14], ip[15]);
+    }
 
-    snprintf(str, len, "%s", ip);
+    else
+    {
+        snprintf(str, len, "%s", ip);
+    }
 }
-
 
 void ConnectionIF3::getBPFStr(char *str, int max_str_len) const {
 
-	char ip1_str[TM_IP_STR_SIZE];
-	char ip2_str[TM_IP_STR_SIZE];
+    if (c_id.get_version() == 4)
+    {
+	    char ip1_str[TM_IP_STR_SIZE];
+	    char ip2_str[TM_IP_STR_SIZE];
 
-	ip_to_str(c_id.get_ip1(), ip1_str, sizeof(ip1_str));
-	ip_to_str(c_id.get_ip2(), ip2_str, sizeof(ip2_str));
+	    ip_to_str(c_id.get_ip1(), ip1_str, sizeof(ip1_str));
+	    ip_to_str(c_id.get_ip2(), ip2_str, sizeof(ip2_str));
 
-	snprintf(str, max_str_len,
-			 "(src host %s and dst host %s and dst port %d) or "
-			 "(dst host %s and src host %s and src port %d)",
-			 ip1_str, ip2_str, ntohs(c_id.get_port()),
-			 ip1_str, ip2_str, ntohs(c_id.get_port()));
+        //printf("The src host %s and dst host %s and dst port %d or dst host %s and src host %s and src port %d", ip1_str, ip2_str, ntohs(c_id.get_port()), ip1_str, ip2_str, ntohs(c_id.get_port()));
+
+	    snprintf(str, max_str_len,
+		     	 "(src host %s and dst host %s and dst port %d) or "
+			     "(dst host %s and src host %s and src port %d)",
+			     ip1_str, ip2_str, ntohs(c_id.get_port()),
+			     ip1_str, ip2_str, ntohs(c_id.get_port()));
+    }
+
+    else
+    {
+        char ip61_str[TM_IP_STR_SIZE];
+        char ip62_str[TM_IP_STR_SIZE];
+
+        ip_to_str(c_id.get_ip1(), ip61_str, sizeof(ip61_str));
+        ip_to_str(c_id.get_ip2(), ip62_str, sizeof(ip62_str));
+
+        //printf("The src host %s and dst host %s and dst port %d or dst host %s and src host %s and src port %d", ip61_str, ip62_str, ntohs(c_id.get_port()), ip61_str, ip62_str, ntohs(c_id.get_port()));
+
+        snprintf(str, max_str_len,
+                 "(src host %s and dst host %s and dst port %d) or "
+                 "(dst host %s and src host %s and src port %d)",
+                 ip61_str, ip62_str, ntohs(c_id.get_port()),
+                 ip61_str, ip62_str, ntohs(c_id.get_port()));
+
+    }
 }
 
 
@@ -856,23 +931,54 @@ void ConnectionIF2:: ip_to_str(const unsigned char* ip, char *str, int len) cons
 			 UCP(ip)[2] & 0xff,
 			 UCP(ip)[3] & 0xff);
     */
+    if (c_id.get_version() == 4)
+    {
+        snprintf(str, len, "%d.%d.%d.%d", ip[12] & 0xff, ip[13] & 0xff, ip[14] & 0xff, ip[15] & 0xff);
+        //printf("The string is %s\n", str);
+        //printf("All of the elements of ip are: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n", ip[0], ip[1], ip[2], ip[3], ip[4], ip[5], ip[6], ip[7], ip[8], ip[9], ip[10], ip[11], ip[12], ip[13], ip[14], ip[15]);
+    }
 
-    snprintf(str, len, "%s", ip);
+    else
+    {
+        snprintf(str, len, "%s", ip);
+    }
 }
 
 
 void ConnectionIF2::getBPFStr(char *str, int max_str_len) const {
 
-	char s_ip_str[TM_IP_STR_SIZE];
-	char d_ip_str[TM_IP_STR_SIZE];
 
-	ip_to_str(c_id.get_ip1(), s_ip_str, sizeof(s_ip_str));
-	ip_to_str(c_id.get_ip2(), d_ip_str, sizeof(d_ip_str));
+    if (c_id.get_version() == 4)
+    {
+        char s_ip_str[TM_IP_STR_SIZE];
+        char d_ip_str[TM_IP_STR_SIZE];
+
+        ip_to_str(c_id.get_ip1(), s_ip_str, 16);
+        ip_to_str(c_id.get_ip2(), d_ip_str, 16);
 
 
-	snprintf(str, max_str_len,
-			 "host %s and host %s",
-			 s_ip_str, d_ip_str);
+        tmlog(TM_LOG_ERROR, "ConnectionIF2::getBPFStr()", "we are in connectionIF2::getBPFStr()");
+
+        snprintf(str, max_str_len,
+                 "host %s and host %s",
+                 s_ip_str, d_ip_str);
+
+    }
+    else
+    {
+	    char s_ip6_str[TM_IP_STR_SIZE];
+	    char d_ip6_str[TM_IP_STR_SIZE];
+
+	    ip_to_str(c_id.get_ip1(), s_ip6_str, 16);
+	    ip_to_str(c_id.get_ip2(), d_ip6_str, 16);
+
+
+        tmlog(TM_LOG_ERROR, "ConnectionIF2::getBPFStr()", "we are in connectionIF2::getBPFStr()");
+
+	    snprintf(str, max_str_len,
+		    	 "host %s and host %s",
+			     s_ip6_str, d_ip6_str);
+    }
 }
 
 
