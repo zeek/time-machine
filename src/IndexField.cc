@@ -25,21 +25,40 @@ static std::string pattern_ip ("(\\d+\\.\\d+\\.\\d+\\.\\d+)"); // TODO: figure o
 
 //static std::string pattern_ip6 ("(\\w+:\\w+:\\w+:\\w+:\\w+:\\w+:\\w+:\\w+)"); // I am using word from re2, perl regular expression for the alphanumeric part
 
-static std::string pattern_ip6 ("\\[(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\\]");
+//static std::string alphanum14 ("[0-9a-fA-F]{1,4}");
+
+static std::string pattern_ip6 ("\\[([0-9a-fA-F]{1,4}:{7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?:(?::[0-9a-fA-F]{1,4}){1,6})|:(?:(?:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(?::[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(?:ffff(?::0{1,4}){0,1}:){0,1}(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])|(?:[0-9a-fA-F]{1,4}:){1,4}:(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\\]");
 // stolen from stackoverflow http://stackoverflow.com/questions/53497/regular-expression-that-matches-valid-ipv6-addresses
+
+//static std::string pattern_ip6 ("\\[([0-9a-fA-F]{1,4}:{7,7}[0-9a-fA-F]{1,4}|[0-9a-fA-F]{1,4}:{1,7}:|[0-9a-fA-F]{1,4}:{1,6}:[0-9a-fA-F]{1,4}|[0-9a-fA-F]{1,4}:{1,5}:[0-9a-fA-F]{1,4}{1,2}|[0-9a-fA-F]{1,4}:{1,4}:[0-9a-fA-F]{1,4}{1,3}|[0-9a-fA-F]{1,4}:{1,3}:[0-9a-fA-F]{1,4}{1,4}|[0-9a-fA-F]{1,4}:{1,2}:[0-9a-fA-F]{1,4}{1,5}|[0-9a-fA-F]{1,4}::[0-9a-fA-F]{1,4}{1,6}|::[0-9a-fA-F]{1,4}{1,7}|:|fe80::[0-9a-fA-F]{0,4}{0,4}%[0-9a-zA-Z]{1,}|::ffff:0{1,4}{0,1}:{0,1}25[0-5]|2[0-4]|1{0,1}[0-9]{0,1}[0-9].{3,3}25[0-5]|2[0-4]|1{0,1}[0-9]{0,1}[0-9]|[0-9a-fA-F]{1,4}:{1,4}:25[0-5]|2[0-4]|1{0,1}[0-9]{0,1}[0-9].{3,3}25[0-5]|2[0-4]|1{0,1}[0-9]{0,1}[0-9])\\]");
+
+
+//static std::string pattern_ip6 ("(/^(?>(?>([a-f0-9]{1,4})(?>:(?1)){7}|(?!(?:.*[a-f0-9](?>:|$)){8,})((?1)(?>:(?1)){0,6})?::(?2)?)|(?>(?>(?1)(?>:(?1)){5}:|(?!(?:.*[a-f0-9]:){6,})(?3)?::(?>((?1)(?>:(?1)){0,4}):)?)?(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(?>\.(?4)){3}))$/iD)");
+
+//static std::string pattern_ip6 ("("["({HEX}:){7}{HEX}"]")|("["0x{HEX}({HEX}|:)*"::"({HEX}|:)*"]")|("["({HEX}|:)*"::"({HEX}|:)*"]")|("["({HEX}|:)*"::"({HEX}|:)])");
+
+//static std::string pattern_ip6 ("(\\[\\w+\\])");
+
+//static std::string pattern_ip6_first ("(\\[\\w+::\\w+:\\w+:\\w+:\\w+\\])");
+//static std::string pattern_ip6_second ("(\\[\\w+::\\w+\\])");
 
 static std::string pattern_ipport ("(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+)");
 
 // brackets are necessary when specifying a port number of IPv6
 //static std::string pattern_ip6port ("([\\w+:\\w+:\\w+:\\w+:\\w+:\\w+:\\w+:\\w+]):(\\d+)"); // IPv6 addresses that have a port are of the form []:#
 
-static std::string pattern_ip6port ("\\[(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\\]:(\\d+)");
-// stolen from stackoverflow http://stackoverflow.com/questions/53497/regular-expression-that-
+//static std::string pattern_ip6port ("(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])):(\\d+)");
+
+//static std::string pattern_ip6port ("\\[([0-9a-fA-F]{1,4}:{7,7}[0-9a-fA-F]{1,4}|[0-9a-fA-F]{1,4}:{1,7}:|[0-9a-fA-F]{1,4}:{1,6}:[0-9a-fA-F]{1,4}|[0-9a-fA-F]{1,4}:{1,5}:[0-9a-fA-F]{1,4}{1,2}|[0-9a-fA-F]{1,4}:{1,4}:[0-9a-fA-F]{1,4}{1,3}|[0-9a-fA-F]{1,4}:{1,3}:[0-9a-fA-F]{1,4}{1,4}|[0-9a-fA-F]{1,4}:{1,2}:[0-9a-fA-F]{1,4}{1,5}|[0-9a-fA-F]{1,4}::[0-9a-fA-F]{1,4}{1,6}|::[0-9a-fA-F]{1,4}{1,7}|:|fe80::[0-9a-fA-F]{0,4}{0,4}%[0-9a-zA-Z]{1,}|::ffff:0{1,4}{0,1}:{0,1}25[0-5]|2[0-4]|1{0,1}[0-9]{0,1}[0-9].{3,3}25[0-5]|2[0-4]|1{0,1}[0-9]{0,1}[0-9]|[0-9a-fA-F]{1,4}:{1,4}:25[0-5]|2[0-4]|1{0,1}[0-9]{0,1}[0-9].{3,3}25[0-5]|2[0-4]|1{0,1}[0-9]{0,1}[0-9])\\]:(\\d+)");
+
+static std::string pattern_ip6port ("\\[([0-9a-fA-F]{1,4}:{7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?:(?::[0-9a-fA-F]{1,4}){1,6})|:(?:(?:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(?::[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(?:ffff(?::0{1,4}){0,1}:){0,1}(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])|(?:[0-9a-fA-F]{1,4}:){1,4}:(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\\]:(\\d+)");
+// stolen from stackoverflow http://stacikoverflow.com/questions/53497/regular-expression-that-
 
 
 /* size of an ip addr in dottet decimal as string: 4x3digits, 
   3 dots, terminating nul byte */
 #define TM_IP_STR_SIZE 16
+#define TM_IP6_STR_SIZE 40
 /*
 static void ip_to_str(const unsigned char* ip, char *str, int len) {
 //#define UCP(x) ((unsigned char *)&(x))
@@ -608,12 +627,13 @@ std::list<ConnectionIF4*> ConnectionIF4::genKeys(const u_char* packet) {
 
 //FIXME: merge this somehow with ConnectionID4::parse() !!!!
 IndexField* ConnectionIF4::parseQuery(const char *query) {
-	std::string protostr, src_ip, dst_ip;
+	//std::string protostr, src_ip, dst_ip;
+    std::string protostr, src_ip, dst_ip;
 	unsigned src_port, dst_port;
 	proto_t proto;
 
 
-	if (!RE2::FullMatch(query, re, &protostr, &src_ip, &src_port, &dst_ip, &dst_port) && !RE2::FullMatch(query, re6, &protostr, &src_ip, &src_port, &dst_ip, &dst_port))
+	if (!RE2::FullMatch(query, re) && !RE2::FullMatch(query, re6))
 		return NULL;
 
 	/*
@@ -631,7 +651,32 @@ IndexField* ConnectionIF4::parseQuery(const char *query) {
 	    return new ConnectionIF4(proto, inet_addr(src_ip.c_str()), htons(src_port),
 			    inet_addr(dst_ip.c_str()), htons(dst_port));
     }
-    
+    else if (RE2::FullMatch(query, re6, &protostr, &src_ip, &src_port, &dst_ip, &dst_port))
+    {
+        struct sockaddr_in6 src_ip6;
+        struct sockaddr_in6 dst_ip6;
+        //char str[INET6_ADDRSTRLEN];
+
+        printf("entering FullMatch for conn3, ipv6\n");
+
+        if (protostr == std::string("tcp"))
+            proto = IPPROTO_TCP;
+        else
+            proto = IPPROTO_UDP;
+
+
+        printf("the query in parsequery is %s\n", query);
+
+        printf("for IPv6, the protocol is <%s> and source ip is <%s> and the dest ip is <%s>i and the source port is <%u> and the destination port is <%u>\n", protostr.c_str(), src_ip.c_str(), dst_ip.c_str(), src_port, dst_port);
+
+        //intf("for IPv6, The source ip is <%s> and the dest ip is <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s>\n", src_ip.c_str(), 
+        // store this IP address in sa:
+        inet_pton(AF_INET6, src_ip.c_str(), &(src_ip6.sin6_addr));
+        inet_pton(AF_INET6, dst_ip.c_str(), &(dst_ip6.sin6_addr));
+        return new ConnectionIF4(proto, src_ip6.sin6_addr.s6_addr, htons(src_port), dst_ip6.sin6_addr.s6_addr, htons(dst_port));
+
+    }
+ 
     else
     {
         //unsigned char src_ip6[16];
@@ -710,10 +755,31 @@ void ConnectionIF4::getBPFStr(char *str, int max_str_len) const {
 
     else
     {
+        printf("the query is for %s\n", c_id.getStr().c_str());
+
+        printf("The size of the first ip address is %lu\n", sizeof(c_id.get_ip1()));
+        printf("The size of the second ip address is %lu\n", sizeof(c_id.get_ip2()));
+
+        //ip_to_str(c_id.get_ip1_addr(), s_ip6_str, 16); //sizeof(s_ip6_str));
+        //ip_to_str(c_id.get_ip2_addr(), d_ip6_str, 16); //sizeof(d_ip6_str));
+
+
+        char s_ip6_str[INET6_ADDRSTRLEN];
+        char d_ip6_str[INET6_ADDRSTRLEN];
+
+        inet_ntop(AF_INET6, c_id.get_ip1_addr(), s_ip6_str, INET6_ADDRSTRLEN);
+        inet_ntop(AF_INET6, c_id.get_ip2_addr(), d_ip6_str, INET6_ADDRSTRLEN);
+
+        //tmlog(TM_LOG_ERROR, "ConnectionIF2::getBPFStr()", "we are in connectionIF2::getBPFStr()");
+
+        printf("host %s and host %s\n", s_ip6_str, d_ip6_str);
+
+        /*
         char s_ip6_str[TM_IP_STR_SIZE];
         char d_ip6_str[TM_IP_STR_SIZE];
         uint32_t s6_port;
         uint32_t d6_port;
+        */
         /*
         if (c_id.get_is_canonified()) {
           s_ip=c_id.get_ip2();
@@ -722,18 +788,20 @@ void ConnectionIF4::getBPFStr(char *str, int max_str_len) const {
           d_port=c_id.get_port1();
           } else {
           */
+        /*
         ip_to_str(c_id.get_ip1(), s_ip6_str, sizeof(s_ip6_str));
         ip_to_str(c_id.get_ip2(), d_ip6_str, sizeof(d_ip6_str));
         s6_port=c_id.get_port1();
         d6_port=c_id.get_port2();
+        */
           /*  }  */
 
         snprintf(str, max_str_len,
                  "host %s and port %d and host %s and port %d",
                  s_ip6_str,
-                 ntohs(s6_port),
+                 ntohs(c_id.get_port1()),
                  d_ip6_str,
-                 ntohs(d6_port));
+                 ntohs(c_id.get_port2()));
 
     }
 }
@@ -769,27 +837,65 @@ IndexField* ConnectionIF3::parseQuery(const char *query) {
 	std::string protostr, src_ip, dst_ip;
 	unsigned port;
 	proto_t proto;
+
+    printf("Entering parQuery method\n");
 	
-	if (!RE2::FullMatch(query, re, &protostr, &src_ip, &dst_ip, &port) && !RE2::FullMatch(query, re6, &protostr, &src_ip, &dst_ip, &port))
-		return NULL;
+	if (!RE2::FullMatch(query, re) && !RE2::FullMatch(query, re6))
+    {
+        tmlog(TM_LOG_ERROR,"parseQuery", "Cannot do full match!");
+
+        return NULL;
+    }
 
 	/*
 	fprintf(stderr, "%s\nConnectionIF3::parseQuery:  %s ===> <%s> <%s> <%s> <%u>\n", 
 				pattern_connection3.c_str(), query, protostr.c_str(), 
 				src_ip.c_str(), dst_ip.c_str(), port);
 	*/
+    /*
 	if (protostr == std::string("tcp"))
 		proto = IPPROTO_TCP;
 	else 
 		proto = IPPROTO_UDP;
-
+    */
     if (RE2::FullMatch(query, re, &protostr, &src_ip, &dst_ip, &port))
     {
+        if (protostr == std::string("tcp"))
+            proto = IPPROTO_TCP;
+        else
+            proto = IPPROTO_UDP;
+
 		return new ConnectionIF3(proto, inet_addr(src_ip.c_str()), 
 			    inet_addr(dst_ip.c_str()), htons(port));
     }
+    else if (RE2::FullMatch(query, re6, &protostr, &src_ip, &dst_ip, &port))
+    {
+        struct sockaddr_in6 src_ip6;
+        struct sockaddr_in6 dst_ip6;
+        //char str[INET6_ADDRSTRLEN];
+
+        printf("entering FullMatch for conn3, ipv6\n");
+
+        if (protostr == std::string("tcp"))
+            proto = IPPROTO_TCP;
+        else
+            proto = IPPROTO_UDP;
+
+
+        printf("the query in parsequery is %s\n", query);
+
+        printf("for IPv6, the protocol is <%s> and source ip is <%s> and the dest ip is <%s>i and the port is <%u>\n", protostr.c_str(), src_ip.c_str(), dst_ip.c_str(), port);
+
+        //intf("for IPv6, The source ip is <%s> and the dest ip is <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s>\n", src_ip.c_str(), 
+        // store this IP address in sa:
+        inet_pton(AF_INET6, src_ip.c_str(), &(src_ip6.sin6_addr));
+        inet_pton(AF_INET6, dst_ip.c_str(), &(dst_ip6.sin6_addr));
+        return new ConnectionIF3(proto, src_ip6.sin6_addr.s6_addr, dst_ip6.sin6_addr.s6_addr, htons(port));
+        
+    }
     else
     {
+        printf("wut we are not suppose to be here!\n");
         //unsigned char src_ip6[16];
         //unsigned char dst_ip6[16];
 
@@ -804,7 +910,7 @@ IndexField* ConnectionIF3::parseQuery(const char *query) {
     }
 }
 
-void ConnectionIF3:: ip_to_str(const unsigned char* ip, char *str, int len) const {
+void ConnectionIF3:: ip4_to_str(const unsigned char* ip, char *str, int len) const {
 //#define UCP(x) ((unsigned char *)&(x))
         str[0] = '\0';
     /*
@@ -814,17 +920,17 @@ void ConnectionIF3:: ip_to_str(const unsigned char* ip, char *str, int len) cons
                          UCP(ip)[2] & 0xff,
                          UCP(ip)[3] & 0xff);
     */
-    if (c_id.get_version() == 4)
-    {
+    //if (c_id.get_version() == 4)
+    //{
         snprintf(str, len, "%d.%d.%d.%d", ip[12] & 0xff, ip[13] & 0xff, ip[14] & 0xff, ip[15] & 0xff);
         //printf("The string is %s\n", str);
         //printf("All of the elements of ip are: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n", ip[0], ip[1], ip[2], ip[3], ip[4], ip[5], ip[6], ip[7], ip[8], ip[9], ip[10], ip[11], ip[12], ip[13], ip[14], ip[15]);
-    }
+    //}
 
-    else
-    {
-        snprintf(str, len, "%s", ip);
-    }
+    //else
+    //{
+        //snprintf(str, len, "%s", ip);
+    //}
 }
 
 void ConnectionIF3::getBPFStr(char *str, int max_str_len) const {
@@ -834,8 +940,8 @@ void ConnectionIF3::getBPFStr(char *str, int max_str_len) const {
 	    char ip1_str[TM_IP_STR_SIZE];
 	    char ip2_str[TM_IP_STR_SIZE];
 
-	    ip_to_str(c_id.get_ip1(), ip1_str, sizeof(ip1_str));
-	    ip_to_str(c_id.get_ip2(), ip2_str, sizeof(ip2_str));
+	    ip4_to_str(c_id.get_ip1(), ip1_str, sizeof(ip1_str));
+	    ip4_to_str(c_id.get_ip2(), ip2_str, sizeof(ip2_str));
 
         //printf("The src host %s and dst host %s and dst port %d or dst host %s and src host %s and src port %d", ip1_str, ip2_str, ntohs(c_id.get_port()), ip1_str, ip2_str, ntohs(c_id.get_port()));
 
@@ -848,6 +954,26 @@ void ConnectionIF3::getBPFStr(char *str, int max_str_len) const {
 
     else
     {
+        printf("the query is for %s\n", c_id.getStr().c_str());
+
+        printf("The size of the first ip address is %lu\n", sizeof(c_id.get_ip1()));
+        printf("The size of the second ip address is %lu\n", sizeof(c_id.get_ip2()));
+
+        //ip_to_str(c_id.get_ip1_addr(), s_ip6_str, 16); //sizeof(s_ip6_str));
+        //ip_to_str(c_id.get_ip2_addr(), d_ip6_str, 16); //sizeof(d_ip6_str));
+
+
+        char s_ip6_str[INET6_ADDRSTRLEN];
+        char d_ip6_str[INET6_ADDRSTRLEN];
+
+        inet_ntop(AF_INET6, c_id.get_ip1_addr(), s_ip6_str, INET6_ADDRSTRLEN);
+        inet_ntop(AF_INET6, c_id.get_ip2_addr(), d_ip6_str, INET6_ADDRSTRLEN);
+
+        //tmlog(TM_LOG_ERROR, "ConnectionIF2::getBPFStr()", "we are in connectionIF2::getBPFStr()");
+
+        printf("host %s and host %s\n", s_ip6_str, d_ip6_str);
+
+        /*
         char ip61_str[TM_IP_STR_SIZE];
         char ip62_str[TM_IP_STR_SIZE];
 
@@ -855,12 +981,12 @@ void ConnectionIF3::getBPFStr(char *str, int max_str_len) const {
         ip_to_str(c_id.get_ip2(), ip62_str, sizeof(ip62_str));
 
         //printf("The src host %s and dst host %s and dst port %d or dst host %s and src host %s and src port %d", ip61_str, ip62_str, ntohs(c_id.get_port()), ip61_str, ip62_str, ntohs(c_id.get_port()));
-
+        */
         snprintf(str, max_str_len,
                  "(src host %s and dst host %s and dst port %d) or "
                  "(dst host %s and src host %s and src port %d)",
-                 ip61_str, ip62_str, ntohs(c_id.get_port()),
-                 ip61_str, ip62_str, ntohs(c_id.get_port()));
+                 s_ip6_str, d_ip6_str, ntohs(c_id.get_port()),
+                 d_ip6_str, s_ip6_str, ntohs(c_id.get_port()));
 
     }
 }
@@ -893,17 +1019,41 @@ ConnectionIF2::genKeys(const u_char* packet) {
 IndexField* ConnectionIF2::parseQuery(const char *query) {
 	std::string src_ip, dst_ip;
 	
-	if (!RE2::FullMatch(query, re, &src_ip, &dst_ip) && !RE2::FullMatch(query, re6, &src_ip, &dst_ip))
+	if (!RE2::FullMatch(query, re) && !RE2::FullMatch(query, re6))
+    {
+        tmlog(TM_LOG_ERROR,"parseQuery", "Cannot do full match!");
+
 		return NULL;
-
-	/*
+    }
+	
 	fprintf(stderr, "%s\nConnectionIF22:parseQuery:  %s ===> <%s> <%s>\n", 
-				pattern_connection2.c_str(), query, src_ip.c_str(), dst_ip.c_str());
-	*/
+				pattern6_connection2.c_str(), query, src_ip.c_str(), dst_ip.c_str());
+	
 
+    
     if (RE2::FullMatch(query, re, &src_ip, &dst_ip))
     {
+        printf("for IPv6, The source ip is %s and the dest ip is %s\n", src_ip.c_str(), dst_ip.c_str());
+
     	return new ConnectionIF2(inet_addr(src_ip.c_str()), inet_addr(dst_ip.c_str()));
+    }
+    else if (RE2::FullMatch(query, re6, &src_ip, &dst_ip))
+    {
+        struct sockaddr_in6 src_ip6;
+        struct sockaddr_in6 dst_ip6;
+        //char str[INET6_ADDRSTRLEN];
+
+        printf("the query in parsequery is %s\n", query);
+
+        printf("for IPv6, the source ip is <%s> and the dest ip is <%s>\n", src_ip.c_str(), dst_ip.c_str());
+
+        //intf("for IPv6, The source ip is <%s> and the dest ip is <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s>\n", src_ip.c_str(), 
+        // store this IP address in sa:
+        inet_pton(AF_INET6, src_ip.c_str(), &(src_ip6.sin6_addr));
+        inet_pton(AF_INET6, dst_ip.c_str(), &(dst_ip6.sin6_addr));
+        return new ConnectionIF2(src_ip6.sin6_addr.s6_addr, dst_ip6.sin6_addr.s6_addr);
+
+        //return new ConnectionIF2(src_ip.c_str(), dst_ip.c_str());
     }
     else
     {
@@ -921,9 +1071,9 @@ IndexField* ConnectionIF2::parseQuery(const char *query) {
     }
 }
 
-void ConnectionIF2:: ip_to_str(const unsigned char* ip, char *str, int len) const {
+void ConnectionIF2:: ip4_to_str(const unsigned char* ip, char *str, int len) const {
 //#define UCP(x) ((unsigned char *)&(x))
-	str[0] = '\0';
+	//str[0] = '\0';
     /*
 	snprintf(str, len, "%d.%d.%d.%d",
 			 UCP(ip)[0] & 0xff,
@@ -931,17 +1081,10 @@ void ConnectionIF2:: ip_to_str(const unsigned char* ip, char *str, int len) cons
 			 UCP(ip)[2] & 0xff,
 			 UCP(ip)[3] & 0xff);
     */
-    if (c_id.get_version() == 4)
-    {
-        snprintf(str, len, "%d.%d.%d.%d", ip[12] & 0xff, ip[13] & 0xff, ip[14] & 0xff, ip[15] & 0xff);
+    str[0] = '\0';
+    snprintf(str, len, "%d.%d.%d.%d", ip[12] & 0xff, ip[13] & 0xff, ip[14] & 0xff, ip[15] & 0xff);
         //printf("The string is %s\n", str);
         //printf("All of the elements of ip are: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n", ip[0], ip[1], ip[2], ip[3], ip[4], ip[5], ip[6], ip[7], ip[8], ip[9], ip[10], ip[11], ip[12], ip[13], ip[14], ip[15]);
-    }
-
-    else
-    {
-        snprintf(str, len, "%s", ip);
-    }
 }
 
 
@@ -953,11 +1096,16 @@ void ConnectionIF2::getBPFStr(char *str, int max_str_len) const {
         char s_ip_str[TM_IP_STR_SIZE];
         char d_ip_str[TM_IP_STR_SIZE];
 
-        ip_to_str(c_id.get_ip1(), s_ip_str, 16);
-        ip_to_str(c_id.get_ip2(), d_ip_str, 16);
+        printf("The size of the first ip address is %lu\n", sizeof(c_id.get_ip1()));
+        printf("The size of the second ip address is %lu\n", sizeof(c_id.get_ip2()));
+
+        ip4_to_str(c_id.get_ip1(), s_ip_str, 16);
+        ip4_to_str(c_id.get_ip2(), d_ip_str, 16);
 
 
-        tmlog(TM_LOG_ERROR, "ConnectionIF2::getBPFStr()", "we are in connectionIF2::getBPFStr()");
+        //tmlog(TM_LOG_ERROR, "ConnectionIF2::getBPFStr()", "we are in connectionIF2::getBPFStr()");
+
+        printf("ip4: host %s and host %s\n", s_ip_str, d_ip_str);
 
         snprintf(str, max_str_len,
                  "host %s and host %s",
@@ -966,14 +1114,27 @@ void ConnectionIF2::getBPFStr(char *str, int max_str_len) const {
     }
     else
     {
-	    char s_ip6_str[TM_IP_STR_SIZE];
-	    char d_ip6_str[TM_IP_STR_SIZE];
+	    //char s_ip6_str[TM_IP_STR_SIZE];
+	    //char d_ip6_str[TM_IP_STR_SIZE];
 
-	    ip_to_str(c_id.get_ip1(), s_ip6_str, 16);
-	    ip_to_str(c_id.get_ip2(), d_ip6_str, 16);
+        printf("the query is for %s\n", c_id.getStr().c_str());
+
+        printf("The size of the first ip address is %lu\n", sizeof(c_id.get_ip1()));
+        printf("The size of the second ip address is %lu\n", sizeof(c_id.get_ip2()));
+
+	    //ip_to_str(c_id.get_ip1_addr(), s_ip6_str, 16); //sizeof(s_ip6_str));
+	    //ip_to_str(c_id.get_ip2_addr(), d_ip6_str, 16); //sizeof(d_ip6_str));
 
 
-        tmlog(TM_LOG_ERROR, "ConnectionIF2::getBPFStr()", "we are in connectionIF2::getBPFStr()");
+        char s_ip6_str[INET6_ADDRSTRLEN];
+        char d_ip6_str[INET6_ADDRSTRLEN];
+
+        inet_ntop(AF_INET6, c_id.get_ip1_addr(), s_ip6_str, INET6_ADDRSTRLEN);
+        inet_ntop(AF_INET6, c_id.get_ip2_addr(), d_ip6_str, INET6_ADDRSTRLEN);
+
+        //tmlog(TM_LOG_ERROR, "ConnectionIF2::getBPFStr()", "we are in connectionIF2::getBPFStr()");
+
+        printf("host %s and host %s\n", s_ip6_str, d_ip6_str);
 
 	    snprintf(str, max_str_len,
 		    	 "host %s and host %s",

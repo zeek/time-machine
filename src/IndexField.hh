@@ -698,7 +698,7 @@ public:
 		return &c_id;
 	}
 
-    void ip_to_str(const unsigned char* ip, char *str, int len) const;
+    void ip4_to_str(const unsigned char* ip, char *str, int len) const;
 
 	bool operator==(const IndexField& other) const {
 		return c_id==((ConnectionIF3*)&other)->c_id;
@@ -779,7 +779,7 @@ public:
     */
 	void getBPFStr(char *, int) const;
 
-    void ip_to_str(const unsigned char* ip, char *str, int len) const;
+    void ip4_to_str(const unsigned char* ip, char *str, int len) const;
 
 	ConnectionID2 *getCID() {
 		return &c_id;

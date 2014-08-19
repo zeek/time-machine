@@ -56,8 +56,8 @@ public:
         init6(proto, s_ip, d_ip, s_port, d_port);
     }
 	ConnectionID4(ConnectionID4 *c_id) {
-        memcpy(key.ip1, c_id->key.ip1, 16);
-        memcpy(key.ip2, c_id->key.ip2, 16);
+        memcpy(key.ip1.s6_addr, c_id->key.ip1.s6_addr, 16);
+        memcpy(key.ip2.s6_addr, c_id->key.ip2.s6_addr, 16);
 		key.port1 = c_id->key.port1;
 		key.port2 = c_id->key.port2;
 		v6.proto = c_id->v6.proto;
@@ -104,8 +104,8 @@ public:
                         && (v6.proto == ((ConnectionID4*)&other)->v6.proto);
                */
                  
-		return (!memcmp(&key.ip1, &((ConnectionID4*)&other)->key.ip1, 16))
-			   && (!memcmp(&key.ip2, &((ConnectionID4*)&other)->key.ip2, 16))
+		return (!memcmp(&key.ip1.s6_addr, &((ConnectionID4*)&other)->key.ip1.s6_addr, 16))
+			   && (!memcmp(&key.ip2.s6_addr, &((ConnectionID4*)&other)->key.ip2.s6_addr, 16))
 			   && (key.port1 == ((ConnectionID4*)&other)->key.port1)
 			   && (key.port2 == ((ConnectionID4*)&other)->key.port2)
 			   && (v6.proto == ((ConnectionID4*)&other)->v6.proto);
@@ -142,11 +142,17 @@ public:
 		return v6.proto;
 	}
 	const unsigned char* get_ip1() const {
-		return key.ip1;
+		return key.ip1.s6_addr;
 	}
+    const in6_addr* get_ip1_addr() const {
+        return &(key.ip1);
+    }
 	const unsigned char* get_ip2() const {
-		return key.ip2;
+		return key.ip2.s6_addr;
 	}
+    const in6_addr* get_ip2_addr() const {
+        return &(key.ip2);
+    }
 	uint16_t get_port1() const {
 		return key.port1;
 	}
@@ -208,8 +214,10 @@ public:
     //proto_t proto;
 
     typedef struct {
-        unsigned char ip1[16];
-        unsigned char ip2[16];
+        in6_addr ip1;
+        in6_addr ip2;
+        //unsigned char ip1[16];
+        //unsigned char ip2[16];
         uint16 port1;
         uint16 port2;
         //int version;
@@ -324,11 +332,17 @@ public:
 		return v6.proto;
 	}
 	const unsigned char* get_ip1() const {
-		return key.ip1;
+		return key.ip1.s6_addr;
 	}
+    const in6_addr* get_ip1_addr() const {
+        return &(key.ip1);
+    }
 	const unsigned char* get_ip2() const {
-		return key.ip2;
+		return key.ip2.s6_addr;
 	}
+    const in6_addr* get_ip2_addr() const {
+        return &(key.ip2);
+    }
 	uint16_t get_port() const {
 		return key.port2;
 	}
@@ -374,8 +388,8 @@ public:
     //proto_t proto;
 
     typedef struct {
-        unsigned char ip1[16];
-        unsigned char ip2[16];
+        in6_addr ip1;
+        in6_addr ip2;
         uint16 port1;
         uint16 port2;
         //int version;
@@ -500,11 +514,17 @@ public:
 */
 
 	const unsigned char* get_ip1() const {
-		return key.ip1;
+		return key.ip1.s6_addr;
 	}
+    const in6_addr* get_ip1_addr() const {
+        return &(key.ip1);
+    }
 	const unsigned char* get_ip2() const {
-		return key.ip2;
+		return key.ip2.s6_addr;
 	}
+    const in6_addr* get_ip2_addr() const {
+        return &(key.ip2);
+    }
     int get_version() const {
         return v6.version;
     }
@@ -540,8 +560,10 @@ public:
     
 
     typedef struct {
-        unsigned char ip1[16];
-        unsigned char ip2[16];
+        in6_addr ip1;
+        in6_addr ip2;
+        //unsigned char ip1[16];
+        //unsigned char ip2[16];
         uint16 port1;
         uint16 port2;
         //int version;

@@ -48,6 +48,13 @@ my_fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
  */
 inline IndexFileReader::IndexFileReader(char *fn) : fp(NULL), fname(fn), eof(false) {
 
+        char filepath[100];
+
+        strcpy(filepath, conf_main_workdir);
+        strcat(filepath, "/");
+        strcat(filepath, fname);
+        //printf("The index file name is %s\n", filepath);
+
         if (chdir(conf_main_workdir)) {
             fprintf(stderr, "cannot chdir to %s\n", conf_main_workdir);
             //return(1);
@@ -57,6 +64,12 @@ inline IndexFileReader::IndexFileReader(char *fn) : fp(NULL), fname(fn), eof(fal
 	if (fp == NULL) {
 		//TODO: Decent error handling
 		tmlog(TM_LOG_ERROR, "IFR", "Could not open index file \"%s\" for reading.\n", fname);
+                char path[70];
+
+                //char errbufnav[PCAP_ERRBUF_SIZE];
+
+                printf("The directory for Fifo that we are in is %s\n", getcwd(path, 70));
+
 	}
 	my_fread(&first, sizeof(tm_time_t), 1, fp);
 	my_fread(&last, sizeof(tm_time_t), 1, fp);

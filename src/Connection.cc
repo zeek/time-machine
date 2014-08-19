@@ -22,10 +22,13 @@
 static std::string pattern_ip ("(\\d+\\.\\d+\\.\\d+\\.\\d+)");
 static std::string pattern_ipport ("(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+)");
 
-static std::string pattern_ip6 ("\\[(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\\]");
+static std::string pattern_ip6 ("\\[([0-9a-fA-F]{1,4}:{7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?:(?::[0-9a-fA-F]{1,4}){1,6})|:(?:(?:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(?::[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(?:ffff(?::0{1,4}){0,1}:){0,1}(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])|(?:[0-9a-fA-F]{1,4}:){1,4}:(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\\]");
 // stolen from stackoverflow http://stackoverflow.com/questions/53497/regular-expression-that-matches-valid-ipv6-addresses
 
-static std::string pattern_ip6port ("\\[(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\\]:(\\d+)");
+//static std::string pattern_ip6 ("\\[([0-9a-fA-F]{1,4}:{7,7}[0-9a-fA-F]{1,4}|[0-9a-fA-F]{1,4}:{1,7}:|[0-9a-fA-F]{1,4}:{1,6}:[0-9a-fA-F]{1,4}|[0-9a-fA-F]{1,4}:{1,5}:[0-9a-fA-F]{1,4}{1,2}|[0-9a-fA-F]{1,4}:{1,4}:[0-9a-fA-F]{1,4}{1,3}|[0-9a-fA-F]{1,4}:{1,3}:[0-9a-fA-F]{1,4}{1,4}|[0-9a-fA-F]{1,4}:{1,2}:[0-9a-fA-F]{1,4}{1,5}|[0-9a-fA-F]{1,4}::[0-9a-fA-F]{1,4}{1,6}|::[0-9a-fA-F]{1,4}{1,7}|:|fe80::[0-9a-fA-F]{0,4}{0,4}%[0-9a-zA-Z]{1,}|::ffff:0{1,4}{0,1}:{0,1}25[0-5]|2[0-4]|1{0,1}[0-9]{0,1}[0-9].{3,3}25[0-5]|2[0-4]|1{0,1}[0-9]{0,1}[0-9]|[0-9a-fA-F]{1,4}:{1,4}:25[0-5]|2[0-4]|1{0,1}[0-9]{0,1}[0-9].{3,3}25[0-5]|2[0-4]|1{0,1}[0-9]{0,1}[0-9])\\]");
+
+static std::string pattern_ip6port ("\\[([0-9a-fA-F]{1,4}:{7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?:(?::[0-9a-fA-F]{1,4}){1,6})|:(?:(?:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(?::[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(?:ffff(?::0{1,4}){0,1}:){0,1}(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])|(?:[0-9a-fA-F]{1,4}:){1,4}:(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\\]:(\\d+)");
+//static std::string pattern_ip6port ("\\[([0-9a-fA-F]{1,4}:{7,7}[0-9a-fA-F]{1,4}|[0-9a-fA-F]{1,4}:{1,7}:|[0-9a-fA-F]{1,4}:{1,6}:[0-9a-fA-F]{1,4}|[0-9a-fA-F]{1,4}:{1,5}:[0-9a-fA-F]{1,4}{1,2}|[0-9a-fA-F]{1,4}:{1,4}:[0-9a-fA-F]{1,4}{1,3}|[0-9a-fA-F]{1,4}:{1,3}:[0-9a-fA-F]{1,4}{1,4}|[0-9a-fA-F]{1,4}:{1,2}:[0-9a-fA-F]{1,4}{1,5}|[0-9a-fA-F]{1,4}::[0-9a-fA-F]{1,4}{1,6}|::[0-9a-fA-F]{1,4}{1,7}|:|fe80::[0-9a-fA-F]{0,4}{0,4}%[0-9a-zA-Z]{1,}|::ffff:0{1,4}{0,1}:{0,1}25[0-5]|2[0-4]|1{0,1}[0-9]{0,1}[0-9].{3,3}25[0-5]|2[0-4]|1{0,1}[0-9]{0,1}[0-9]|[0-9a-fA-F]{1,4}:{1,4}:25[0-5]|2[0-4]|1{0,1}[0-9]{0,1}[0-9].{3,3}25[0-5]|2[0-4]|1{0,1}[0-9]{0,1}[0-9])\\]:(\\d+)");
 // stolen from stackoverflow http://stackoverflow.com/questions/53497/regular-expression-that-
 
 /*
@@ -91,11 +94,11 @@ void ConnectionID4::init(proto_t proto4,
         //key.ip1.s6_tm_addr = &v4_mapped_prefix[0];
         //char *
 
-        memcpy(key.ip1, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&key.ip1[12], &d_ip, sizeof(d_ip));
+        memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip1.s6_addr[12], &d_ip, sizeof(d_ip));
 
-        memcpy(key.ip2, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&key.ip2[12], &s_ip, sizeof(s_ip));
+        memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip2.s6_addr[12], &s_ip, sizeof(s_ip));
 
 
 
@@ -135,11 +138,11 @@ void ConnectionID4::init(proto_t proto4,
 
         // setting v6.ip1 to be source address and v6.ip2 to be destination address
 
-        memcpy(key.ip1, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&key.ip1[12], &s_ip, sizeof(s_ip));
+        memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip1.s6_addr[12], &s_ip, sizeof(s_ip));
 
-        memcpy(key.ip2, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&key.ip2[12], &d_ip, sizeof(d_ip));
+        memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip2.s6_addr[12], &d_ip, sizeof(d_ip));
 
 
         /*
@@ -208,8 +211,8 @@ void ConnectionID4::init6(proto_t proto6,
 	if (addr6_port_canon_lt(s_ip,d_ip,s_port,d_port)) {
 		//    v6.is_canonified=true;
         // memcpy(destination, source, size)
-        memcpy(key.ip1, d_ip, 16);
-        memcpy(key.ip2, s_ip, 16);
+        memcpy(key.ip1.s6_addr, d_ip, 16);
+        memcpy(key.ip2.s6_addr, s_ip, 16);
 		//v6.ip1=d_ip;
 		//v6.ip2=s_ip;
 		//v6.port1=d_port;
@@ -229,8 +232,8 @@ void ConnectionID4::init6(proto_t proto6,
 
 	} else {
 		//    v6.is_canonified=false;
-        memcpy(key.ip1, s_ip, 16);
-        memcpy(key.ip2, d_ip, 16);
+        memcpy(key.ip1.s6_addr, s_ip, 16);
+        memcpy(key.ip2.s6_addr, d_ip, 16);
 		//v6.ip1=s_ip;
 		//v6.ip2=d_ip;
 		//v6.port1=s_port;
@@ -299,11 +302,11 @@ void ConnectionID3::init(proto_t proto4,
 
     */
 
-    memcpy(key.ip1, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-    memcpy(&key.ip1[12], &ip1, sizeof(ip1));
+    memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+    memcpy(&key.ip1.s6_addr[12], &ip1, sizeof(ip1));
 
-    memcpy(key.ip2, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-    memcpy(&key.ip2[12], &ip2, sizeof(ip2));
+    memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+    memcpy(&key.ip2.s6_addr[12], &ip2, sizeof(ip2));
 
 
 	//key.port2=port2;
@@ -377,8 +380,8 @@ void ConnectionID3::init6(proto_t proto6,
 
     // memcpy(destination, source, size)
     // setting v6.ip1 to be source address and v6.ip2 to be destination address 
-    memcpy(key.ip1, ip1, 16);
-    memcpy(key.ip2, ip2, 16);
+    memcpy(key.ip1.s6_addr, ip1, 16);
+    memcpy(key.ip2.s6_addr, ip2, 16);
 
 	//v.ip1=ip1;
 	//v.ip2=ip2;
@@ -474,11 +477,11 @@ void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
 
         // setting v6.ip1 to dest address and v6.ip2 to source address
 
-        memcpy(key.ip1, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&key.ip1[12], &d_ip, sizeof(d_ip));
+        memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip1.s6_addr[12], &d_ip, sizeof(d_ip));
 
-        memcpy(key.ip2, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&key.ip2[12], &s_ip, sizeof(s_ip));
+        memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip2.s6_addr[12], &s_ip, sizeof(s_ip));
 
         // this is for the hash key
         //in6_addr s6_ip;
@@ -506,11 +509,11 @@ void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
 
         // setting v6.ip1 to be source address and v6.ip2 to be dest address
 
-        memcpy(key.ip1, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&key.ip1[12], &s_ip, sizeof(s_ip));
+        memcpy(key.ip1.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip1.s6_addr[12], &s_ip, sizeof(s_ip));
 
-        memcpy(key.ip2, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&key.ip2[12], &d_ip, sizeof(d_ip));
+        memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
+        memcpy(&key.ip2.s6_addr[12], &d_ip, sizeof(d_ip));
 
 
         // this is for the hash key
@@ -551,8 +554,8 @@ void ConnectionID2::init6( unsigned char s_ip[], unsigned char d_ip[]) {
 	if (addr6_port_canon_lt(s_ip,d_ip,0,0)) {
 		//    v.is_canonified=true;
         // memcpy(destination, source, size)
-        memcpy(key.ip1, d_ip, 16);
-        memcpy(key.ip2, s_ip, 16);
+        memcpy(key.ip1.s6_addr, d_ip, 16);
+        memcpy(key.ip2.s6_addr, s_ip, 16);
 
 		//v6.ip1=d_ip;
 		//v6.ip2=s_ip;
@@ -571,8 +574,8 @@ void ConnectionID2::init6( unsigned char s_ip[], unsigned char d_ip[]) {
 
 	} else {
 		//    v.is_canonified=false;
-        memcpy(key.ip1, s_ip, 16);
-        memcpy(key.ip2, d_ip, 16);
+        memcpy(key.ip1.s6_addr, s_ip, 16);
+        memcpy(key.ip2.s6_addr, d_ip, 16);
 		//v.ip1=s_ip;
 		//v.ip2=d_ip;
 
@@ -588,6 +591,17 @@ void ConnectionID2::init6( unsigned char s_ip[], unsigned char d_ip[]) {
 	    key.port1 = 0;
 	    key.port2 = 0;
 	}
+
+    //char str_test1[INET6_ADDRSTRLEN];
+    //char str_test2[INET6_ADDRSTRLEN];
+
+    // now get it back and print it
+    //inet_ntop(AF_INET6, &(key.ip1), str_test1, INET6_ADDRSTRLEN);
+
+    //inet_ntop(AF_INET6, &(key.ip2), str_test2, INET6_ADDRSTRLEN);
+
+    //printf("testing 1 ... %s\n", str_test1); // prints "2001:db8:8714:3a90::12"
+    //printf("testing 2 ... %s\n", str_test2);
 
     //init_hash_function();
 
@@ -781,6 +795,7 @@ ConnectionID2::ConnectionID2(const u_char* packet) {
     else
     {
         //tmlog(TM_LOG_NOTE, "Connection.cc: ConnectionID3", "IPv6");
+        //printf("the source address is %s, and the dest address is %s\n", IP6(packet)->ip6_src.s6_addr, IP6(packet)->ip6_dst.s6_addr);
     	init6(IP6(packet)->ip6_src.s6_addr, IP6(packet)->ip6_dst.s6_addr);
     }
 }
@@ -808,11 +823,11 @@ bool ConnectionID3::operator==(const ConnectionID& other) const {
 //consistent with ConnectionID4
 bool ConnectionID2::operator==(const ConnectionID& other) const {
 /*
-        return equal(key.ip1.s6_addr, ((ConnectionID2*)&other)->key.ip2.s6_addr)
-               && equal(key.ip2.s6_addr, ((ConnectionID2*)&other)->key.ip2.s6_addr);
+        //return equal(key.ip1.s6_addr, ((ConnectionID2*)&other)->key.ip2.s6_addr)
+               //&& equal(key.ip2.s6_addr, ((ConnectionID2*)&other)->key.ip2.s6_addr);
 */
-       return (!memcmp(&key.ip1, &((ConnectionID2*)&other)->key.ip1, 16))
-               && (!memcmp(&key.ip2, &((ConnectionID2*)&other)->key.ip2, 16));
+       return (!memcmp(&key.ip1, &((ConnectionID2*)&other)->key.ip1, sizeof(in6_addr)))
+               && (!memcmp(&key.ip2, &((ConnectionID2*)&other)->key.ip2, sizeof(in6_addr)));
 
 }
 
@@ -921,11 +936,11 @@ std::string ConnectionID4::getStr() const {
 
         char str1[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, key.ip1, str1, INET6_ADDRSTRLEN);
+        inet_ntop(AF_INET6, &key.ip1, str1, INET6_ADDRSTRLEN);
 
         char str2[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, key.ip2, str2, INET6_ADDRSTRLEN);
+        inet_ntop(AF_INET6, &key.ip2, str2, INET6_ADDRSTRLEN);
 
 
         ss << " ConnectionID4 for IPv6"
@@ -1086,14 +1101,25 @@ std::string ConnectionID2::getStr() const {
 
         // I already put v6.ip1 and v6.ip2 in there
 
+        //struct sockaddr_in6 sa;
+        //char str_test[INET6_ADDRSTRLEN];
+
+        // store this IP address in sa:
+        //inet_pton(AF_INET6, "fe80::213:faff:fe03:c11e", &(sa.sin6_addr));
+
+        // now get it back and print it
+        //inet_ntop(AF_INET6, &(sa.sin6_addr), str_test, INET6_ADDRSTRLEN);
+
+        //printf("testing ... %s\n", str_test); // prints "2001:db8:8714:3a90::12"
+
 
         char str1[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(key.ip1), str1, INET6_ADDRSTRLEN);
+        inet_ntop(AF_INET6, &(key.ip1), str1, INET6_ADDRSTRLEN);
 
         char str2[INET6_ADDRSTRLEN];
 
-        bro_inet_ntop(AF_INET6, &(key.ip2), str2, INET6_ADDRSTRLEN);
+        inet_ntop(AF_INET6, &(key.ip2), str2, INET6_ADDRSTRLEN);
 
         ss << " ConnectionID2 for IPv6"
 
