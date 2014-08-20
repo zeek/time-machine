@@ -729,6 +729,9 @@ void ConnectionIF4::getBPFStr(char *str, int max_str_len) const {
 	    char d_ip_str[TM_IP_STR_SIZE];
 	    uint32_t s_port;
 	    uint32_t d_port;
+
+        printf("the query is for %s\n", c_id.getStr().c_str());
+
 	    /*
 	    if (c_id.get_is_canonified()) {
 	      s_ip=c_id.get_ip2();
@@ -940,6 +943,8 @@ void ConnectionIF3::getBPFStr(char *str, int max_str_len) const {
 	    char ip1_str[TM_IP_STR_SIZE];
 	    char ip2_str[TM_IP_STR_SIZE];
 
+        printf("the query is for %s\n", c_id.getStr().c_str());
+
 	    ip4_to_str(c_id.get_ip1(), ip1_str, sizeof(ip1_str));
 	    ip4_to_str(c_id.get_ip2(), ip2_str, sizeof(ip2_str));
 
@@ -1095,6 +1100,8 @@ void ConnectionIF2::getBPFStr(char *str, int max_str_len) const {
     {
         char s_ip_str[TM_IP_STR_SIZE];
         char d_ip_str[TM_IP_STR_SIZE];
+
+        printf("the query is for %s\n", c_id.getStr().c_str());
 
         printf("The size of the first ip address is %lu\n", sizeof(c_id.get_ip1()));
         printf("The size of the second ip address is %lu\n", sizeof(c_id.get_ip2()));
