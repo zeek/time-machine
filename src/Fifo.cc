@@ -287,9 +287,9 @@ uint64_t Fifo::query(QueryRequest *qreq, QueryResult *qres,
                     //return;
                 }
 
-                char path[70];
+                //char path[70];
 
-                char errbufnav[PCAP_ERRBUF_SIZE];
+                //char errbufnav[PCAP_ERRBUF_SIZE];
 
                 //printf("The directory for Fifo that we are in is %s\n", getcwd(path, 70));
 

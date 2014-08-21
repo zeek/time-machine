@@ -275,7 +275,7 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
 	if (is_open)
 		flush();
 
-	char errbuf[PCAP_ERRBUF_SIZE];
+	//char errbuf[PCAP_ERRBUF_SIZE];
 
     //printf("The file name we are querying in is %s\n", filename.c_str());
 
@@ -284,9 +284,9 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
         //return;
     }
 
-    char path[70];
+    //char path[70];
 
-    char errbufnav[PCAP_ERRBUF_SIZE];
+    //char errbufnav[PCAP_ERRBUF_SIZE];
 
     //printf("The directory that we are in is %s\n", getcwd(path, 70));
 /*
@@ -430,11 +430,12 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
                     }
                 */
 
-                
+                /* 
                 //tmlog(TM_LOG_ERROR, "FifoDisk.cc: query", "the query packet has source ip address: %s and dst ip address %s and header time stamp %lu and %lu", \
                 str1, str2, hdr.ts.tv_sec, hdr.ts.tv_usec);
                 //tmlog(TM_LOG_ERROR, "FifoDisk.cc:query", "the query parameters are that it has a time interval from %f to %f, a hash of %lu, a timestamp of %f, and a form of %s", \
                 qreq->getT0(), qreq->getT1(), qreq->getField()->hash(), qreq->getField()->ts, qreq->getField()->getStr().c_str());
+                */
 				if (qreq->matchPkt(&hdr, pkt))  {
 					matches++;
 					qres->sendPkt(&hdr, pkt);

@@ -159,10 +159,11 @@ void Index<T>::addPkt(const pcap_pkthdr* header, const u_char* packet) {
         // push this IndexField pointer entry to the front of the input queue, which is of type MyQueue
         // (Index.hh)
 		input_q.push_front(curentry);
-
+        /*
         //tmlog(TM_LOG_NOTE, "addPkt for indexfields", "we are pushing in the front an indexfield to the input queue with timestamp %f and form %s and type %s", \
         curentry->ts, curentry->getStrPkt(packet).c_str(), curentry->getIndexName().c_str());
         //tmlog(TM_LOG_NOTE, "addPkt: size of input q", "The size of the input queue in the for loop is %d", input_q.size());
+        */
 	}
 
     //tmlog(TM_LOG_NOTE, "addPkt: size of input q", "The size of the input queue is %d", input_q.size());
