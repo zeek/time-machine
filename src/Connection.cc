@@ -311,6 +311,8 @@ void ConnectionID3::init(proto_t proto4,
     memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
     memcpy(&key.ip2.s6_addr[12], &ip2, sizeof(ip2));
 
+    v6.ip1 = ip1;
+    v6.ip2 = ip2;
 
 	//key.port2=port2;
 
@@ -486,6 +488,9 @@ void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
         memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
         memcpy(&key.ip2.s6_addr[12], &s_ip, sizeof(s_ip));
 
+        v6.ip1 = d_ip;
+        v6.ip2 = s_ip;
+
         // this is for the hash key
         //in6_addr s6_ip;
         //in6_addr d6_ip;
@@ -518,6 +523,8 @@ void ConnectionID2::init( uint32_t s_ip, uint32_t d_ip) {
         memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
         memcpy(&key.ip2.s6_addr[12], &d_ip, sizeof(d_ip));
 
+        v6.ip1 = s_ip;
+        v6.ip2 = d_ip;
 
         // this is for the hash key
         //in6_addr s6_ip;
@@ -813,13 +820,22 @@ bool ConnectionID3::operator==(const ConnectionID& other) const {
                && (key.port2 == ((ConnectionID3*)&other)->key.port2)
                && (v6.proto == ((ConnectionID3*)&other)->v6.proto);
 */
-
-
+    if (v6.version == 4 && ((ConnectionID3*)&other)->v6.version == 4)
+    {
+        return (v6.ip1 == ((ConnectionID3*)&other)->v6.ip1)
+               && (v6.ip2 == ((ConnectionID3*)&other)->v6.ip2)
+               && (key.port2 == ((ConnectionID3*)&other)->key.port2)
+               && (v6.proto == ((ConnectionID3*)&other)->v6.proto);
+    }
+    else if (v6.version == 6 && ((ConnectionID3*)&other)->v6.version == 6)
+    {
         return (!memcmp(&key.ip1, &((ConnectionID3*)&other)->key.ip1, 16))
                && (!memcmp(&key.ip2, &((ConnectionID3*)&other)->key.ip2, 16))
                && (key.port2 == ((ConnectionID3*)&other)->key.port2)
                && (v6.proto == ((ConnectionID3*)&other)->v6.proto);
-
+    }
+    else
+        return false;
 }
 
 //TODO: MAke this inline (i.e. move to Connection.hh so that it is
@@ -829,9 +845,18 @@ bool ConnectionID2::operator==(const ConnectionID& other) const {
         //return equal(key.ip1.s6_addr, ((ConnectionID2*)&other)->key.ip2.s6_addr)
                //&& equal(key.ip2.s6_addr, ((ConnectionID2*)&other)->key.ip2.s6_addr);
 */
-       return (!memcmp(&key.ip1, &((ConnectionID2*)&other)->key.ip1, sizeof(in6_addr)))
+    if (v6.version == 4 && ((ConnectionID3*)&other)->v6.version == 4)
+    {
+        return (v6.ip1 == ((ConnectionID3*)&other)->v6.ip1)
+               && (v6.ip2 == ((ConnectionID3*)&other)->v6.ip2);   
+    }
+    else if (v6.version == 6 && ((ConnectionID3*)&other)->v6.version == 6)
+    {
+        return (!memcmp(&key.ip1, &((ConnectionID2*)&other)->key.ip1, sizeof(in6_addr)))
                && (!memcmp(&key.ip2, &((ConnectionID2*)&other)->key.ip2, sizeof(in6_addr)));
-
+    }
+    else
+        return false;
 }
 
 void ConnectionID4::getStr(char* s, int maxsize) const {

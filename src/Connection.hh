@@ -109,7 +109,7 @@ public:
                 {
                 //return (!memcmp(&key.ip1.s6_addr + 12, &((ConnectionID4*)&other)->key.ip1.s6_addr + 12, 4))
                 //           && (!memcmp(&key.ip2.s6_addr + 12, &((ConnectionID4*)&other)->key.ip2.s6_addr + 12, 4))
-                return (v6.ip1 == ((ConnectionID4*)&other)->v6.ip1)
+                    return (v6.ip1 == ((ConnectionID4*)&other)->v6.ip1)
                            && (v6.ip2 == ((ConnectionID4*)&other)->v6.ip2)
                            && (key.port1 == ((ConnectionID4*)&other)->key.port1)
                            && (key.port2 == ((ConnectionID4*)&other)->key.port2)
@@ -118,11 +118,11 @@ public:
                 }                 
                 else if (v6.version == 6 && ((ConnectionID4*)&other)->v6.version == 6)
                 {
-		return (!memcmp(&key.ip1.s6_addr, &((ConnectionID4*)&other)->key.ip1.s6_addr, 16))
-			   && (!memcmp(&key.ip2.s6_addr, &((ConnectionID4*)&other)->key.ip2.s6_addr, 16))
-			   && (key.port1 == ((ConnectionID4*)&other)->key.port1)
-			   && (key.port2 == ((ConnectionID4*)&other)->key.port2)
-			   && (v6.proto == ((ConnectionID4*)&other)->v6.proto);
+                	return (!memcmp(&key.ip1.s6_addr, &((ConnectionID4*)&other)->key.ip1.s6_addr, 16))
+			            && (!memcmp(&key.ip2.s6_addr, &((ConnectionID4*)&other)->key.ip2.s6_addr, 16))
+			            && (key.port1 == ((ConnectionID4*)&other)->key.port1)
+			            && (key.port2 == ((ConnectionID4*)&other)->key.port2)
+			            && (v6.proto == ((ConnectionID4*)&other)->v6.proto);
                 }
                 else
                     return false;
@@ -397,6 +397,8 @@ public:
 		//unsigned char ip1[16];
 		//unsigned char ip2[16];
 		//uint16_t port2;
+        int ip1;
+        int ip2;
 		proto_t proto;
         int version;
 		//    bool is_canonified;
@@ -444,13 +446,14 @@ public:
 
     hash_t hash() const;
 
-    hash_t hash_key;  
+    hash_t hash_key; 
+    v6_t v6; 
 protected:
 	void init(proto_t proto, uint32_t s_ip, uint32_t d_ip, uint16_t port);
     void init6(proto_t proto, unsigned char s_ip[], unsigned char d_ip[], 
                uint16_t port);
 	//v_t v;
-    v6_t v6;
+    //v6_t v6;
     key_t key;
 
 
@@ -572,6 +575,8 @@ public:
 		//    uint32_t ts;
 		//unsigned char ip1[16];
 		//unsigned char ip2[16];
+        int ip1;
+        int ip2;
         int version;
 		//    bool is_canonified;
 	}
@@ -615,12 +620,12 @@ public:
     hash_t hash() const;
 
     hash_t hash_key;
-
+    v6_t v6;
 protected:
 	void init(uint32_t s_ip, uint32_t d_ip);
     void init6( unsigned char s_ip[], unsigned char d_ip[]);
 	//v_t v;
-    v6_t v6;
+    //v6_t v6;
     key_t key;
 
 //private:
