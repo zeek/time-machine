@@ -130,7 +130,7 @@ void FifoDisk::addPkt(const pkt_ptr p) {
                 // push back the newest disk file into the list of files
 				files.push_back(new FifoDiskFile(new_file_name, pcap_handle));
 
-                tmlog(TM_LOG_NOTE, "FifoDisk: addPkt", "the new file name is: %s", new_file_name);
+                //tmlog(TM_LOG_NOTE, "FifoDisk: addPkt", "the new file name is: %s", new_file_name);
                 // free new_file_name since we malloced it and don't need it anymore
 				free(new_file_name);
 			}
@@ -277,7 +277,7 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
 
 	char errbuf[PCAP_ERRBUF_SIZE];
 
-    printf("The file name we are querying in is %s\n", filename.c_str());
+    //printf("The file name we are querying in is %s\n", filename.c_str());
 
     if (chdir(classdirectory)) {
         fprintf(stderr, "cannot class(Fifo:query) chdir to %s\n", classdirectory);
@@ -288,7 +288,7 @@ uint64_t FifoDiskFile::query( QueryRequest *qreq, QueryResult *qres, IntervalSet
 
     char errbufnav[PCAP_ERRBUF_SIZE];
 
-    printf("The directory that we are in is %s\n", getcwd(path, 70));
+    //printf("The directory that we are in is %s\n", getcwd(path, 70));
 /*
     if (chdir(classdirectory)) {
         fprintf(stderr, "cannot class(Fifo:query) chdir to %s\n", classdirectory);

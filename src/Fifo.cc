@@ -259,8 +259,8 @@ uint64_t Fifo::query(QueryRequest *qreq, QueryResult *qres,
         }
     */ 
 
-    printf("The class name is: %s\n", classname.c_str());
-    printf("The directory the classes are in is: %s\n", classdir); 
+    //printf("The class name is: %s\n", classname.c_str());
+    //printf("The directory the classes are in is: %s\n", classdir); 
 	FifoDiskFile *cur_file;
 
 	if (!qreq->isMemOnly()) {
@@ -291,7 +291,7 @@ uint64_t Fifo::query(QueryRequest *qreq, QueryResult *qres,
 
                 char errbufnav[PCAP_ERRBUF_SIZE];
 
-                printf("The directory for Fifo that we are in is %s\n", getcwd(path, 70));
+                //printf("The directory for Fifo that we are in is %s\n", getcwd(path, 70));
 
 
 				matches+= cur_file->query(qreq, qres, interval_set, classdir);

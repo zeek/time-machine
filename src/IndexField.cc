@@ -58,7 +58,7 @@ static std::string pattern_ip6port ("\\[((?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4
 /* size of an ip addr in dottet decimal as string: 4x3digits, 
   3 dots, terminating nul byte */
 #define TM_IP_STR_SIZE 16
-#define TM_IP6_STR_SIZE 40
+//#define TM_IP6_STR_SIZE 40
 /*
 static void ip_to_str(const unsigned char* ip, char *str, int len) {
 //#define UCP(x) ((unsigned char *)&(x))
@@ -96,7 +96,7 @@ IndexField* IPAddress::parseQuery(const char *query) {
 
 	if (!RE2::FullMatch(query, re, &ip) && !RE2::FullMatch(query, re6, &ip))
     {
-        tmlog(TM_LOG_ERROR,"parseQuery", "Cannot do full match!");
+        //tmlog(TM_LOG_ERROR,"parseQuery", "Cannot do full match!");
         //tmlog(TM_LOG_ERROR, "parseQuery", ip);
 		return NULL;
     }
@@ -113,7 +113,7 @@ IndexField* IPAddress::parseQuery(const char *query) {
     // INET6_ADDRSTRLEN is 46 and INET_ADDRSTRLEN is 16
     //char strIP46[INET6_ADDRSTRLEN];
 
-    tmlog(TM_LOG_NOTE, "parseQuery", "the argument we pass to IPAddress is %s", ip.c_str());
+    //tmlog(TM_LOG_NOTE, "parseQuery", "the argument we pass to IPAddress is %s", ip.c_str());
 
 	return new IPAddress(ip.c_str());//, strIP46);
 }
@@ -138,21 +138,21 @@ void IPAddress::getStr(char* s, int maxsize) const {
 
 	if ( GetFamily() == IPv4 )
 		{
-        tmlog(TM_LOG_NOTE, "IPAddress", "IPAddress, IPv4");
+        //tmlog(TM_LOG_NOTE, "IPAddress", "IPAddress, IPv4");
 		char ucp[INET_ADDRSTRLEN];
 
 		if ( ! bro_inet_ntop(AF_INET, &ipv6_address.s6_addr[12], ucp, INET_ADDRSTRLEN) )
-			tmlog(TM_LOG_ERROR, "IPAddress", "<bad IPv4 address conversion");
+		        tmlog(TM_LOG_ERROR, "IPAddress", "<bad IPv4 address conversion");
 		else
 			snprintf(s, maxsize, "%s", ucp);
 		}
 	else
 		{
-        tmlog(TM_LOG_NOTE, "IPAddress", "IPAddress, IPv6");
+        //tmlog(TM_LOG_NOTE, "IPAddress", "IPAddress, IPv6");
 		char ucp[INET6_ADDRSTRLEN];
 
 		if ( ! bro_inet_ntop(AF_INET6, ipv6_address.s6_addr, ucp, INET6_ADDRSTRLEN) )
-			tmlog(TM_LOG_ERROR, "IPAddress", "<bad IPv6 address conversion");
+		        tmlog(TM_LOG_ERROR, "IPAddress", "<bad IPv6 address conversion");
 		else
 			snprintf(s, maxsize, "%s", ucp);
 		}
@@ -186,7 +186,7 @@ void IPAddress::Init(const std::string& s)
     // if it could not find :, then it is equal to npos and so IPv4
 	if ( s.find(':') == std::string::npos ) // IPv4.
 		{
-        tmlog(TM_LOG_NOTE, "IPAddress:Init", "initializing IPAddress, IPv4");
+        //tmlog(TM_LOG_NOTE, "IPAddress:Init", "initializing IPAddress, IPv4");
 		memcpy(ipv6_address.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
 
 		// Parse the address directly instead of using inet_pton since
@@ -220,7 +220,7 @@ void IPAddress::Init(const std::string& s)
 
 	else
 		{
-        tmlog(TM_LOG_NOTE, "IPAddress:Init", "initializing IPAddress, IPv6");
+        //tmlog(TM_LOG_NOTE, "IPAddress:Init", "initializing IPAddress, IPv6");
 		if ( inet_pton(AF_INET6, s.c_str(), ipv6_address.s6_addr) <=0 )
 			{
             tmlog(TM_LOG_ERROR, "Bad IP address: %s", s.c_str());
@@ -228,7 +228,7 @@ void IPAddress::Init(const std::string& s)
 			memset(ipv6_address.s6_addr, 0, sizeof(ipv6_address.s6_addr));
 			}
 		}
-        tmlog(TM_LOG_NOTE, "IPAddress::Init", "good IP Address %s", s.c_str());
+        //tmlog(TM_LOG_NOTE, "IPAddress::Init", "good IP Address %s", s.c_str());
 
         //init_hash_function();
         HashKey* newHashKey = new HashKey((void*)ipv6_address.s6_addr, sizeof(ipv6_address.s6_addr));
@@ -245,7 +245,7 @@ std::string IPAddress::getStr() const
     
 	if ( GetFamily() == IPv4 )
 		{
-        tmlog(TM_LOG_ERROR, "IPAddress: getStr()", "IPAddress, IPv4");
+        //tmlog(TM_LOG_ERROR, "IPAddress: getStr()", "IPAddress, IPv4");
 		char s[INET_ADDRSTRLEN];
 
 		if ( ! bro_inet_ntop(AF_INET, &ipv6_address.s6_addr[12], s, INET_ADDRSTRLEN) ) //bro_inet_ntop(AF_INET, &ipv6_address.s6_addr[12], s, INET_ADDRSTRLEN) )
@@ -256,7 +256,7 @@ std::string IPAddress::getStr() const
 	else
 		{
         
-        tmlog(TM_LOG_ERROR, "IPAddress: getStr()", "IPAddress, IPv6");
+        //tmlog(TM_LOG_ERROR, "IPAddress: getStr()", "IPAddress, IPv6");
 		char s[INET6_ADDRSTRLEN];
 
 		if ( ! bro_inet_ntop(AF_INET6, ipv6_address.s6_addr, s, INET6_ADDRSTRLEN) ) //bro_inet_ntop(AF_INET6, ipv6_address.s6_addr, s, INET6_ADDRSTRLEN) )
@@ -289,7 +289,7 @@ std::string IPAddress::getStrPkt(const u_char* packet) const
 	else
 		{   
 
-        tmlog(TM_LOG_NOTE, "IPAddress: getStr(u_char*)", "IPAddress, IPv6");
+        //tmlog(TM_LOG_NOTE, "IPAddress: getStr(u_char*)", "IPAddress, IPv6");
 		char str[INET6_ADDRSTRLEN];
 
 		if ( ! bro_inet_ntop(AF_INET6, ipv6_address.s6_addr, str, INET6_ADDRSTRLEN) )
@@ -308,7 +308,7 @@ std::string IPAddress::getStrPkt(const u_char* packet) const
 void IPAddress::getBPFStr(char *str, int max_str_len) const {
 	int rc = snprintf(str, max_str_len, "host %s", getStr().c_str());
 	if ( rc >= max_str_len )
-		tmlog(TM_LOG_ERROR, "query",  "IPAddress::getBPFStr: %s truncated by %d characters",
+	    tmlog(TM_LOG_ERROR, "query",  "IPAddress::getBPFStr: %s truncated by %d characters",
 				str, rc-max_str_len);
 }
 
@@ -317,14 +317,14 @@ SrcIPAddress::SrcIPAddress(const u_char* packet)
 {
     if (IP(packet)->ip_v == 4)
     {
-        tmlog(TM_LOG_NOTE, "IndexField.cc: SrcIPAddress", "IPv4 initialization");
+       //tmlog(TM_LOG_NOTE, "IndexField.cc: SrcIPAddress", "IPv4 initialization");
 	    new IPAddress(IP(packet)->ip_src.s_addr);
 
     }
 
     else
     {
-        tmlog(TM_LOG_NOTE, "IndexField.cc: SrcIPAddress", "IPv6 initialization");
+        //tmlog(TM_LOG_NOTE, "IndexField.cc: SrcIPAddress", "IPv6 initialization");
         new IPAddress(IP6(packet)->ip6_src.s6_addr);  
     } 
 }
@@ -415,7 +415,7 @@ std::string DstIPAddress::getStrPkt(const u_char* packet) const
 	else
 		{   
 
-        tmlog(TM_LOG_NOTE, "DstIPAddress: getStr(u_char*)", "IPAddress, IPv6");
+        //tmlog(TM_LOG_NOTE, "DstIPAddress: getStr(u_char*)", "IPAddress, IPv6");
 		char str[INET6_ADDRSTRLEN];
 
 		if ( ! bro_inet_ntop(AF_INET6, IP6(packet)->ip6_dst.s6_addr, str, INET6_ADDRSTRLEN) )
@@ -845,7 +845,7 @@ IndexField* ConnectionIF3::parseQuery(const char *query) {
 	
 	if (!RE2::FullMatch(query, re) && !RE2::FullMatch(query, re6))
     {
-        tmlog(TM_LOG_ERROR,"parseQuery", "Cannot do full match!");
+        //tmlog(TM_LOG_ERROR,"parseQuery", "Cannot do full match!");
 
         return NULL;
     }
@@ -1026,7 +1026,7 @@ IndexField* ConnectionIF2::parseQuery(const char *query) {
 	
 	if (!RE2::FullMatch(query, re) && !RE2::FullMatch(query, re6))
     {
-        tmlog(TM_LOG_ERROR,"parseQuery", "Cannot do full match!");
+        //tmlog(TM_LOG_ERROR,"parseQuery", "Cannot do full match!");
 
 		return NULL;
     }

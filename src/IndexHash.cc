@@ -95,7 +95,7 @@ IndexEntry* IndexHash::lookup( IndexField* key) {
 /*
     //IndexEntry *cur;
 
-    tmlog(TM_LOG_NOTE, "idxhash", "checking that there is not a similar key for this timestamp: %f and info: %s", key->ts, key->getStr().c_str());
+    //tmlog(TM_LOG_NOTE, "idxhash", "checking that there is not a similar key for this timestamp: %f and info: %s", key->ts, key->getStr().c_str());
     //printf("This key has the following form: " + key->getStr() + "\n");
 
     //std::cout << "This key has the following form: " << key->getStr() << std::endl;
@@ -104,9 +104,9 @@ IndexEntry* IndexHash::lookup( IndexField* key) {
 
     //cur = htable[key->getInt()%numBuckets];
 
-    tmlog(TM_LOG_NOTE, "idxhash", "the hash is: %u for this timestamp %f and form %s", key->hash(), key->ts, key->getStr().c_str());
-    tmlog(TM_LOG_NOTE, "idxhash", "the index is: %u for this timestamp %f and form %s", key->hash()%numBuckets, key->ts, key->getStr().c_str());
-    tmlog(TM_LOG_NOTE, "idxhash", "the number of buckets is %d for this timestampe %f and form %s", numBuckets, key->ts, key->getStr().c_str());
+    //tmlog(TM_LOG_NOTE, "idxhash", "the hash is: %u for this timestamp %f and form %s", key->hash(), key->ts, key->getStr().c_str());
+    //tmlog(TM_LOG_NOTE, "idxhash", "the index is: %u for this timestamp %f and form %s", key->hash()%numBuckets, key->ts, key->getStr().c_str());
+    //tmlog(TM_LOG_NOTE, "idxhash", "the number of buckets is %d for this timestampe %f and form %s", numBuckets, key->ts, key->getStr().c_str());
 
     // testing out the other method in add method to determine if this would help
     IndexEntry *curalt;
@@ -118,9 +118,9 @@ IndexEntry* IndexHash::lookup( IndexField* key) {
         assert(troot->parent == NULL);
 #endif
 
-    tmlog(TM_LOG_NOTE, "idx_hash: lookup", "the entry to add 'lookup' has key: %d", *(key->getConstKeyPtr()));
+    //tmlog(TM_LOG_NOTE, "idx_hash: lookup", "the entry to add 'lookup' has key: %d", *(key->getConstKeyPtr()));
 
-    tmlog(TM_LOG_NOTE, "idx_hash: lookup", "the entry to add 'lookup' has timestamp: %f", key->ts);
+    //tmlog(TM_LOG_NOTE, "idx_hash: lookup", "the entry to add 'lookup' has timestamp: %f", key->ts);
 
     while (curalt) {
 #ifdef TM_HEAVY_DEBUG
@@ -132,17 +132,17 @@ IndexEntry* IndexHash::lookup( IndexField* key) {
         else if (cmp < 0)
             curalt = curalt->right;
         else {
-            tmlog(TM_LOG_NOTE, "idx_hash: lookup", "this is in lookup using the add method checker. the already existing entry is: %d\n", *(curalt->getKey()->getConstKeyPtr()));
-            tmlog(TM_LOG_NOTE, "idx_hash: lookup",  "this is in lookup using the add method checker. tried to insert an already existing entry into the tree. numEntries=%d\n",
+            //tmlog(TM_LOG_NOTE, "idx_hash: lookup", "this is in lookup using the add method checker. the already existing entry is: %d\n", *(curalt->getKey()->getConstKeyPtr()));
+            //tmlog(TM_LOG_NOTE, "idx_hash: lookup",  "this is in lookup using the add method checker. tried to insert an already existing entry into the tree. numEntries=%d\n",
                     getNumEntries());
             break;
             //h->add_or_update(key, ie);
         }
     }
-
+   
     if (curalt == NULL)
-        tmlog(TM_LOG_NOTE, "idxhash", "cur is NULL, which means that this entry is allegedly unique");
-
+        //tmlog(TM_LOG_NOTE, "idxhash", "cur is NULL, which means that this entry is allegedly unique");
+    
     return curalt;
 */
 
@@ -151,12 +151,12 @@ IndexEntry* IndexHash::lookup( IndexField* key) {
     cur = htable[key->hash()%numBuckets];
 
     /*
-    tmlog(TM_LOG_NOTE, "IndexHash:Lookup", "huh, number of buckets is shit %d and the key is %d", numBuckets, key->hash());
+    //tmlog(TM_LOG_NOTE, "IndexHash:Lookup", "huh, number of buckets is shit %d and the key is %d", numBuckets, key->hash());
 
     if (numBuckets > 0)
     {
 
-        tmlog(TM_LOG_NOTE, "IndexHash:Lookup", "huh, can we do modular shit, %d", key->hash()%numBuckets);
+        //tmlog(TM_LOG_NOTE, "IndexHash:Lookup", "huh, can we do modular shit, %d", key->hash()%numBuckets);
 
         cur = htable[key->hash()%numBuckets];
 

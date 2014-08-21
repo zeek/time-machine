@@ -100,7 +100,8 @@ void ConnectionID4::init(proto_t proto4,
         memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
         memcpy(&key.ip2.s6_addr[12], &s_ip, sizeof(s_ip));
 
-
+        v6.ip1 = d_ip;
+        v6.ip2 = s_ip;
 
         /*
         IPAddr(ipv4_d_address);
@@ -144,6 +145,8 @@ void ConnectionID4::init(proto_t proto4,
         memcpy(key.ip2.s6_addr, v4_mapped_prefix, sizeof(v4_mapped_prefix));
         memcpy(&key.ip2.s6_addr[12], &d_ip, sizeof(d_ip));
 
+        v6.ip1 = s_ip;
+        v6.ip2 = d_ip;
 
         /*
         IPAddr(ipv4_s_address);
@@ -1187,7 +1190,7 @@ ConnectionID4* ConnectionID4::parse(const char *str) {
 	proto_t proto;
 
 	if (!RE2::FullMatch(str, re, &protostr, &src_ip, &src_port, &dst_ip, &dst_port) && !RE2::FullMatch(str, re6, &protostr, &src_ip, &src_port, &dst_ip, &dst_port)) {
-        tmlog(TM_LOG_ERROR, "ConnectionID4", "No match found");
+        //tmlog(TM_LOG_ERROR, "ConnectionID4", "No match found");
 		return NULL;
 	}
 	if (protostr == std::string("tcp"))

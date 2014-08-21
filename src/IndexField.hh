@@ -172,7 +172,7 @@ public:
         //free_hash_function();
 	}
 	virtual ~IPAddress() {
-        tmlog(TM_LOG_NOTE, "IPAddress", "deleting an ipaddress type");
+        //tmlog(TM_LOG_NOTE, "IPAddress", "deleting an ipaddress type");
         //delete [] ip6_address;
         //delete [] strIP;
     };
@@ -185,7 +185,7 @@ public:
 	Family GetFamily() const
 		{
         
-		if ( memcmp(ipv6_address.s6_addr, v4_mapped_prefix, 12) == 0 )
+		if (!memcmp(ipv6_address.s6_addr, v4_mapped_prefix, 12))
 			return IPv4;
 		else
 			return IPv6;
@@ -313,14 +313,14 @@ public:
             if(IP(packet)->ip_v == 4)
             {
                 
-                tmlog(TM_LOG_NOTE, "SrcIPAddress: genKey", "get key for IPv4 address");
+                //tmlog(TM_LOG_NOTE, "SrcIPAddress: genKey", "get key for IPv4 address");
                 return new SrcIPAddress(IP(packet)->ip_src.s_addr);
             }
 
             else
             {
                 //tmlog(TM_LOG_NOTE, "SrcIPAddress:genkey tester", "the version for Ipv6 is: %d", IP6(packet)->ip6_ctlun.ip6_un1.ip6_un1_flow);
-                tmlog(TM_LOG_NOTE, "SrcIPAddress: genKey", "get key for IPv6 address");
+                //tmlog(TM_LOG_NOTE, "SrcIPAddress: genKey", "get key for IPv6 address");
                 return new SrcIPAddress(IP6(packet)->ip6_src.s6_addr);
             }
         }

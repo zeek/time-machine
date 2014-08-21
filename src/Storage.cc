@@ -172,7 +172,7 @@ Storage::Storage(StorageConfig& conf):
     // I added this in to help understand the code
     else
     {
-        tmlog(TM_LOG_NOTE, "storage", "hmmm, filter is empty!");
+        //tmlog(TM_LOG_NOTE, "storage", "hmmm, filter is empty!");
     }
     */
 	for (std::list<Fifo*>::iterator it=conf.fifos.begin(); it!=conf.fifos.end(); it++) {

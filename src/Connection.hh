@@ -62,6 +62,8 @@ public:
 		key.port2 = c_id->key.port2;
 		v6.proto = c_id->v6.proto;
         v6.version = c_id->v6.version;
+        v6.ip1 = c_id->v6.ip1;
+        v6.ip2 = c_id->v6.ip2;
 	}
 	ConnectionID4(const u_char* packet);
 	ConnectionID4() {};
@@ -103,12 +105,27 @@ public:
                return (!memcmp(key, ((ConnectionID4*)&other)->key, sizeof(key_t)))
                         && (v6.proto == ((ConnectionID4*)&other)->v6.proto);
                */
-                 
+                if (v6.version == 4 && ((ConnectionID4*)&other)->v6.version == 4)
+                {
+                //return (!memcmp(&key.ip1.s6_addr + 12, &((ConnectionID4*)&other)->key.ip1.s6_addr + 12, 4))
+                //           && (!memcmp(&key.ip2.s6_addr + 12, &((ConnectionID4*)&other)->key.ip2.s6_addr + 12, 4))
+                return (v6.ip1 == ((ConnectionID4*)&other)->v6.ip1)
+                           && (v6.ip2 == ((ConnectionID4*)&other)->v6.ip2)
+                           && (key.port1 == ((ConnectionID4*)&other)->key.port1)
+                           && (key.port2 == ((ConnectionID4*)&other)->key.port2)
+                           && (v6.proto == ((ConnectionID4*)&other)->v6.proto);
+
+                }                 
+                else if (v6.version == 6 && ((ConnectionID4*)&other)->v6.version == 6)
+                {
 		return (!memcmp(&key.ip1.s6_addr, &((ConnectionID4*)&other)->key.ip1.s6_addr, 16))
 			   && (!memcmp(&key.ip2.s6_addr, &((ConnectionID4*)&other)->key.ip2.s6_addr, 16))
 			   && (key.port1 == ((ConnectionID4*)&other)->key.port1)
 			   && (key.port2 == ((ConnectionID4*)&other)->key.port2)
 			   && (v6.proto == ((ConnectionID4*)&other)->v6.proto);
+                }
+                else
+                    return false;
                 /*
                 return equal(key.ip1.s6_addr, ((ConnectionID4*)&other)->key.ip2.s6_addr)
                            && equal(key.ip2.s6_addr, ((ConnectionID4*)&other)->key.ip2.s6_addr)
@@ -206,6 +223,8 @@ public:
 		//uint16_t port2;
         int version;
 		proto_t proto;
+                int ip1;
+                int ip2;
 		//    bool is_canonified;
 	}
     // have the structure fields align on one-byte boundaries
