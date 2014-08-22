@@ -11,6 +11,7 @@
 
 #include <fstream>
 #include <queue>
+#include <string>
 //#include <gperftools/profiler.h> 
 
 #include "tm.h"
@@ -88,6 +89,14 @@ Index<T>::Index(tm_time_t d_t, int hash_size_index, bool do_disk_index, Storage 
             fprintf(stderr, "cannot chdir to %s\n", conf_main_workdir);
             //return(1);
         }
+
+        struct stat st;
+
+        if (stat(conf_main_indexdir, &st) != 0)
+        {
+            printf("The index directory %s did not exist. Creating the directory ...\n", conf_main_indexdir);
+            mkdir(conf_main_indexdir, 0755);
+        } 
         
 	    if (do_disk_index)
 		    disk_index = new IndexFiles<T>((std::string)conf_main_indexdir, "index_"+T::getIndexNameStatic());

@@ -152,6 +152,15 @@ QueryResultFile::QueryResultFile(int queryID, const std::string& filename, int l
            //return(1);
         }
 
+        struct stat st;
+
+        if (stat(conf_main_queryfiledir, &st) != 0)
+        {
+            printf("The index directory %s did not exist. Creating the directory ...\n", conf_main_queryfiledir);
+            mkdir(conf_main_queryfiledir, 0755);
+        }
+
+
 	ph = pcap_open_dead(linktype, snaplen);
 	f = new FifoDiskFile(conf_main_queryfiledir+std::string("/")+filename, ph);
 }
