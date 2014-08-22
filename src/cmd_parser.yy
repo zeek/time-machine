@@ -348,11 +348,11 @@ queryspec_flag:
 
 queryspec_key:
 	TOK_INDEX TOK_ID TOK_STRING {
-		fprintf(stderr, "INDEX QUERY: <%s>, string <%s>\n", $2, $3);
+		//fprintf(stderr, "INDEX QUERY: <%s>, string <%s>\n", $2, $3);
 		IndexType *idx=cmd_parser_storage->getIndexes()->getIndexByName($2);
 		if (idx) {
 			IndexField *ifp;
-			fprintf(stderr, "found the index\n");
+			//fprintf(stderr, "found the index\n");
 			ifp = idx->parseQuery($3);
 			//DEBUG fprintf(stderr, ">>>>> %s\n", ifp->getStr().c_str());
 			if (ifp==NULL) 

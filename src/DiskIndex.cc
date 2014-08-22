@@ -64,11 +64,11 @@ inline IndexFileReader::IndexFileReader(char *fn) : fp(NULL), fname(fn), eof(fal
 	if (fp == NULL) {
 		//TODO: Decent error handling
 		tmlog(TM_LOG_ERROR, "IFR", "Could not open index file \"%s\" for reading.\n", fname);
-                char path[70];
+                //char path[70];
 
                 //char errbufnav[PCAP_ERRBUF_SIZE];
 
-                printf("The directory for Fifo that we are in is %s\n", getcwd(path, 70));
+                //printf("The directory for Fifo that we are in is %s\n", getcwd(path, 70));
 
 	}
 	my_fread(&first, sizeof(tm_time_t), 1, fp);

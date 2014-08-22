@@ -657,7 +657,7 @@ IndexField* ConnectionIF4::parseQuery(const char *query) {
         struct sockaddr_in6 dst_ip6;
         //char str[INET6_ADDRSTRLEN];
 
-        printf("entering FullMatch for conn3, ipv6\n");
+        //printf("entering FullMatch for conn3, ipv6\n");
 
         if (protostr == std::string("tcp"))
             proto = IPPROTO_TCP;
@@ -665,9 +665,9 @@ IndexField* ConnectionIF4::parseQuery(const char *query) {
             proto = IPPROTO_UDP;
 
 
-        printf("the query in parsequery is %s\n", query);
+        //printf("the query in parsequery is %s\n", query);
 
-        printf("for IPv6, the protocol is <%s> and source ip is <%s> and the dest ip is <%s>i and the source port is <%u> and the destination port is <%u>\n", protostr.c_str(), src_ip.c_str(), dst_ip.c_str(), src_port, dst_port);
+        //printf("for IPv6, the protocol is <%s> and source ip is <%s> and the dest ip is <%s>i and the source port is <%u> and the destination port is <%u>\n", protostr.c_str(), src_ip.c_str(), dst_ip.c_str(), src_port, dst_port);
 
         //intf("for IPv6, The source ip is <%s> and the dest ip is <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s>\n", src_ip.c_str(), 
         // store this IP address in sa:
@@ -730,7 +730,7 @@ void ConnectionIF4::getBPFStr(char *str, int max_str_len) const {
 	    uint32_t s_port;
 	    uint32_t d_port;
 
-        printf("the query is for %s\n", c_id.getStr().c_str());
+        //printf("the query is for %s\n", c_id.getStr().c_str());
 
 	    /*
 	    if (c_id.get_is_canonified()) {
@@ -758,10 +758,10 @@ void ConnectionIF4::getBPFStr(char *str, int max_str_len) const {
 
     else
     {
-        printf("the query is for %s\n", c_id.getStr().c_str());
+        //printf("the query is for %s\n", c_id.getStr().c_str());
 
-        printf("The size of the first ip address is %lu\n", sizeof(c_id.get_ip1()));
-        printf("The size of the second ip address is %lu\n", sizeof(c_id.get_ip2()));
+        //printf("The size of the first ip address is %lu\n", sizeof(c_id.get_ip1()));
+        //printf("The size of the second ip address is %lu\n", sizeof(c_id.get_ip2()));
 
         //ip_to_str(c_id.get_ip1_addr(), s_ip6_str, 16); //sizeof(s_ip6_str));
         //ip_to_str(c_id.get_ip2_addr(), d_ip6_str, 16); //sizeof(d_ip6_str));
@@ -775,7 +775,7 @@ void ConnectionIF4::getBPFStr(char *str, int max_str_len) const {
 
         //tmlog(TM_LOG_ERROR, "ConnectionIF2::getBPFStr()", "we are in connectionIF2::getBPFStr()");
 
-        printf("host %s and host %s\n", s_ip6_str, d_ip6_str);
+        //printf("host %s and host %s\n", s_ip6_str, d_ip6_str);
 
         /*
         char s_ip6_str[TM_IP_STR_SIZE];
@@ -841,7 +841,7 @@ IndexField* ConnectionIF3::parseQuery(const char *query) {
 	unsigned port;
 	proto_t proto;
 
-    printf("Entering parQuery method\n");
+    //printf("Entering parQuery method\n");
 	
 	if (!RE2::FullMatch(query, re) && !RE2::FullMatch(query, re6))
     {
@@ -877,7 +877,7 @@ IndexField* ConnectionIF3::parseQuery(const char *query) {
         struct sockaddr_in6 dst_ip6;
         //char str[INET6_ADDRSTRLEN];
 
-        printf("entering FullMatch for conn3, ipv6\n");
+        //printf("entering FullMatch for conn3, ipv6\n");
 
         if (protostr == std::string("tcp"))
             proto = IPPROTO_TCP;
@@ -885,9 +885,9 @@ IndexField* ConnectionIF3::parseQuery(const char *query) {
             proto = IPPROTO_UDP;
 
 
-        printf("the query in parsequery is %s\n", query);
+        //printf("the query in parsequery is %s\n", query);
 
-        printf("for IPv6, the protocol is <%s> and source ip is <%s> and the dest ip is <%s>i and the port is <%u>\n", protostr.c_str(), src_ip.c_str(), dst_ip.c_str(), port);
+        //printf("for IPv6, the protocol is <%s> and source ip is <%s> and the dest ip is <%s>i and the port is <%u>\n", protostr.c_str(), src_ip.c_str(), dst_ip.c_str(), port);
 
         //intf("for IPv6, The source ip is <%s> and the dest ip is <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s>\n", src_ip.c_str(), 
         // store this IP address in sa:
@@ -898,7 +898,7 @@ IndexField* ConnectionIF3::parseQuery(const char *query) {
     }
     else
     {
-        printf("wut we are not suppose to be here!\n");
+        //printf("wut we are not suppose to be here!\n");
         //unsigned char src_ip6[16];
         //unsigned char dst_ip6[16];
 
@@ -943,7 +943,7 @@ void ConnectionIF3::getBPFStr(char *str, int max_str_len) const {
 	    char ip1_str[TM_IP_STR_SIZE];
 	    char ip2_str[TM_IP_STR_SIZE];
 
-        printf("the query is for %s\n", c_id.getStr().c_str());
+        //printf("the query is for %s\n", c_id.getStr().c_str());
 
 	    ip4_to_str(c_id.get_ip1(), ip1_str, sizeof(ip1_str));
 	    ip4_to_str(c_id.get_ip2(), ip2_str, sizeof(ip2_str));
@@ -959,10 +959,10 @@ void ConnectionIF3::getBPFStr(char *str, int max_str_len) const {
 
     else
     {
-        printf("the query is for %s\n", c_id.getStr().c_str());
+        //printf("the query is for %s\n", c_id.getStr().c_str());
 
-        printf("The size of the first ip address is %lu\n", sizeof(c_id.get_ip1()));
-        printf("The size of the second ip address is %lu\n", sizeof(c_id.get_ip2()));
+        //printf("The size of the first ip address is %lu\n", sizeof(c_id.get_ip1()));
+        //printf("The size of the second ip address is %lu\n", sizeof(c_id.get_ip2()));
 
         //ip_to_str(c_id.get_ip1_addr(), s_ip6_str, 16); //sizeof(s_ip6_str));
         //ip_to_str(c_id.get_ip2_addr(), d_ip6_str, 16); //sizeof(d_ip6_str));
@@ -976,7 +976,7 @@ void ConnectionIF3::getBPFStr(char *str, int max_str_len) const {
 
         //tmlog(TM_LOG_ERROR, "ConnectionIF2::getBPFStr()", "we are in connectionIF2::getBPFStr()");
 
-        printf("host %s and host %s\n", s_ip6_str, d_ip6_str);
+        //printf("host %s and host %s\n", s_ip6_str, d_ip6_str);
 
         /*
         char ip61_str[TM_IP_STR_SIZE];
@@ -1031,14 +1031,14 @@ IndexField* ConnectionIF2::parseQuery(const char *query) {
 		return NULL;
     }
 	
-	fprintf(stderr, "%s\nConnectionIF22:parseQuery:  %s ===> <%s> <%s>\n", 
-				pattern6_connection2.c_str(), query, src_ip.c_str(), dst_ip.c_str());
+	//fprintf(stderr, "%s\nConnectionIF22:parseQuery:  %s ===> <%s> <%s>\n", 
+	//			pattern6_connection2.c_str(), query, src_ip.c_str(), dst_ip.c_str());
 	
 
     
     if (RE2::FullMatch(query, re, &src_ip, &dst_ip))
     {
-        printf("for IPv6, The source ip is %s and the dest ip is %s\n", src_ip.c_str(), dst_ip.c_str());
+        //printf("for IPv6, The source ip is %s and the dest ip is %s\n", src_ip.c_str(), dst_ip.c_str());
 
     	return new ConnectionIF2(inet_addr(src_ip.c_str()), inet_addr(dst_ip.c_str()));
     }
@@ -1048,9 +1048,9 @@ IndexField* ConnectionIF2::parseQuery(const char *query) {
         struct sockaddr_in6 dst_ip6;
         //char str[INET6_ADDRSTRLEN];
 
-        printf("the query in parsequery is %s\n", query);
+        //printf("the query in parsequery is %s\n", query);
 
-        printf("for IPv6, the source ip is <%s> and the dest ip is <%s>\n", src_ip.c_str(), dst_ip.c_str());
+        //printf("for IPv6, the source ip is <%s> and the dest ip is <%s>\n", src_ip.c_str(), dst_ip.c_str());
 
         //intf("for IPv6, The source ip is <%s> and the dest ip is <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s> and <%s>\n", src_ip.c_str(), 
         // store this IP address in sa:
@@ -1101,10 +1101,10 @@ void ConnectionIF2::getBPFStr(char *str, int max_str_len) const {
         char s_ip_str[TM_IP_STR_SIZE];
         char d_ip_str[TM_IP_STR_SIZE];
 
-        printf("the query is for %s\n", c_id.getStr().c_str());
+        //printf("the query is for %s\n", c_id.getStr().c_str());
 
-        printf("The size of the first ip address is %lu\n", sizeof(c_id.get_ip1()));
-        printf("The size of the second ip address is %lu\n", sizeof(c_id.get_ip2()));
+        //printf("The size of the first ip address is %lu\n", sizeof(c_id.get_ip1()));
+        //printf("The size of the second ip address is %lu\n", sizeof(c_id.get_ip2()));
 
         ip4_to_str(c_id.get_ip1(), s_ip_str, 16);
         ip4_to_str(c_id.get_ip2(), d_ip_str, 16);
@@ -1112,7 +1112,7 @@ void ConnectionIF2::getBPFStr(char *str, int max_str_len) const {
 
         //tmlog(TM_LOG_ERROR, "ConnectionIF2::getBPFStr()", "we are in connectionIF2::getBPFStr()");
 
-        printf("ip4: host %s and host %s\n", s_ip_str, d_ip_str);
+        //printf("ip4: host %s and host %s\n", s_ip_str, d_ip_str);
 
         snprintf(str, max_str_len,
                  "host %s and host %s",
@@ -1124,10 +1124,10 @@ void ConnectionIF2::getBPFStr(char *str, int max_str_len) const {
 	    //char s_ip6_str[TM_IP_STR_SIZE];
 	    //char d_ip6_str[TM_IP_STR_SIZE];
 
-        printf("the query is for %s\n", c_id.getStr().c_str());
+        //printf("the query is for %s\n", c_id.getStr().c_str());
 
-        printf("The size of the first ip address is %lu\n", sizeof(c_id.get_ip1()));
-        printf("The size of the second ip address is %lu\n", sizeof(c_id.get_ip2()));
+        //printf("The size of the first ip address is %lu\n", sizeof(c_id.get_ip1()));
+        //printf("The size of the second ip address is %lu\n", sizeof(c_id.get_ip2()));
 
 	    //ip_to_str(c_id.get_ip1_addr(), s_ip6_str, 16); //sizeof(s_ip6_str));
 	    //ip_to_str(c_id.get_ip2_addr(), d_ip6_str, 16); //sizeof(d_ip6_str));
@@ -1141,7 +1141,7 @@ void ConnectionIF2::getBPFStr(char *str, int max_str_len) const {
 
         //tmlog(TM_LOG_ERROR, "ConnectionIF2::getBPFStr()", "we are in connectionIF2::getBPFStr()");
 
-        printf("host %s and host %s\n", s_ip6_str, d_ip6_str);
+        //printf("host %s and host %s\n", s_ip6_str, d_ip6_str);
 
 	    snprintf(str, max_str_len,
 		    	 "host %s and host %s",

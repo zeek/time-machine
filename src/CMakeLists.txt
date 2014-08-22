@@ -1,3 +1,4 @@
+enable_language(C ASM)
 bison_target(CMDParser cmd_parser.yy ${CMAKE_CURRENT_BINARY_DIR}/cmd_parser.cc
              HEADER ${CMAKE_CURRENT_BINARY_DIR}/cmd_parser.h
              VERBOSE ${CMAKE_CURRENT_BINARY_DIR}/cmd_parser.output
@@ -102,7 +103,8 @@ if (USE_BROCCOLI)
 endif()
 
 add_executable(timemachine ${timemachine_SRCS})
-target_link_libraries(timemachine ${CMAKE_THREAD_LIBS_INIT} ${PCAP_LIBRARY} ${Readline_LIBRARY} ${OPTLIBS} ${EXTRA_LIBS} re2Static pcapnavStatic)
+#set_target_properties(timemachine PROPERTIES COMPILE_DEFINITIONS "-save-temps")
+target_link_libraries(timemachine ${CMAKE_THREAD_LIBS_INIT} ${PCAP_LIBRARY} ${Readline_LIBRARY} ${OPTLIBS} ${EXTRA_LIBS} re2Static pcapnavStatic) # "-save-temps")
 
 if (NOT TimeMachine_SKIP_INSTALL)
     install(TARGETS timemachine DESTINATION bin)
