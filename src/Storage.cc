@@ -76,6 +76,11 @@ void *capture_thread(void *arg) {
 	return NULL;
 }
 
+bool compare_precedence(Fifo* first, Fifo* second)
+{
+    return (first->getPrecedence() > second->getPrecedence());
+}
+
 // Abstracts the configuration for a Storage instance,
 // initializing some of member variables
 StorageConfig::StorageConfig() : 
@@ -185,6 +190,7 @@ Storage::Storage(StorageConfig& conf):
     // clear the list of Fifo* from the Storage configuration
 	conf.fifos.clear();
 
+    fifos.sort(compare_precedence);
 
     // go through the list of Fifo* for Storage
 	for (std::list<Fifo*>::iterator i=fifos.begin(); i!=fifos.end(); i++)
@@ -500,6 +506,7 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 		 * Now evaluate BPF expressions defined for all classes and pick
 		 * the appropriate class
 		*/
+        /*
 		int max_precedence=INT_MAX;
         // go through all the possible classes
 		for (std::list<Fifo*>::iterator i=fifos.begin(); i!=fifos.end(); i++) {
@@ -518,6 +525,18 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 				max_precedence=f->getPrecedence();
 			}
 		}
+        */
+
+        std::list<Fifo*>::iterator i = fifos.begin();
+        while (i != fifos.end())
+        {
+            if ((*i)->matchPkt(header, packet))
+            {
+                f = *i;
+                break;
+            }
+            i++;
+        }
         // if class is assigned
 		if (f)
             // set cache to which class this connection belongs
