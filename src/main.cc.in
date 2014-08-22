@@ -811,6 +811,12 @@ void usage() {
 	exit(1);
 }
 
+void print_version()
+{
+    printf("TimeMachine version %s\n", VERSION);
+    exit(1); 
+}
+
 
 
 /***************************************************************************
@@ -836,7 +842,13 @@ main(int argc, char** argv) {
 	 */
 
 	int opt;
-	while ((opt=getopt(argc, argv, "i:r:f:c:h")) != -1) {
+    /*
+    if (getopt(argc, argv, "v") != -1)
+    {
+        print_version();
+    }
+    */
+	while ((opt=getopt(argc, argv, "i:r:f:c:v:h")) != -1) {
         //std::cout << "the command line arg you put in is: " << opt << std::endl;
         //std::cout << "the second command line arg you put in is: " << argv[1] << std::endl;
 		switch(opt) {
@@ -852,6 +864,9 @@ main(int argc, char** argv) {
 		case 'c':
 			conffile=strdup(optarg);
 			break;
+        case 'v':
+            print_version();
+            break;
 		case 'h':
 		default:
 			usage();
@@ -942,7 +957,7 @@ main(int argc, char** argv) {
 		delete log_file;
 		exit(1);
 	}
-	tmlog(TM_LOG_NOTE, "main: main.cc.in, ~line 714", "capture started, capture thread come on");
+	//tmlog(TM_LOG_NOTE, "main: main.cc.in, ~line 714", "capture started, capture thread come on");
 
 	//tmlog(TM_LOG_NOTE, "main", "capture started, capture thread WORK WORK WORK WORK WORK WORK WORK WORK WORK WORK");
 
@@ -956,7 +971,7 @@ main(int argc, char** argv) {
 	i = pthread_create(&index_aggregation_thread_tid, NULL, index_aggregation_thread, NULL);
 
     // NOTE NOTE NOTE
-    tmlog(TM_LOG_NOTE, "index aggregation thread: main.cc.in, ~line 728", "creating index aggregation thread");
+    //tmlog(TM_LOG_NOTE, "index aggregation thread: main.cc.in, ~line 728", "creating index aggregation thread");
 	if (i) {
 		tmlog(TM_LOG_ERROR, "main", "Could not start index aggregation thread.\n");
 		exit(1);
@@ -1016,7 +1031,7 @@ main(int argc, char** argv) {
 						 statisticslog_thread, &conf_main_log_interval);
 
         // NOTE NOTE NOTE
-        tmlog(TM_LOG_NOTE, "statistics log thread: main.cc.in, ~line 788", "creating statistics log thread");
+       // tmlog(TM_LOG_NOTE, "statistics log thread: main.cc.in, ~line 788", "creating statistics log thread");
 
 		if (i) {
 			tmlog(TM_LOG_ERROR, "main", "Could not start statistics log thread.\n");
