@@ -135,7 +135,8 @@ void DynClassTable::removeOld() {
     now = valspec_to_tm(&tmptv);
     #endif
     */
-    #if defined(linux) || defined(__APPLE__)
+    /*
+    #ifdef linux
     struct timespec tmptv;
     clock_gettime(CLOCK_MONOTONIC_COARSE, &tmptv);
     now = spec_to_tm(&tmptv);
@@ -145,7 +146,12 @@ void DynClassTable::removeOld() {
     clock_gettime(CLOCK_MONOTONIC_FAST, &tmptv);
     now = spec_to_tm(&tmptv);
     #endif
-
+    */
+    
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    now = to_tm_time(&tv);
+    
 	//now = to_tm_time(&tv);
 
     // set next to pointer to the entry with the lowest timeout (timeouts are sorted)

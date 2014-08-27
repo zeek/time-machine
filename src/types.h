@@ -17,11 +17,11 @@ typedef double tm_time_t;
 inline tm_time_t to_tm_time(const struct timeval* tv) {
 	return (double)tv->tv_sec+(double)tv->tv_usec/1e6;
 }
-
+/*
 inline tm_time_t spec_to_tm(const struct timespec* tv) {
     return (double)tv->tv_sec + (double)tv->tv_nsec/1e9;
 }
-
+*/
 /*
 #ifdef __APPLE__
 inline tm_time_t valspec_to_tm(const struct tvalspec* tv) {

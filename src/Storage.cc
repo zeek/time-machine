@@ -716,9 +716,9 @@ tm_time_t Storage::getOldestTimestampDisk() {
 
 
 void Storage::query(QueryRequest *query_req, QueryResult *query_res) {
-	//struct timeval t_start, t_end;
-	//gettimeofday(&t_start, NULL);
-
+	struct timeval t_start, t_end;
+	gettimeofday(&t_start, NULL);
+    /*
     #ifdef __APPLE__
     struct tvalspec t_start, t_end;
     clock_get_time(CLOCK_MONOTONIC_COARSE, &t_start);
@@ -731,7 +731,7 @@ void Storage::query(QueryRequest *query_req, QueryResult *query_res) {
     struct timespec t_start, t_end;
     clock_gettime(CLOCK_MONOTONIC_FAST, &t_start);
     #endif
-
+    */
 	//fprintf(stderr, "Query ID: %d\n",  query_res->getQueryID());
 
     // getIndexByName is from Index.hh from class Indexes
@@ -789,6 +789,7 @@ void Storage::query(QueryRequest *query_req, QueryResult *query_res) {
     #endif
     */
     //#ifdef linux
+    /*
     #if defined(linux) || defined(__APPLE__)
     clock_gettime(CLOCK_MONOTONIC_COARSE, &t_end);
     tmlog(TM_LOG_NOTE, "query", "%d Done. It took %.2lf seconds", query_res->getQueryID(),  
@@ -799,11 +800,11 @@ void Storage::query(QueryRequest *query_req, QueryResult *query_res) {
     tmlog(TM_LOG_NOTE, "query", "%d Done. It took %.2lf seconds", query_res->getQueryID(),  
         spec_to_tm(&t_end)-spec_to_tm(&t_start));
     #endif
+    */
 
-
-	//gettimeofday(&t_end, NULL);
-	//tmlog(TM_LOG_NOTE, "query", "%d Done. It took %.2lf seconds", query_res->getQueryID(), 
-		//to_tm_time(&t_end)-to_tm_time(&t_start));
+	gettimeofday(&t_end, NULL);
+	tmlog(TM_LOG_NOTE, "query", "%d Done. It took %.2lf seconds", query_res->getQueryID(), 
+		to_tm_time(&t_end)-to_tm_time(&t_start));
 	if (query_res->getUsage() == 0) {
 		/* haven't passed it on to a subscription, delete it */
 		delete query_res;
@@ -811,7 +812,7 @@ void Storage::query(QueryRequest *query_req, QueryResult *query_res) {
 	delete query_req;
 
 	tot_queries_duration+=(uint64_t) ( (t_end.tv_sec-t_start.tv_sec)*1e6
-										+(t_end.tv_nsec-t_start.tv_nsec)/1000 );
+										+(t_end.tv_usec-t_start.tv_usec)/1000 );
 	tot_num_queries++;
 }
 
@@ -848,13 +849,13 @@ bool Storage::suspendTimeout(ConnectionID4 cid, bool b) {
 }
 
 bool Storage::setDynClass(IPAddress *ip, int dir, const char *classname) {
-	//struct timeval tv;
+	struct timeval tv;
 	tm_time_t now;
 	Fifo *f;
 	bool retval = true;
 
-	//gettimeofday(&tv, NULL);
-	//now = to_tm_time(&tv);
+	gettimeofday(&tv, NULL);
+	now = to_tm_time(&tv);
 
         /*
         #ifdef __APPLE__
@@ -864,6 +865,7 @@ bool Storage::setDynClass(IPAddress *ip, int dir, const char *classname) {
         #endif
         #ifdef linux
         */
+        /*
         #if defined(linux) || defined(__APPLE__)
         struct timespec tmptv;
         clock_gettime(CLOCK_MONOTONIC_COARSE, &tmptv);
@@ -874,7 +876,7 @@ bool Storage::setDynClass(IPAddress *ip, int dir, const char *classname) {
         clock_gettime(CLOCK_MONOTONIC_FAST, &tmptv);
         now = spec_to_tm(&tmptv);
         #endif
-
+        */
 	//tmlog(TM_LOG_DEBUG, "dyn_class", "Setting IP %s to class %s, direction %d",
 			//ip->getStr().c_str(), classname, dir);
 	f = getFifoByName(std::string("class_") + classname);

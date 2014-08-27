@@ -960,7 +960,7 @@ main(int argc, char** argv) {
 
         //struct stat st;
 
-        printf("the directory to the profile is: %s\n", filepath);
+        //printf("the directory to the profile is: %s\n", filepath);
 
         /*
         if (stat(filepath, &st) != 0)
