@@ -28,8 +28,9 @@
 #define USE_MALLINFO
 #endif
 #include <sys/ioctl.h>
-//#include <gperftools/profiler.h>
-
+#ifdef USE_PERFTOOLS_CPU
+#include <gperftools/profiler.h>
+#endif
 
 #ifdef USE_BROCCOLI
 #include "BroccoliComm.hh"
@@ -117,6 +118,7 @@ int conf_main_log_interval=60;
 int conf_main_log_level=20;
 const char* conf_main_workdir="./";
 const char* conf_main_indexdir="./";
+const char* conf_main_profilepath="./";
 //const char* conf_classdir = "./";
 const char* conf_main_queryfiledir="./";
 const char* conf_main_logfile_name="timemachine.log";
@@ -826,7 +828,29 @@ void print_version()
 int
 main(int argc, char** argv) {
 
-        //ProfilerStart("/home/neto/data/profile/blah.prof");
+        /*
+        char filepath[100];
+
+        strcpy(filepath, conf_main_workdir);
+        strcat(filepath, "/");
+        strcat(filepath, conf_main_profilepath);
+
+        struct stat st;
+
+        printf("the directory to the profile is: %s\n", filepath);
+
+        if (stat(filepath, &st) != 0)
+        {
+            printf("The index directory %s did not exist. Creating the directory ...\n", conf_main_profilepath);
+            mkdir("home/lakers/timemachine_results/profile", 0755);
+        }
+
+        char path[70];
+
+        printf("The directory for initial main that we are in is %s\n", getcwd(path, 70));       
+ 
+        ProfilerStart(filepath);
+        */
 	const char *conffile="@BRO_ETC_INSTALL_DIR@/timemachine.cfg";
 	struct sigaction exit_action;
 	int i;
@@ -926,7 +950,33 @@ main(int argc, char** argv) {
 		/* don't close stderr yet. wait until startup is finished */
 	}
 
+        char filepath[100];
 
+        strcpy(filepath, conf_main_workdir);
+        strcat(filepath, "/");
+        strcat(filepath, conf_main_profilepath);
+
+        
+
+        //struct stat st;
+
+        printf("the directory to the profile is: %s\n", filepath);
+
+        /*
+        if (stat(filepath, &st) != 0)
+        {
+            printf("The index directory %s did not exist. Creating the directory ...\n", conf_main_profilepath);
+            mkdir(filepath, 0755);
+        }
+        */
+
+        //char path[70];
+
+        //printf("The directory for initial main that we are in is %s\n", getcwd(path, 70));
+
+        #ifdef USE_PERFTOOLS_CPU 
+        ProfilerStart(filepath);
+        #endif
 
 
 	// Blocl all signals. This signal mask is then inherited by spawned 
@@ -1073,7 +1123,9 @@ main(int argc, char** argv) {
 				pause();
 		}
 
-        //ProfilerStop();
+        #ifdef USE_PERFTOOLS_CPU
+        ProfilerStop();
+        #endif
         delete stats_log_file;
         delete classes_log_file;
         delete index_log_file; 

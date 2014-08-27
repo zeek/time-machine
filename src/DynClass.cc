@@ -128,12 +128,14 @@ void DynClassTable::removeOld() {
 	lock();
 	//gettimeofday(&tv, NULL);
 
+    /*
     #ifdef __APPLE__
     struct tvalspec tmptv;
     clock_get_time(CLOCK_MONOTONIC_COARSE, &tmptv)i;
     now = valspec_to_tm(&tmptv);
     #endif
-    #ifdef linux
+    */
+    #if defined(linux) || defined(__APPLE__)
     struct timespec tmptv;
     clock_gettime(CLOCK_MONOTONIC_COARSE, &tmptv);
     now = spec_to_tm(&tmptv);

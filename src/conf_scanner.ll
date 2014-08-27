@@ -58,6 +58,7 @@ NEWLINE \n
 "workdir"	 return TOK_WORKDIR;
 "queryfiledir"	 return TOK_QUERYFILEDIR;
 "indexdir"	 return TOK_INDEXDIR;
+"profilepath"    return TOK_PROFILEPATH;
 "index"      return TOK_INDEX;
 "logfile"	 return TOK_LOGFILE;
 "bro_connect_str" return TOK_BRO_CONNECT_STR;

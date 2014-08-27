@@ -17,28 +17,29 @@ usage="\
 Usage: $0 [OPTION]... [VAR=VALUE]...
 
   Build Directory:
-    --builddir=DIR         place build files in directory [build]
+    --builddir=DIR             place build files in directory [build]
 
   Installation Directories:
-    --prefix=PREFIX        installation directory [/usr/local]
-    --conf-files-dir=DIR   config files installation directory [PREFIX/etc]
+    --prefix=PREFIX            installation directory [/usr/local]
+    --conf-files-dir=DIR       config files installation directory [PREFIX/etc]
 
   Optional Features:
-    --enable-debug         compile in debugging mode
+    --enable-debug             compile in debugging mode
+    --enable-gperftools-cpu    enable the use of gperftools' cpu profiler
 
   Required Packages in Non-Standard Locations:
-    --with-broccoli=PATH   path to libbroccoli install root
-    --with-pcap=PATH       path to libpcap install root
-    --with-pcapnav=PATH    path to libpcapnav install root
-    --with-flex=PATH       path to flex executable
-    --with-bison=PATH      path to bison executable
+    --with-broccoli=PATH       path to libbroccoli install root
+    --with-pcap=PATH           path to libpcap install root
+    --with-pcapnav=PATH        path to libpcapnav install root
+    --with-flex=PATH           path to flex executable
+    --with-bison=PATH          path to bison executable
 
   Influential Environment Variables (only on first invocation
   per build directory):
-    CC                     C compiler command
-    CFLAGS                 C compiler flags
-    CXX                    C++ compiler command
-    CXXFLAGS               C++ compiler flags
+    CC                         C compiler command
+    CFLAGS                     C compiler flags
+    CXX                        C++ compiler command
+    CXXFLAGS                   C++ compiler flags
 "
 
 sourcedir="$( cd "$( dirname "$0" )" && pwd )"

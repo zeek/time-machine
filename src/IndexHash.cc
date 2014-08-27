@@ -1,6 +1,27 @@
 #include "IndexHash.hh"
 #include <iostream>
 
+/*
+ * Pseudo-proof about use of prime number hash table sizes. Please let me
+ * know if you find something wrong in the proof via email.
+ *
+ * The indexes in the hash table are calculated by doing key mod (hash table
+ *  size).
+ * We can note that there exists y / GCF(y, n) distinct instances of m * n (mod y) for all m.
+ * To see why this is true, we can let a = GCF(y, n).
+ * Let n be a particular key, and y = a * x and n = a * b
+ * Let's say we have n mod y, which can be written as (a * b) (mod a * x)
+ * So, note that (a * b) (mod a * x) = a * (b + x) (mod a * x), since a * b + a * x (mod a * x) = a * b (mod a * x)
+ * So, we only have x instances of unique remainders for all numbers with a
+ * factor of a.
+ * Note that y = a * x, which can be written as x = y / a
+ * So, x = y / GCF(y, n)
+ * We want x to be equal to y, since we want to utilize all the buckets in the
+ * hash table.
+ * So, GCF(y, n) = 1, which leads to only y being prime would suffice.
+ * So, we need a prime number hash size to avoid clustering.
+ */
+
 static const uint64_t IndexHash_primes[] = {1, 2, 3, 7, 13, 29, 53, 97, 193, 389, 769, 1543, 3079, 6151, \
                                             12289, 24593, 49517, 98317, 196613, 393241, 786433, 1572869, \
                                             3145739, 6291469, 12582917, 25165843, 50331653, 100663319, \

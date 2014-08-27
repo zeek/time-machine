@@ -1,5 +1,19 @@
+0.1-5 | 2014-08-26 15:35:00 -0800
+
+    * Changed the hash table sizes to always be prime number, to help avoid clustering in the collisions lists. (Naoki Eto) 
+
+    * Added gperftools CPU profiler, which can be enabled (Naoki Eto)
+
+    * Changed the method for reading the configuration classes so that it is first ordered by precedence and then the highest precedence match is found (Naoki Eto)    
+
+    * Implemented querying for IPv4 and IPv6 ip, conn2, conn3, and conn4 (Naoki Eto)
+
+    * Implemented class directories that can be specified in the configuration file (Naoki Eto)
+
 0.1-4 | 2014-07-18 16:53:50 -0800
     
+    * Implemented IPv6 support for the classes. (Naoki Eto)   
+ 
     * Some querying for IPv6 addresses is enabled. (Naoki Eto)
 
     * VLAN tags are taken into account w/o MPLS labels (Naoki Eto)

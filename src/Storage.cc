@@ -271,6 +271,7 @@ Storage::~Storage() {
 	//tmlog(TM_LOG_DEBUG, "storage: Storage.cc, ~line 210", "Fifos deleted.");
 	delete indexes;
 	//tmlog(TM_LOG_DEBUG, "storage: Storage.cc, ~line 212", "pcap handle closed.");
+        //printf("Pcap handle closed\n");
 	pcap_close(ph);
 }
 
@@ -780,13 +781,15 @@ void Storage::query(QueryRequest *query_req, QueryResult *query_res) {
 		}
 	} /* if (subscription requested) */
 
-
+    /*
     #ifdef __APPLE__
     clock_get_time(CLOCK_MONOTONIC_COARSE, &t_end);
     tmlog(TM_LOG_NOTE, "query", "%d Done. It took %.2lf seconds", query_res->getQueryID(), 
         valspec_to_tm(&t_end)-valspec_to_tm(&t_start));
     #endif
-    #ifdef linux
+    */
+    //#ifdef linux
+    #if defined(linux) || defined(__APPLE__)
     clock_gettime(CLOCK_MONOTONIC_COARSE, &t_end);
     tmlog(TM_LOG_NOTE, "query", "%d Done. It took %.2lf seconds", query_res->getQueryID(),  
         spec_to_tm(&t_end)-spec_to_tm(&t_start));
@@ -853,12 +856,15 @@ bool Storage::setDynClass(IPAddress *ip, int dir, const char *classname) {
 	//gettimeofday(&tv, NULL);
 	//now = to_tm_time(&tv);
 
+        /*
         #ifdef __APPLE__
         struct tvalspec tmptv;
         clock_get_time(CLOCK_MONOTONIC_COARSE, &tmptv)i;
         now = valspec_to_tm(&tmptv);
         #endif
         #ifdef linux
+        */
+        #if defined(linux) || defined(__APPLE__)
         struct timespec tmptv;
         clock_gettime(CLOCK_MONOTONIC_COARSE, &tmptv);
         now = spec_to_tm(&tmptv);

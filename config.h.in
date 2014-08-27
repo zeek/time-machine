@@ -7,6 +7,12 @@
 /* Define if you have the `mallinfo' function. */
 #cmakedefine HAVE_MALLINFO
 
+/* Define if you have gperftools library. */
+#cmakedefine HAVE_PERFTOOLS
+
+/* Define if you have gperftools' cpu profiler */
+#cmakedefine USE_PERFTOOLS_CPU
+
 /* Define if you have the <memory.h> header file. */
 #cmakedefine HAVE_MEMORY_H
 

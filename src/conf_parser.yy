@@ -68,7 +68,7 @@
 %token <ipaddr> TOK_IPADDRESS;
 %token TOK_CLASS TOK_FILTER TOK_MAIN TOK_LOG_INTERVAL TOK_LOG_LEVEL TOK_DEVICE
 %token TOK_CLASSDIR
-%token TOK_LOGFILE TOK_WORKDIR TOK_QUERYFILEDIR TOK_INDEXDIR
+%token TOK_LOGFILE TOK_WORKDIR TOK_QUERYFILEDIR TOK_INDEXDIR TOK_PROFILEPATH
 %token TOK_READ_TRACEFILE TOK_BRO_CONNECT_STR
 %token TOK_MEM TOK_DISK TOK_K TOK_M TOK_G TOK_CUTOFF TOK_PRECEDENCE
 %token TOK_DYN_TIMEOUT
@@ -245,6 +245,10 @@ main_option:
 	  conf_main_indexdir=strdup($2);
 	  free($2);
 	}
+        | TOK_PROFILEPATH TOK_STRING {
+          conf_main_profilepath=strdup($2);
+          free($2);
+        }
 	| TOK_BRO_CONNECT_STR TOK_STRING {
 	  conf_main_bro_connect_str=strdup($2);
 	  free($2);
