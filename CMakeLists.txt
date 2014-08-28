@@ -78,7 +78,9 @@ if (ENABLE_PERFTOOLS_CPU OR ENABLE_PERFTOOLS_DEBUG OR ENABLE_PERFTOOLS)
     # perftools weren't found
 endif ()
 
-set(CMAKE_CXX_FLAGS "-g -Wall")
+set(CMAKE_CXX_FLAGS "-g -Wall -O3")
+set(CMAKE_C_FLAGS "-g -Wall -O3")
+add_definitions("-O3")
 
 #detect 32 or 64 bit compiler
 # Also in config.h.in

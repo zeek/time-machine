@@ -7,6 +7,8 @@
  *
  * The indexes in the hash table are calculated by doing key mod (hash table
  *  size).
+ * The statement to prove is: number of buckets used = hash_table_size / GCF(hash_table_size, factor).
+ *
  * We can note that there exists y / GCF(y, n) distinct instances of m * n (mod y) for all m.
  * To see why this is true, we can let a = GCF(y, n).
  * Let n be a particular key, and y = a * x and n = a * b

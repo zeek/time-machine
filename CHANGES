@@ -1,20 +1,30 @@
 0.1-5 | 2014-08-26 15:35:00 -0800
 
-    * Changed the hash table sizes to always be prime number, to help avoid clustering in the collisions lists. (Naoki Eto) 
+    * Implemented the creation of index and query directories by default if the user did not create the index and query directories. Also,
+      if indexes are not enabled, index directory is not created. If querying is not occuring, query directory is not created.
 
-    * Added gperftools CPU profiler, which can be enabled (Naoki Eto)
+    * Implemented a counter instead of the many calls to gettimeofday when determining when to write to disk, which costed a lot of CPU.
 
-    * Changed the method for reading the configuration classes so that it is first ordered by precedence and then the highest precedence match is found (Naoki Eto)    
+    * Changed the hash table sizes to always be prime number, to help avoid clustering in the collisions lists. (Naoki Eto)
+
+    * Added gperftools CPU profiler, which can be enabled by using --enable-gperftools-cpu in the ./configure option and
+      adding a name to profilepath in the configuration file (Naoki Eto)
+
+    * Changed the method for reading the configuration classes so that it is first ordered by precedence and then the highest precedence match is found (Naoki Eto)
 
     * Implemented querying for IPv4 and IPv6 ip, conn2, conn3, and conn4 (Naoki Eto)
 
-    * Implemented class directories that can be specified in the configuration file (Naoki Eto)
+    * Implemented class directories that can be specified in the configuration file. Example:
+      ...
+      filesize 2000m;
+      mem 100m;
+      classdir "/home/neto/data_http";
+      }
+      (Naoki Eto)
 
 0.1-4 | 2014-07-18 16:53:50 -0800
-    
-    * Implemented IPv6 support for the classes. (Naoki Eto)   
- 
-    * Some querying for IPv6 addresses is enabled. (Naoki Eto)
+
+    * Implemented IPv6 support for the classes. (Naoki Eto)
 
     * VLAN tags are taken into account w/o MPLS labels (Naoki Eto)
 
@@ -25,3 +35,4 @@
 0.1-3 | 2013-02-07 14:33:20 -0800
 
   * Starting CHANGES.
+

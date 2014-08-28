@@ -398,6 +398,9 @@ public:
                 */
         // returns 0 if lock was successfully achieved
 
+        // 500000 came from testing. In the above commented out code, you can see that previously, gettimeofday was used.
+        // Basically, I did a counter while it was doing gettimeofday, and found that it did around 500000 entries before trying
+        // disk write lock. It was pretty consistent on two different machines.
         if (num_of_entries < 500000)
         {
             num_of_entries++;

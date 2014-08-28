@@ -25,7 +25,7 @@ Usage: $0 [OPTION]... [VAR=VALUE]...
 
   Optional Features:
     --enable-debug             compile in debugging mode
-    --enable-gperftools-cpu    enable the use of gperftools' cpu profiler
+    --enable-perftools-cpu    enable the use of gperftools' cpu profiler
 
   Required Packages in Non-Standard Locations:
     --with-broccoli=PATH       path to libbroccoli install root
