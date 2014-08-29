@@ -310,8 +310,11 @@ void Index<T>::addEntry(IndexField *iqe) {
 			/* Balance number of hash buckets */
 			/* Hash has twice as many buckets as entries. shrink.
 			 * yes, we want to compare the size of cur with the # entries of old (formerly new hash table) */
-           
-		    if (hash_size > 2.05*old->getNumEntries()) {
+            /* Why 2.24? The biggest ratio between consecutive numbers in the hash table size list was 29/13, which is 2.23. So, if the hash table
+             * size is more than 2.24 times bigger than the number of entries, we can safely shrink the hash table size, to the element before in the
+             * hash table size array. 
+             */
+		    if (hash_size > 2.24*old->getNumEntries()) {
               //if (hash_size < old->getNumEntries()) { 
                 // Note that we delete cur - this means we delete the formerly old hash table, which has been written to disk
                 //tmlog(TM_LOG_NOTE, "Index.cc", "we are about to delete the current (formerly old) hash table");
@@ -321,10 +324,18 @@ void Index<T>::addEntry(IndexField *iqe) {
                     //tmlog(TM_LOG_ERROR, "Index.cc:addEntry", "we are decreasing hash table size to %d and the number of entries in old hash is %d with %d buckets", hash_size_index - 1, old->getNumEntries(), old->getNumBuckets()); 
 				    cur = new IndexHash(hash_size_index - 1);
                 }
+                else
+                    cur = new IndexHash(0);
 			}
             
 			/* Hash has half as many buckets than entries. enlarge */
-            else if (1.95 * hash_size < old->getNumEntries()) {
+            /* UPDATED COMMENT: If 1.82 * hash_size is less than the number of entries, then enlarge the hash table (1.82 was chosen instead of 3/2 = 1.5 because 
+             * 1.82 is for the 53/29, which is the smallest and more likely to happen than 3/2. We enlarge it by two (approx factor of 4) via hash table
+             * size array. We do this because sometimes, the number of entries were observed to increase by a factor of 4 (tested via the numerous tmlogs you see
+             * littering this area of the code). Also, 1.82 worked better than simply 1 or 1.95 in terms of packet drops, it appears. More testing may be needed
+             * to determine the optimal number.
+             */
+            else if (1.82 * hash_size < old->getNumEntries()) {
 	    	//else if (1.9*hash_size < old->getNumEntries()) {
             //else if (hash_size > old->getNumEntries()) {
                 // Note that we delete cur - this means we delete the formerly old hash table, which has been written to disk
@@ -335,6 +346,9 @@ void Index<T>::addEntry(IndexField *iqe) {
                     //tmlog(TM_LOG_ERROR, "Index.cc:addEntry", "we are increasing hash table size to %d and the number of entries is %d with %d buckets ", hash_size_index + 2, old->getNumEntries(), old->getNumBuckets());
 				    cur = new IndexHash(hash_size_index + 2);
                 }
+                // Based on experimentation, it should never go here. Hash table sizes range at around 10,000->100,000 only.
+                else
+                    cur = new IndexHash(old->getNumEntries() + (old->getNumEntries() % 2 + 1));
                 /*
                 else
                 {

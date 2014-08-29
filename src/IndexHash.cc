@@ -73,7 +73,10 @@ IndexHash::IndexHash(int size_index) {
     */
 	numEntries = 0;
 	numBucketsIndex = size_index;
-    numBuckets = Primes[size_index];
+    if (size_index < 43)
+        numBuckets = Primes[size_index];
+    else
+        numBuckets = size_index;
 
     htable = new hash_t[numBuckets];
 
