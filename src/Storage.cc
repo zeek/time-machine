@@ -390,6 +390,8 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
         
 
 		idxpacket += 4; // Skip the vlan header
+		packet += 4; // Skip the vlan header
+		
 		//pkt_hdr_size = 0;
 
 		// Check for 802.1ah (Q-in-Q) containing IP.
@@ -397,8 +399,12 @@ void Storage::addPkt(const struct pcap_pkthdr *header,
 		// stripping because there is no
 		// specification that allows for deeper
 		// nesting.
+
 		if ( ((idxpacket[2] << 8) + idxpacket[3]) == 0x0800 )
+		{
 			idxpacket += 4;
+			packet += 4;
+		}
     }
 
     // TODO: Cannot handle MPLS labels just yet
