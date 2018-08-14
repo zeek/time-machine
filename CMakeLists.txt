@@ -18,6 +18,9 @@ FindRequiredPackage(PCAP)
 FindRequiredPackage(Readline)
 FindRequiredPackage(Threads)
 
+include_directories(BEFORE ${Readline_INCLUDE_DIR})
+target_link_libraries(-lreadline) 
+
 # Optional Dependencies
 
 set(USE_BROCCOLI false)
