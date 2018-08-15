@@ -20,7 +20,7 @@ class FifoDiskFile;
 class FifoDisk {
 public:
 	FifoDisk(const std::string& classname, uint64_t size,
-			 uint64_t file_size, pcap_t*);
+			 uint64_t file_size, pcap_t*, const char* classdir);
 	~FifoDisk();
 	//  void addPkt(const struct pcap_pkthdr *header, const unsigned char *packet);
 	void addPkt(const pkt_ptr p);
@@ -69,6 +69,7 @@ public:
 
 protected:
 	std::string classname;
+        const char* classdir;
 	std::list <FifoDiskFile*> files;
 	uint64_t size;
 	uint64_t file_size;
@@ -117,9 +118,10 @@ public:
 	}
 	/* iterator will be increased up to the first interval completeley
 	   not in file */
-	uint64_t query( QueryRequest*, QueryResult*, IntervalSet*);
+	uint64_t query( QueryRequest*, QueryResult*, IntervalSet*, const char* classdirectory);
 protected:
 	std::string filename;
+        const char* classdir;
 	bool is_open;
 	pcap_dumper_t *pcap_dumper_handle;
 	int64_t cur_file_size;

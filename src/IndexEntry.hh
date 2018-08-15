@@ -75,23 +75,29 @@ class IndexEntry {
 public:
 	IndexEntry(IndexField* key, tm_time_t t0, tm_time_t t1) :
 	key(key), icount(1), intlist(Interval(t0,t1)) {
+        //tmlog(TM_LOG_NOTE, "IndexEntry:IndexEntry()", "Creating an IndexEntry instance with an IndexField type that has timestamp %f", key->ts);
 		curint = &intlist;
 		parent = left = right = NULL;
 		col_next = col_prev = NULL;
 		avlbal=0;
 	};
-	virtual ~IndexEntry() {  
+	virtual ~IndexEntry() {
+        //tmlog(TM_LOG_NOTE, "IndexEntry, deleting", "starting to delete IndexEntry type");  
 		Interval *ci;
 		Interval *ni;
+        //tmlog(TM_LOG_NOTE, "IndexEntry, deleting", "about the delete the key, which is of IndexField type");
 		delete key;
+        key = NULL;
 		ci=intlist.next;
 		while(ci) {
+            //tmlog(TM_LOG_NOTE, "IndexEntry, deleting", "deleting the linked list of intervals");
 			ni = ci->next;
 			delete ci;
 			ci = ni;
 		}
 	};
 	inline IndexField* getKey() {
+        //tmlog(TM_LOG_NOTE, "IndexEntry:getKey()", "accessing IndexEntry's getKey() method");
 		return key;
 	}
 	virtual int update_time(tm_time_t t, tm_time_t d_t, tm_time_t iat) {
@@ -110,6 +116,7 @@ public:
 		return &intlist;
 	};
 	virtual std::string getStr() const {
+        //tmlog(TM_LOG_NOTE, "IndexEntry:getStr()", "accessing IndexEntry's getStr() method");
 		std::stringstream ss;
 		ss.setf(std::ios::fixed);
 		ss << "key: " << key->getStr()

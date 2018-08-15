@@ -128,7 +128,7 @@ append_fix_trunc_packet(pcapnav_t *pn, FILE *result)
 
 
 static pcap_dumper_t *
-append_impl(pcap_t *pcap, const char *filename, pcapnav_dumpmode_t mode)
+append_impl(pcap_t *pcap, const char *filename, pcapnav_dumpmode_t mode, const char* classdirectory)
 {
   pcapnav_t *pn = NULL;
   FILE *result = NULL;
@@ -148,7 +148,7 @@ append_impl(pcap_t *pcap, const char *filename, pcapnav_dumpmode_t mode)
        */
     }
   
-  if (! (pn = pcapnav_open_offline(filename)))
+  if (! (pn = pcapnav_open_offline_tm(filename, classdirectory)))
     {
       D(("Error opening '%s'\n", filename));
       return NULL;
@@ -223,15 +223,15 @@ append_impl(pcap_t *pcap, const char *filename, pcapnav_dumpmode_t mode)
 
 
 pcap_dumper_t *
-pcapnav_append_fast(pcap_t *pcap, const char *filename)
+pcapnav_append_fast(pcap_t *pcap, const char *filename, const char* classdirectory)
 {
-  return append_impl(pcap, filename, PCAPNAV_DUMP_APPEND_FAST);
+  return append_impl(pcap, filename, PCAPNAV_DUMP_APPEND_FAST, classdirectory);
 }
 
 
 pcap_dumper_t *   
-pcapnav_append_safe(pcap_t *pcap, const char *filename)
+pcapnav_append_safe(pcap_t *pcap, const char *filename, const char* classdirectory)
 {
-  return append_impl(pcap, filename, PCAPNAV_DUMP_APPEND_SAFE);
+  return append_impl(pcap, filename, PCAPNAV_DUMP_APPEND_SAFE, classdirectory);
 }
 

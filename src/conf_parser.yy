@@ -67,7 +67,8 @@
 %token <s> TOK_ID
 %token <ipaddr> TOK_IPADDRESS;
 %token TOK_CLASS TOK_FILTER TOK_MAIN TOK_LOG_INTERVAL TOK_LOG_LEVEL TOK_DEVICE
-%token TOK_LOGFILE TOK_WORKDIR TOK_QUERYFILEDIR TOK_INDEXDIR
+%token TOK_CLASSDIR
+%token TOK_LOGFILE TOK_WORKDIR TOK_QUERYFILEDIR TOK_INDEXDIR TOK_PROFILEPATH
 %token TOK_READ_TRACEFILE TOK_BRO_CONNECT_STR
 %token TOK_MEM TOK_DISK TOK_K TOK_M TOK_G TOK_CUTOFF TOK_PRECEDENCE
 %token TOK_DYN_TIMEOUT
@@ -186,6 +187,12 @@ classoption:
 		newclass->setDynTimeout($2);
 		$$=newclass;
 	}
+    | TOK_CLASSDIR TOK_STRING {
+		new_class();
+        //conf_classdir = ($2);
+        newclass->setClassdir($2);
+        $$=newclass;
+	}
 	;
 size:
 	TOK_INTEGER { $$=$1; }
@@ -238,6 +245,10 @@ main_option:
 	  conf_main_indexdir=strdup($2);
 	  free($2);
 	}
+        | TOK_PROFILEPATH TOK_STRING {
+          conf_main_profilepath=strdup($2);
+          free($2);
+        }
 	| TOK_BRO_CONNECT_STR TOK_STRING {
 	  conf_main_bro_connect_str=strdup($2);
 	  free($2);
@@ -335,23 +346,33 @@ void conf_add_index(const char* name, bool do_disk_index) {
 		conferror(msg);
 		return;
 	}
+        /*
+        uint64_t primes[] = {53, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157, /
+                             98317, 196613, 393241, 786433, 1572869, 3145739, 6291469, /
+                             12582917, 25165843, 50331653, 100663319, 201326611, 402653189, /
+                             805306457, 1610612741, 3221225479, 6442450967, 12884901947};
+        */
 	/* TODO: We really should do index configuration with a regitry that knows 
 	   of all potential IndexTypes .... */
 	if (ConnectionIF4::getIndexNameStatic() == name) {
-		IndexType *idx = new Index<ConnectionIF4>(30, int(250000), do_disk_index, NULL);
+		//IndexType *idx = new Index<ConnectionIF4>(30, int(250000), do_disk_index, NULL);
+        IndexType *idx = new Index<ConnectionIF4>(30, 15, do_disk_index, NULL);
 		conf_parser_storageConf->indexes->addIndex(idx);
 	}
 	else if (ConnectionIF3::getIndexNameStatic() == name) {
-		IndexType *idx = new Index<ConnectionIF3>(30, int(250000), do_disk_index, NULL);
+		//IndexType *idx = new Index<ConnectionIF3>(30, int(250000), do_disk_index, NULL);
+        IndexType *idx = new Index<ConnectionIF3>(30, 15, do_disk_index, NULL);
 		conf_parser_storageConf->indexes->addIndex(idx);
 	}
 
 	else if (ConnectionIF2::getIndexNameStatic() == name) {
-		IndexType *idx = new Index<ConnectionIF2>(30, int(250000), do_disk_index, NULL);
+		//IndexType *idx = new Index<ConnectionIF2>(30, int(250000), do_disk_index, NULL);
+        IndexType *idx = new Index<ConnectionIF2>(30, 15, do_disk_index, NULL);
 		conf_parser_storageConf->indexes->addIndex(idx);
 	}
 	else if (IPAddress::getIndexNameStatic() == name) {
-		IndexType *idx = new Index<IPAddress>(30, int(250000), do_disk_index, NULL);
+		//IndexType *idx = new Index<IPAddress>(30, int(250000), do_disk_index, NULL);
+        IndexType *idx = new Index<IPAddress>(30, 15, do_disk_index, NULL);
 		conf_parser_storageConf->indexes->addIndex(idx);
 	}
 	else {

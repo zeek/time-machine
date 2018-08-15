@@ -77,7 +77,9 @@ protected:
 
 	pthread_mutex_t lock_mutex;
 
-	inline pkt_ptr block (pkt_ptr p);
+	inline pkt_ptr block (pkt_ptr p); // TODO: check this out, ipv6 - no need to worry about ipv6
+                                      // seems like mainly the protected parameters like size and end are the ones
+                                      // to look at instead
 	int bin_search (pkt_ptr *p, tm_time_t t, bool floor);
 
 	uint64_t pktEviction();
@@ -90,6 +92,7 @@ public:
 	virtual ~FifoMemEvictionHandler() { }
 	// stuff to do before a packet will get evicted from memory
 	// returns true if it removed a packet
+    // this goes to Fifo:pktEviction in Fifo.cc
 	virtual uint64_t pktEviction() = 0;
 };
 

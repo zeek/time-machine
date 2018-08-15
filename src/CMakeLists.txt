@@ -1,3 +1,4 @@
+enable_language(C ASM)
 bison_target(CMDParser cmd_parser.yy ${CMAKE_CURRENT_BINARY_DIR}/cmd_parser.cc
              HEADER ${CMAKE_CURRENT_BINARY_DIR}/cmd_parser.h
              VERBOSE ${CMAKE_CURRENT_BINARY_DIR}/cmd_parser.output
@@ -18,6 +19,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/main.cc.in
                ${CMAKE_CURRENT_BINARY_DIR}/main.cc)
 
+#configure_file(util-config.h.in ${CMAKE_CURRENT_BINARY_DIR}/util-config.h)
+
 set(timemachine_SRCS
     ${BISON_CMDParser_INPUT}
     ${FLEX_CMDScanner_INPUT}
@@ -27,8 +30,11 @@ set(timemachine_SRCS
     ${FLEX_CONFScanner_INPUT}
     ${BISON_CONFParser_OUTPUTS}
     ${FLEX_CONFScanner_OUTPUTS}
+    util.cc
     BroccoliComm.cc
     BroccoliComm.hh
+    bro_inet_ntop.c
+    bro_inet_ntop.h 
     Connection.cc
     Connection.hh
     Connections.cc
@@ -44,7 +50,9 @@ set(timemachine_SRCS
     FifoMem.cc
     FifoMem.hh
     Hash.cc
-    Hash.hh
+    Hash.h
+    #HashIterator.hh
+    H3.h
     #Index.cc
     Index.hh
     IndexEntry.hh
@@ -52,22 +60,32 @@ set(timemachine_SRCS
     IndexField.hh
     IndexHash.cc
     IndexHash.hh
+    #IPAddr.cc
+    #IPAddr.h
     LogFile.cc
     LogFile.hh
+    #modp_numtoa.h
+    #net_util.h
     Query.cc
     Query.hh
-    Queue.cc
-    Queue.hh
+    #Queue.cc
+    #Queue.hh
     Storage.cc
     Storage.hh
     conf.h
-    jhash3.h
     ${CMAKE_CURRENT_BINARY_DIR}/main.cc
     packet_headers.h
     rmtconsole.cc
     tm.h
     types.h
+    #util.h
 )
+
+set(CMAKE_CXX_FLAGS "-g -Wall")
+
+set(CMAKE_C_FLAGS "-DPCAPNAV_DEBUG")
+
+set (EXTRA_LIBS ${EXTRA_LIBS} -lssl -lcrypto -DPCAPNAV_DEBUG)
 
 set(tm_query_benchmark_SRCS
     tm_query_benchmark.cc
@@ -85,7 +103,8 @@ if (USE_BROCCOLI)
 endif()
 
 add_executable(timemachine ${timemachine_SRCS})
-target_link_libraries(timemachine ${CMAKE_THREAD_LIBS_INIT} ${PCAP_LIBRARY} ${Readline_LIBRARY} ${OPTLIBS} re2Static pcapnavStatic)
+#set_target_properties(timemachine PROPERTIES COMPILE_DEFINITIONS "-save-temps")
+target_link_libraries(timemachine ${CMAKE_THREAD_LIBS_INIT} ${PCAP_LIBRARY} ${Readline_LIBRARY} ${OPTLIBS} ${EXTRA_LIBS} re2Static pcapnavStatic) # "-save-temps")
 
 if (NOT TimeMachine_SKIP_INSTALL)
     install(TARGETS timemachine DESTINATION bin)

@@ -121,21 +121,53 @@ void DynClassTable::remove_from_q(DynClass *dc) {
 
 
 void DynClassTable::removeOld() {
-	struct timeval tv;
+	//struct timeval tv;
 	tm_time_t now;
 	DynClass *next, *cur;
 
 	lock();
-	gettimeofday(&tv, NULL);
-	now = to_tm_time(&tv);
+	//gettimeofday(&tv, NULL);
 
+    /*
+    #ifdef __APPLE__
+    struct tvalspec tmptv;
+    clock_get_time(CLOCK_MONOTONIC_COARSE, &tmptv)i;
+    now = valspec_to_tm(&tmptv);
+    #endif
+    */
+    /*
+    #ifdef linux
+    struct timespec tmptv;
+    clock_gettime(CLOCK_MONOTONIC_COARSE, &tmptv);
+    now = spec_to_tm(&tmptv);
+    #endif
+    #ifdef __FreeBSD__
+    struct timespec tmptv;
+    clock_gettime(CLOCK_MONOTONIC_FAST, &tmptv);
+    now = spec_to_tm(&tmptv);
+    #endif
+    */
+    
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    now = to_tm_time(&tv);
+    
+	//now = to_tm_time(&tv);
+
+    // set next to pointer to the entry with the lowest timeout (timeouts are sorted)
 	next = qhead;
+    // as long as it is not null?
 	while (next) {
 		cur = next;
+        // next to the next entry
 		next = cur->qNext;
+        // if the timeout parameter of the dynamic class pointer is less than the current time,
+        // it is and old connection and should be removed from Hash table and sorted list/queue that 
+        // determine the order of the timeouts
 		if (cur->timeout < now) {
 			//fprintf(stderr, "GMDEBUG: Removing dynClass: %s\n", cur->key->getStr().c_str());
 			removeNoLock(cur);
+            // delete the key and entry that seem to be by themselves now (the removeNoLock doesn't seem to actually delete, just re-arrange the pointers)
 			delete(cur->key);
 			delete(cur);
 		}
@@ -163,12 +195,21 @@ DynClass* DynClassTable::get(const IPAddress* k) {
 
 DynClass* DynClassTable::getNoLock(const IPAddress* k) { 
 	DynClass *next;
-
+    
+    // get the collision list of the entry in hash table, it looks like
+    // this particular command colNext sets it to the first element of the
+    // collision list
 	next = table[k->hash()%numBuckets].colNext;
+
+    //tmlog(TM_LOG_NOTE, "DynClassTable::getNoLock", "the k->hash() is %u", k->hash());
+    //tmlog(TM_LOG_NOTE, "DynClassTable::getNoLock", "the k->hash()_numBuckets is %u and the numBuckets is %d", k->hash()%numBuckets, numBuckets);
+    // as long as the element we are on is not NULL
 	while(next!=NULL) {
+        // check if the key matches the ip address key
 		if (*k == *(next->key)) {
 			return next;
 		}
+        // if not, move on to the next element in the collision list
 		next = next->colNext;
 	}
 	return NULL;

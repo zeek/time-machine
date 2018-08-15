@@ -38,6 +38,7 @@ NEWLINE \n
 "]"		 return RBRACK;
 ";"		 return SEMICOLON;
 "class"		 return TOK_CLASS;
+"classdir"	 return TOK_CLASSDIR;
 "mem"		 return TOK_MEM;
 "disk"		 return TOK_DISK;
 "filesize"	 return TOK_FILESIZE;
@@ -57,6 +58,7 @@ NEWLINE \n
 "workdir"	 return TOK_WORKDIR;
 "queryfiledir"	 return TOK_QUERYFILEDIR;
 "indexdir"	 return TOK_INDEXDIR;
+"profilepath"    return TOK_PROFILEPATH;
 "index"      return TOK_INDEX;
 "logfile"	 return TOK_LOGFILE;
 "bro_connect_str" return TOK_BRO_CONNECT_STR;
@@ -90,6 +92,7 @@ NEWLINE \n
 			}
 \".*\"	 { conflval.s=strdup(yytext+1);
 		   conflval.s[strlen(conflval.s)-1]=0;
+           /*free(conflval.s)*/
 		   return TOK_STRING;
 		 } 
 {WHITE}

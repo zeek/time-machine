@@ -26,9 +26,11 @@ public:
 
 	IPAddress *key;
 	Fifo *target;
+    // direction, probably means direction of the packet (source, destination, maybe both (see Storage.cc))
 	int dir;
 	tm_time_t timeout;
 
+    // pointers for the collision list? O.o
 	DynClass *colNext;
 	DynClass *colPrev;
 

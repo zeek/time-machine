@@ -27,7 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "pcapnav.h"
 
-pcap_dumper_t *   pcapnav_append_fast(pcap_t *pcap, const char *filename);
-pcap_dumper_t *   pcapnav_append_safe(pcap_t *pcap, const char *filename);
+pcap_dumper_t *   pcapnav_append_fast(pcap_t *pcap, const char *filename, const char* classdirectory);
+pcap_dumper_t *   pcapnav_append_safe(pcap_t *pcap, const char *filename, const char* classdirectory);
 
 #endif
