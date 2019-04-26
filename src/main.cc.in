@@ -134,6 +134,7 @@ int conf_main_bro_listen = 1;
 int conf_main_bro_listen_port = 47557;
 struct in_addr conf_main_bro_listen_addr; // defualt value is set in main!
 
+const char *conf_main_classdir_format = NULL; // default is no special directory naming
 
 
 /***************************************************************************
@@ -190,8 +191,8 @@ void print_stats(FILE *outfp) {
 	fprintf(outfp, "%u\tpkts received\t[pcap_stats]\n"
 		   "%u\tpkts dropped by kernel\t[pcap_stats]\n"
 		   "%.2f\t%% dropped/received\t[pcap_stats]\n"
-		   "%"PRIu64"\tpkts total received by capture application\n"
-		   "%"PRIu64"\tbytes total\n",
+		   "%" PRIu64 "\tpkts total received by capture application\n"
+		   "%" PRIu64 "\tbytes total\n",
 		   ps.ps_recv, ps.ps_drop,
 		   (float)ps.ps_drop/ps.ps_recv*100,
 		   tot_pkt_cnt, tot_bytes);
@@ -530,24 +531,24 @@ void *statisticslog_thread(void* arg)
         #ifdef __APPLE__
         snprintf(s, LOG_STRING_SIZE,
                  "%.2lf "
-                 "%"PRIu64" "
+                 "%" PRIu64 " "
                  "%d " 
                  "%u "
                  "%u " 
                  "%.2lf%% "
                  "%u "
-                 "%"PRIu64" "
-                 "%"PRIu64" "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
                  "%.2lf "
-                 "%"PRIu64" "
-                 "%"PRIu64" "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
                  "%.2lf "
                  "%.1lf "
                  "%.1lf "
-                 "%"PRIu64" "
-                 "%"PRIu64" "
-                 "%"PRIu64" "
-                 "%"PRIu64" "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
                                  "%d ",
                  valspec_to_tm(&now),
                  storage->getConns().getNumEntries(),
@@ -575,24 +576,24 @@ void *statisticslog_thread(void* arg)
         #if defined(linux) || defined(__FreeBSD__)
         snprintf(s, LOG_STRING_SIZE,
                  "%.2lf "
-                 "%"PRIu64" "
+                 "%" PRIu64 " "
                  "%d " 
                  "%u "
                  "%u " 
                  "%.2lf%% "
                  "%u "
-                 "%"PRIu64" "
-                 "%"PRIu64" "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
                  "%.2lf "
-                 "%"PRIu64" "
-                 "%"PRIu64" "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
                  "%.2lf "
                  "%.1lf "
                  "%.1lf "
-                 "%"PRIu64" "
-                 "%"PRIu64" "
-                 "%"PRIu64" "
-                 "%"PRIu64" "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
                                  "%d ",
                  spec_to_tm(&now),
                  storage->getConns().getNumEntries(),
@@ -621,24 +622,24 @@ void *statisticslog_thread(void* arg)
         
 		snprintf(s, LOG_STRING_SIZE,
 				 "%.2lf "
-				 "%"PRIu64" "
+				 "%" PRIu64 " "
 				 "%d " 
 				 "%u "
 				 "%u " 
 				 "%.2lf%% "
 				 "%u "
-				 "%"PRIu64" "
-				 "%"PRIu64" "
+				 "%" PRIu64 " "
+				 "%" PRIu64 " "
 				 "%.2lf "
-				 "%"PRIu64" "
-				 "%"PRIu64" "
+				 "%" PRIu64 " "
+				 "%" PRIu64 " "
 				 "%.2lf "
 				 "%.1lf "
 				 "%.1lf "
-				 "%"PRIu64" "
-				 "%"PRIu64" "
-				 "%"PRIu64" "
-				 "%"PRIu64" "
+				 "%" PRIu64 " "
+				 "%" PRIu64 " "
+				 "%" PRIu64 " "
+				 "%" PRIu64 " "
                                  "%d ",
 				 to_tm_time(&now),
 				 storage->getConns().getNumEntries(),
@@ -708,7 +709,7 @@ void *statisticslog_thread(void* arg)
             snprintf(s, LOG_STRING_SIZE, 
                     "%.2lf "
                     "%s "
-                    "%"PRIu64" "
+                    "%" PRIu64 " "
                     "%u ",
                     valspec_to_tm(&now),
                     (*i)->getIndexName().c_str(),
@@ -720,7 +721,7 @@ void *statisticslog_thread(void* arg)
             snprintf(s, LOG_STRING_SIZE, 
                     "%.2lf "
                     "%s "
-                    "%"PRIu64" "
+                    "%" PRIu64 " "
                     "%u ",
                     spec_to_tm(&now),
                     (*i)->getIndexName().c_str(),
@@ -733,7 +734,7 @@ void *statisticslog_thread(void* arg)
 			snprintf(s, LOG_STRING_SIZE, 
 					"%.2lf "
 					"%s "
-					"%"PRIu64" "
+					"%" PRIu64 " "
 					"%u ",
 					to_tm_time(&now),
 					(*i)->getIndexName().c_str(),

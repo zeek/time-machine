@@ -72,6 +72,18 @@ public:
     const char* getClassdir() {
         return classdir;
     }
+	void setFilenameFormat(const char *s) {
+		filename_format=s;
+	}
+	const char* getFilenameFormat() {
+		return filename_format;
+	}
+	void setClassdirFormat(const char *s) {
+		classdir_format=s;
+	}
+	const char* getClassdirFormat() {
+		return classdir_format;
+	}
 	void setFifoMemSz(uint64_t s) {
 		fifo_mem_sz=s;
 	}
@@ -124,6 +136,8 @@ protected:
 	std::string classname;
 	std::string filter;
     const char* classdir; 
+        const char* filename_format;
+	const char* classdir_format;
 	uint64_t fifo_mem_sz;
 	uint64_t fifo_disk_sz;
 	uint64_t fifo_disk_filesz;

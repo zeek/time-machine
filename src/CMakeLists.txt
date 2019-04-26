@@ -81,6 +81,7 @@ set(timemachine_SRCS
     #util.h
 )
 
+set (CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-g -Wall")
 
 set(CMAKE_C_FLAGS "-DPCAPNAV_DEBUG")
@@ -93,6 +94,7 @@ set(tm_query_benchmark_SRCS
 
 add_subdirectory(re2)
 add_subdirectory(pcapnav)
+add_subdirectory(fmt)
 
 if (USE_BROCCOLI)
     include_directories(${Broccoli_INCLUDE_DIR})
@@ -105,6 +107,8 @@ endif()
 add_executable(timemachine ${timemachine_SRCS})
 #set_target_properties(timemachine PROPERTIES COMPILE_DEFINITIONS "-save-temps")
 target_link_libraries(timemachine ${CMAKE_THREAD_LIBS_INIT} ${PCAP_LIBRARY} ${Readline_LIBRARY} ${OPTLIBS} ${EXTRA_LIBS} re2Static pcapnavStatic) # "-save-temps")
+
+target_link_libraries(timemachine PRIVATE fmt-header-only)
 
 if (NOT TimeMachine_SKIP_INSTALL)
     install(TARGETS timemachine DESTINATION bin)

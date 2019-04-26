@@ -70,6 +70,8 @@ NEWLINE \n
 "tweak_capture_thread" return TOK_TWEAK_CAPTURE_THREAD;
 "scope"		return TOK_SCOPE;
 "priority"		return TOK_PRIORITY;
+"filename_format" return TOK_FILENAME_FORMAT;
+"classdir_format" return TOK_CLASSDIR_FORMAT;
 
 "rmtconsole_listen_addr"	return TOK_RMTCONSOLE_LISTEN_ADDR;
 "rmtconsole_port"	return TOK_RMTCONSOLE_PORT;

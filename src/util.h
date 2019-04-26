@@ -186,7 +186,7 @@ extern bool is_printable(const char* s, int len);
 extern const char* fmt_bytes(const char* data, int len);
 
 // Note: returns a pointer into a shared buffer.
-extern const char* fmt(const char* format, ...)
+extern const char* fmt_(const char* format, ...)
 	myattribute((format (printf, 1, 2)));
 extern const char* fmt_access_time(double time);
 

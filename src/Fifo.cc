@@ -44,6 +44,7 @@ Fifo::Fifo(const std::string& classname, uint64_t fifo_mem_sz, uint64_t fifo_dis
 void Fifo::init() {
 	classname="default";
         classdir=conf_main_workdir;
+	classdir_format = conf_main_classdir_format;
 	filter="";
 	fifo_mem_sz=5000000;
 	fifo_disk_sz=50000000;
@@ -74,7 +75,7 @@ void Fifo::start() {
     // fifo_disk_sz is the size of buffer block in bytes
     // fifo_disk_filesz is the size of the file
     // ph is the handler
-	fd=new FifoDisk(classname, fifo_disk_sz, fifo_disk_filesz, ph, classdir);
+	fd=new FifoDisk(classname, fifo_disk_sz, fifo_disk_filesz, ph, classdir, filename_format, classdir_format);
     
     // setting eviction handler for FifoMem object
 	fm->setEvictionHandler(this);
@@ -139,7 +140,7 @@ uint64_t Fifo::pktEviction() {
 	}
     // this shouldn't happen often
 	if (i<pkts_to_disk) {
-		tmlog(TM_LOG_WARN, "storage", "Strange, only evicted %"PRIu64" packets", i);
+		tmlog(TM_LOG_WARN, "storage", "Strange, only evicted %" PRIu64 " packets", i);
 	}
     // return the total number of bytes evicted from the memory ring buffer and added to the disk ring buffer
 	return n;
@@ -196,15 +197,15 @@ std::string Fifo::getStatsStr() {
 	char s[STR_SIZE];
 	if (started) {
 		snprintf(s, STR_SIZE, 
-				"%"PRIu64" "
-				"%"PRIu64" "
-				"%"PRIu64" "
-				"%"PRIu64" "
-				"%"PRIu64" "
-				"%"PRIu64" "
+				"%" PRIu64 " "
+				"%" PRIu64 " "
+				"%" PRIu64 " "
+				"%" PRIu64 " "
+				"%" PRIu64 " "
+				"%" PRIu64 " "
 				"%.2lf "
-				"%"PRIu64" "
-				"%"PRIu64" "
+				"%" PRIu64 " "
+				"%" PRIu64 " "
 				"%.2lf ",
 			 stored_bytes,
 			 stored_pkts,

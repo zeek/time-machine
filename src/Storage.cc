@@ -650,13 +650,13 @@ void Storage::debugPrint() {
 void Storage::debugPrint(FILE *fp) {
 	//  Fifo* f[]={&f_udp, &f_tcp, &f_other};
 	for (std::list<Fifo*>::iterator i=fifos.begin(); i!=fifos.end(); i++)
-		fprintf(fp, "%s totBytes: %"PRIu64"\n", (*i)->getClassname().c_str(),
+		fprintf(fp, "%s totBytes: %" PRIu64 "\n", (*i)->getClassname().c_str(),
 			   (*i)->getFm()->getTotPktbytes());
 	for (std::list<IndexType*>::iterator i=indexes->begin();
 			i!=indexes->end();
 			i++) {
 		//(*i)->lock();
-		fprintf(fp, "# %s index nodes RAM/Disk %"PRIu64" %"PRIu64"\n",
+		fprintf(fp, "# %s index nodes RAM/Disk %" PRIu64 " %" PRIu64 "\n",
 			   (*i)->getIndexName().c_str(),
 			   (*i)->getNumEntriesRAM(),
 			   (*i)->getNumEntriesDisk());

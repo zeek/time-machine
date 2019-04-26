@@ -11,6 +11,8 @@
 #include "FifoDisk.hh"
 #include "Query.hh"
 //#include "bro_inet_ntop.h"
+#include <fmt/core.h>
+#include <fmt/time.h>
 
 
 /***************************************************************************
@@ -45,11 +47,13 @@
  */
 
 FifoDisk::FifoDisk(const std::string& classname, uint64_t size,
-				   uint64_t file_size, pcap_t* pcap_handle, const char* classdir):
+				   uint64_t file_size, pcap_t* pcap_handle, const char* classdir,
+				   const char* filename_format, const char* classdir_format):
 		classname(classname), classdir(classdir), size(size), file_size(file_size),
 		tot_bytes(0), tot_pkts(0),
 		file_number(0), pcap_handle(pcap_handle),
-held_bytes(0), held_pkts(0), oldestTimestamp(0), newestTimestamp(0), queries(0) {
+held_bytes(0), held_pkts(0), oldestTimestamp(0), newestTimestamp(0), queries(0),
+		filename_format(filename_format), classdir_format(classdir_format) {
 
 	pthread_mutex_init(&query_in_progress_mutex, NULL);
 
@@ -62,6 +66,27 @@ FifoDisk::~FifoDisk() {
 		delete(files.back());
 		files.pop_back();
 	}
+}
+
+// from https://stackoverflow.com/a/2336245/124042
+static void mkdirall(const char *dir) {
+    char tmp[25600];
+	char *p = NULL;
+    size_t len;
+
+    snprintf(tmp, sizeof(tmp), "%s", dir);
+    len = strlen(tmp);
+    if (tmp[len - 1] == '/') {
+        tmp[len - 1] = 0;
+	}
+    for (p = tmp + 1; *p; p++) {
+        if(*p == '/') {
+            *p = 0;
+            mkdir(tmp, S_IRWXU);
+            *p = '/';
+        }
+	}
+    mkdir(tmp, S_IRWXU);
 }
 
 // called in Fifo.c, in the pktEviction method definition
@@ -113,13 +138,38 @@ void FifoDisk::addPkt(const pkt_ptr p) {
 				}
                 // increment the file number
 				file_number++;
-                // string size of the file name
-				const int strsz=classname.length()+30;
                 // malloc that size to create a new char array for the file name 
-				char *new_file_name=(char*)malloc(strsz);
-                // do a safe sprintf to create new_file_name
-				snprintf(new_file_name, strsz, "%s_%.6f",
-						 classname.c_str(), newestTimestamp);
+				char *new_file_name;
+    			if (filename_format != NULL) {
+					struct tm newestTimestampTM;
+					time_t newestTimestampT = (time_t) newestTimestamp;
+					if (localtime_r(&newestTimestampT, &newestTimestampTM) == NULL) {
+	                    fprintf(stderr, "cannot get localtime for %ld\n", newestTimestampT);
+					}
+					std::string dirpath;
+					if (classdir_format) {
+						// also format/create directory path
+						dirpath = fmt::format(classdir_format,
+											  fmt::arg("class_name", classname), 
+											  fmt::arg("newest_timestamp", newestTimestampTM)
+											  );
+						mkdirall(dirpath.c_str());
+						dirpath += "/";
+					}
+					std::string fname = fmt::format(filename_format, 
+													fmt::arg("class_name", classname), 
+													fmt::arg("newest_timestamp", newestTimestampTM)
+													);
+					std::string path = dirpath + fname;								
+					new_file_name = strdup(path.c_str());
+				} else {
+					// string size of the file name
+					const int strsz=classname.length()+30;
+					new_file_name=(char*)malloc(strsz);
+		            // do a safe sprintf to create new_file_name
+					snprintf(new_file_name, strsz, "%s_%.6f",
+							classname.c_str(), newestTimestamp);
+				}
 
                 if (chdir(classdir)) {
                     fprintf(stderr, "cannot class chdir to %s\n", classdir);

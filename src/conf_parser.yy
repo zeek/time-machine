@@ -78,6 +78,7 @@
 %token TOK_BRO_LISTEN TOK_BRO_LISTEN_PORT TOK_BRO_LISTEN_ADDR
 %token TOK_TWEAK_CAPTURE_THREAD TOK_SCOPE TOK_PRIORITY 
 %token TOK_INDEX
+%token TOK_FILENAME_FORMAT TOK_CLASSDIR_FORMAT
 
 %type <s> classname option
 %type <i64> size
@@ -193,6 +194,16 @@ classoption:
         newclass->setClassdir($2);
         $$=newclass;
 	}
+	| TOK_FILENAME_FORMAT TOK_STRING {
+		new_class();
+		newclass->setFilenameFormat($2);
+		$$=newclass;
+	}
+	| TOK_CLASSDIR_FORMAT TOK_STRING {
+		new_class();
+		newclass->setClassdirFormat($2);
+		free($2);
+	}
 	;
 size:
 	TOK_INTEGER { $$=$1; }
@@ -202,9 +213,9 @@ size:
 	;
 option:
 	TOK_ID TOK_INTEGER {
-	  printf("option: ignored option %s int value %"PRIi64"\n", $1, $2);
+	  printf("option: ignored option %s int value %" PRIi64 "\n", $1, $2);
 	  $$=(char*)malloc(31);
-	  snprintf($$, 30, "%"PRIi64, $2);
+	  snprintf($$, 30, "%" PRIi64, $2);
 	  free($1);
 	}
 	| TOK_ID TOK_STRING {
@@ -244,6 +255,10 @@ main_option:
 	| TOK_INDEXDIR TOK_STRING {
 	  conf_main_indexdir=strdup($2);
 	  free($2);
+	}
+	| TOK_CLASSDIR_FORMAT TOK_STRING {
+		conf_main_classdir_format=strdup($2);
+		free($2);
 	}
         | TOK_PROFILEPATH TOK_STRING {
           conf_main_profilepath=strdup($2);

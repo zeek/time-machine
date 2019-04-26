@@ -259,7 +259,7 @@ void FifoMem::debugPrint() const {
 void FifoMem::debugPrint(FILE *fp) const {
 	fprintf(fp, "\nstart = %ld  s = %ld  wp = %ld  lp = %ld  end = %ld  held_pkts = %lu\n",
 		   (long int)(start-start), (long int)(s-start), (long int)(wp-start), (long int)(lp-start), (long int)(end-start), (long int)held_pkts);
-	fprintf(fp, "a_next = %ld  a_wp = XX  a_s = %"PRIu64" a_lp = %"PRIu64" a_max = %"PRIu64"\n",
+	fprintf(fp, "a_next = %ld  a_wp = XX  a_s = %" PRIu64 " a_lp = %" PRIu64 " a_max = %" PRIu64 "\n",
 		   (long int)(a_next-start), a_s, a_lp, a_max);
 
 	/*
