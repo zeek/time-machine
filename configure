@@ -115,6 +115,9 @@ while [ $# -ne 0 ]; do
         --with-bison=*)
             append_cache_entry BISON_EXECUTABLE PATH $optarg
             ;;
+        --with-openssl=*)
+            append_cache_entry OpenSSL_ROOT_DIR PATH $optarg
+            ;;
         *)
             echo "Invalid option '$1'.  Try $0 --help to see available options."
             exit 1

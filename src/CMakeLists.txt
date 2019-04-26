@@ -85,7 +85,7 @@ set(CMAKE_CXX_FLAGS "-g -Wall")
 
 set(CMAKE_C_FLAGS "-DPCAPNAV_DEBUG")
 
-set (EXTRA_LIBS ${EXTRA_LIBS} -lssl -lcrypto -DPCAPNAV_DEBUG)
+set (EXTRA_LIBS ${EXTRA_LIBS} ${OpenSSL_SSL_LIBRARY} ${OpenSSL_CRYPTO_LIBRARY} -DPCAPNAV_DEBUG)
 
 set(tm_query_benchmark_SRCS
     tm_query_benchmark.cc

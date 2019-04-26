@@ -21,6 +21,9 @@ FindRequiredPackage(Threads)
 include_directories(BEFORE ${Readline_INCLUDE_DIR})
 target_link_libraries(-lreadline) 
 
+find_package(OpenSSL REQUIRED)
+include_directories(BEFORE ${OpenSSL_INCLUDE_DIR})
+
 # Optional Dependencies
 
 set(USE_BROCCOLI false)

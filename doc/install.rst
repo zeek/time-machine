@@ -29,3 +29,9 @@ If you have Bro installed in it's default <prefix> of
 timemachine with Bro support.
 
     ./configure --with-broccoli=/usr/local/bro
+
+If you have OpenSSL installed in a non-default search path that the compiler and linker
+won't search, e.g. /usr/local/opt/openssl due to Homebrew, this configure command will
+pick up OpenSSL include and libraries:
+
+    ./configure --with-openssl=/usr/local/opt/openssl

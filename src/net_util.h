@@ -212,6 +212,7 @@ inline double ntohd(double d)
 
 inline double htond(double d) { return ntohd(d); }
 
+#if !defined(__MACH__)
 inline uint64 ntohll(uint64 i)
 	{
 	u_char c;
@@ -229,6 +230,7 @@ inline uint64 ntohll(uint64 i)
 	}
 
 inline uint64 htonll(uint64 i) { return ntohll(i); }
+#endif /* !defined(__MACH__) */
 
 #endif
 
