@@ -173,6 +173,8 @@ public:
 	virtual void debugPrint() const = 0;
 	virtual void debugPrint(FILE *fp) const = 0;
 	pthread_t maintainer_thread;
+	virtual bool hasDiskIndex() const = 0;
+
 protected:
 	pthread_mutex_t hash_lock_mutex;
 	pthread_mutex_t queue_lock_mutex;
@@ -253,6 +255,9 @@ public:
 	}
 	void debugPrint() const;
 	void debugPrint(FILE *fp) const;
+	virtual bool hasDiskIndex() const {
+		return disk_index != NULL;
+	}
 protected:
 	MyQueue input_q;
 	//std::deque<IndexField *> input_q;

@@ -93,6 +93,9 @@ public:
 	void setFifoDiskSz(uint64_t s) {
 		fifo_disk_sz=s;
 	}
+	void setFifoDiskSzInfinite() {
+		fifo_disk_infinite=true;
+	}
 	void setFifoDiskFileSz(uint64_t s) {
 		fifo_disk_filesz=s;
 	}
@@ -144,6 +147,7 @@ protected:
 	const char* classdir_format;
 	uint64_t fifo_mem_sz;
 	uint64_t fifo_disk_sz;
+	bool fifo_disk_infinite;
 	uint64_t fifo_disk_filesz;
 	int precedence;
 	tm_time_t dynTimeout;

@@ -49,13 +49,15 @@
 FifoDisk::FifoDisk(const std::string& classname, uint64_t size,
 				   uint64_t file_size, pcap_t* pcap_handle, const char* classdir,
 				   const char* filename_format, const char* classdir_format,
-				   const std::string &classnameId):
+				   const std::string &classnameId,
+				   bool size_infinite):
 		classname(classname), classdir(classdir), size(size), file_size(file_size),
 		tot_bytes(0), tot_pkts(0),
 		file_number(0), pcap_handle(pcap_handle),
 		held_bytes(0), held_pkts(0), oldestTimestamp(0), newestTimestamp(0), queries(0),
 		filename_format(filename_format), classdir_format(classdir_format),
-		classnameId(classnameId) {
+		classnameId(classnameId),
+		size_infinite(size_infinite) {
 
 	pthread_mutex_init(&query_in_progress_mutex, NULL);
 
@@ -94,7 +96,7 @@ static void mkdirall(const char *dir) {
 // called in Fifo.c, in the pktEviction method definition
 void FifoDisk::addPkt(const pkt_ptr p) {
     // if the size of the buffer block (disk size) is greater than 0
-	if (size>0) {
+	if (size_infinite || size>0) {
         // get the time stamp from the pcap packet header
 		newestTimestamp = to_tm_time(&(((struct pcap_pkthdr*)p)->ts));
         // if the list of FifoDisk files is empty OR
@@ -122,7 +124,9 @@ void FifoDisk::addPkt(const pkt_ptr p) {
 					files.back()->close();
                     // if the number of bytes currently held in disk ring buffer block + size of a file are greater than the disk size that was configured
                     // note that held_bytes is the number of bytes currently held in block
-					if (held_bytes+file_size > size) {
+					// if we're not managing storage, i.e. size_infinite, then don't remove old files.
+					// XXX: we should prune the in-memory structure though.
+					if (!size_infinite && held_bytes+file_size > size) {
 						// delete oldest file
                         // decrement the number of bytes currently in disk ring buffer block by the number of bytes in the file in the front of the list (the oldest file)
 						held_bytes-=files.front()->getHeldBytes();

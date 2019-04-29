@@ -38,6 +38,7 @@
   void end_new_class() { assert(newclass); newclass=NULL; }
 
   void conf_add_index(const char* name, bool do_disk_index);
+	bool diskIndexesExist();
 /*
   IndexType* newindex=NULL;
   void new_index() { if (!newindex) newindex=new IndexType(); }
@@ -79,6 +80,7 @@
 %token TOK_TWEAK_CAPTURE_THREAD TOK_SCOPE TOK_PRIORITY 
 %token TOK_INDEX
 %token TOK_FILENAME_FORMAT TOK_CLASSDIR_FORMAT
+%token TOK_INFINITE
 
 %type <s> classname option
 %type <i64> size
@@ -145,6 +147,16 @@ classoption:
 	| TOK_DISK size {
 	  new_class();
 	  newclass->setFifoDiskSz($2);
+	  $$=newclass;
+	}
+	| TOK_DISK TOK_INFINITE {
+	  new_class();
+		if (diskIndexesExist()) {
+			char msg[2048];
+			snprintf(msg, sizeof(msg), "In class %s, cannot specify disk infinite when disk indexes are used\n", newclass->getClassname().c_str());
+			conferror(msg);
+		}
+	  newclass->setFifoDiskSzInfinite();
 	  $$=newclass;
 	}
 	| TOK_FILESIZE size {
@@ -357,6 +369,18 @@ int parse_config(const char* filename, StorageConfig *s) {
   confparse();
   fclose(confin);
   return conf_parse_errors;
+}
+
+bool diskIndexesExist() {
+	std::list<IndexType*>::iterator i;
+	for (i = conf_parser_storageConf->indexes->begin(); 
+			 i != conf_parser_storageConf->indexes->end();
+	     ++i) {
+		if ((*i)->hasDiskIndex()) {
+			return true;
+		}
+	}
+	return false;
 }
 
 void conf_add_index(const char* name, bool do_disk_index) {
