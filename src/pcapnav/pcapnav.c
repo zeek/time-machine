@@ -22,9 +22,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
-#if HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include "config.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -34,6 +32,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include "pcapnav_globals.c"
 
@@ -81,11 +80,20 @@ pcapnav_open_offline_tm(const char *fname, const char* classdirectory)
 
   FILE *fp_log;
 
-  char filepath[100];
+#ifdef HAVE_PATH_MAX
+  char filepath[PATH_MAX];
+#else
+  #error
+  char filepath[1024];
+#endif
 
-  strcpy(filepath, classdirectory);
-  strcat(filepath, "/");
-  strcat(filepath, fname);
+  if (fname[0] != '/') {
+    strcpy(filepath, classdirectory);
+    strcat(filepath, "/");
+    strcat(filepath, fname);
+  } else {
+    strcpy(filepath, fname);
+  }
 
   char logpath[] = "/home/neto/data/pcapLog.txt";
 
@@ -125,7 +133,7 @@ pcapnav_open_offline_tm(const char *fname, const char* classdirectory)
 
   D_ENTER;
 
-  if (!filepath || filepath[0] == '\0')
+  if (filepath[0] == '\0')
     {
       fp_log = fopen(logpath, "a");
 

@@ -55,6 +55,9 @@
 /* Define if you have the <sys/ethernet.h> header file. */
 #cmakedefine HAVE_SYS_ETHERNET_H
 
+/* Define if you have PATH_MAX */
+#cmakedefine HAVE_PATH_MAX
+
 /* Some libpcap versions use an extra parameter (error) in pcap_compile_nopcap
    */
 #cmakedefine LIBPCAP_PCAP_COMPILE_NOPCAP_HAS_ERROR_PARAMETER

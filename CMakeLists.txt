@@ -100,6 +100,8 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86|x86_64)$")
     endif()
 ENDIF()
 
+check_symbol_exists(PATH_MAX limits.h HAVE_PATH_MAX)
+
 ########################################################################
 ## System Introspection
 
