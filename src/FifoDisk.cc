@@ -48,12 +48,14 @@
 
 FifoDisk::FifoDisk(const std::string& classname, uint64_t size,
 				   uint64_t file_size, pcap_t* pcap_handle, const char* classdir,
-				   const char* filename_format, const char* classdir_format):
+				   const char* filename_format, const char* classdir_format,
+				   const std::string &classnameId):
 		classname(classname), classdir(classdir), size(size), file_size(file_size),
 		tot_bytes(0), tot_pkts(0),
 		file_number(0), pcap_handle(pcap_handle),
-held_bytes(0), held_pkts(0), oldestTimestamp(0), newestTimestamp(0), queries(0),
-		filename_format(filename_format), classdir_format(classdir_format) {
+		held_bytes(0), held_pkts(0), oldestTimestamp(0), newestTimestamp(0), queries(0),
+		filename_format(filename_format), classdir_format(classdir_format),
+		classnameId(classnameId) {
 
 	pthread_mutex_init(&query_in_progress_mutex, NULL);
 
@@ -151,6 +153,7 @@ void FifoDisk::addPkt(const pkt_ptr p) {
 						// also format/create directory path
 						dirpath = fmt::format(classdir_format,
 											  fmt::arg("class_name", classname), 
+											  fmt::arg("class_id", classnameId), 
 											  fmt::arg("newest_timestamp", newestTimestampTM)
 											  );
 						mkdirall(dirpath.c_str());
@@ -158,6 +161,7 @@ void FifoDisk::addPkt(const pkt_ptr p) {
 					}
 					std::string fname = fmt::format(filename_format, 
 													fmt::arg("class_name", classname), 
+													fmt::arg("class_id", classnameId), 
 													fmt::arg("newest_timestamp", newestTimestampTM)
 													);
 					std::string path = dirpath + fname;								

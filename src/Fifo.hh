@@ -66,6 +66,9 @@ public:
 	std::string getClassname() {
 		return classname;
 	}
+	void setClassnameId(std::string s) {
+		classnameId=s;
+	}
     void setClassdir(const char* s) {
         classdir=s;
     }
@@ -134,6 +137,7 @@ protected:
 	bool do_cutoff;
 	uint64_t cutoff;
 	std::string classname;
+	std::string classnameId;
 	std::string filter;
     const char* classdir; 
         const char* filename_format;

@@ -83,7 +83,6 @@ pcapnav_open_offline_tm(const char *fname, const char* classdirectory)
 #ifdef HAVE_PATH_MAX
   char filepath[PATH_MAX];
 #else
-  #error
   char filepath[1024];
 #endif
 

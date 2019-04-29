@@ -21,7 +21,8 @@ class FifoDisk {
 public:
 	FifoDisk(const std::string& classname, uint64_t size,
 			 uint64_t file_size, pcap_t*, const char* classdir,
-			 const char* filename_format, const char* classdir_format);
+			 const char* filename_format, const char* classdir_format,
+			 const std::string &classnameId);
 	~FifoDisk();
 	//  void addPkt(const struct pcap_pkthdr *header, const unsigned char *packet);
 	void addPkt(const pkt_ptr p);
@@ -70,6 +71,7 @@ public:
 
 protected:
 	std::string classname;
+	std::string classnameId;
         const char* classdir;
 	const char* filename_format;
 	const char* classdir_format;

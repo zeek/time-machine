@@ -122,6 +122,7 @@ class:
 	  std::string s="class_";
 	  s+=$2;
 	  $4->setClassname(s);
+	  $4->setClassnameId($2);
 	  $$=$4;
 	  end_new_class();
 	}
@@ -202,7 +203,7 @@ classoption:
 	| TOK_CLASSDIR_FORMAT TOK_STRING {
 		new_class();
 		newclass->setClassdirFormat($2);
-		free($2);
+		$$=newclass;
 	}
 	;
 size:
@@ -258,6 +259,10 @@ main_option:
 	}
 	| TOK_CLASSDIR_FORMAT TOK_STRING {
 		conf_main_classdir_format=strdup($2);
+		free($2);
+	}
+	| TOK_FILENAME_FORMAT TOK_STRING {
+		conf_main_filename_format=strdup($2);
 		free($2);
 	}
         | TOK_PROFILEPATH TOK_STRING {

@@ -135,7 +135,7 @@ int conf_main_bro_listen_port = 47557;
 struct in_addr conf_main_bro_listen_addr; // defualt value is set in main!
 
 const char *conf_main_classdir_format = NULL; // default is no special directory naming
-
+const char *conf_main_filename_format = NULL; // default is no special fifo file naming
 
 /***************************************************************************
  * logging functions
