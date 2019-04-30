@@ -125,7 +125,7 @@ void FifoDisk::addPkt(const pkt_ptr p) {
                     // if the number of bytes currently held in disk ring buffer block + size of a file are greater than the disk size that was configured
                     // note that held_bytes is the number of bytes currently held in block
 					// if we're not managing storage, i.e. size_unlimited, then don't remove old files.
-					if ((size_unlimited && files.size() > 1) || held_bytes+file_size > size) {
+					if ((size_unlimited && files.size() > 1) || (!size_unlimited && held_bytes+file_size > size)) {
 						// delete/drop in-memory reference to oldest file
                         // decrement the number of bytes currently in disk ring buffer block by the number of bytes in the file in the front of the list (the oldest file)
 						held_bytes-=files.front()->getHeldBytes();
