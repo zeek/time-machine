@@ -80,7 +80,7 @@
 %token TOK_TWEAK_CAPTURE_THREAD TOK_SCOPE TOK_PRIORITY 
 %token TOK_INDEX
 %token TOK_FILENAME_FORMAT TOK_CLASSDIR_FORMAT
-%token TOK_INFINITE
+%token TOK_UNLIMITED
 
 %type <s> classname option
 %type <i64> size
@@ -149,14 +149,14 @@ classoption:
 	  newclass->setFifoDiskSz($2);
 	  $$=newclass;
 	}
-	| TOK_DISK TOK_INFINITE {
+	| TOK_DISK TOK_UNLIMITED {
 	  new_class();
 		if (diskIndexesExist()) {
 			char msg[2048];
 			snprintf(msg, sizeof(msg), "In class %s, cannot specify disk infinite when disk indexes are used\n", newclass->getClassname().c_str());
 			conferror(msg);
 		}
-	  newclass->setFifoDiskSzInfinite();
+	  newclass->setFifoDiskSzUnlimited();
 	  $$=newclass;
 	}
 	| TOK_FILESIZE size {

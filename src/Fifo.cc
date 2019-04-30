@@ -36,7 +36,7 @@ Fifo::Fifo(const std::string& classname, uint64_t fifo_mem_sz, uint64_t fifo_dis
 	this->classnameId = classname;
 	this->fifo_mem_sz=fifo_mem_sz;
 	this->fifo_disk_sz=fifo_disk_sz;
-	this->fifo_disk_infinite = false;
+	this->fifo_disk_unlimited = false;
 	this->ph=pcap_handle;
     this->classdir = classdir;
 	this->started=false;
@@ -52,7 +52,7 @@ void Fifo::init() {
 	filter="";
 	fifo_mem_sz=5000000;
 	fifo_disk_sz=50000000;
-	fifo_disk_infinite=false;
+	fifo_disk_unlimited=false;
 	fifo_disk_filesz=50000000;
 	do_cutoff=true;
 	cutoff=10000;
@@ -82,7 +82,7 @@ void Fifo::start() {
     // ph is the handler
 	fd=new FifoDisk(classname, fifo_disk_sz, fifo_disk_filesz, ph, classdir, 
 		filename_format, classdir_format, classnameId,
-		fifo_disk_infinite);
+		fifo_disk_unlimited);
     
     // setting eviction handler for FifoMem object
 	fm->setEvictionHandler(this);

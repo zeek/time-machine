@@ -23,7 +23,7 @@ public:
 			 uint64_t file_size, pcap_t*, const char* classdir,
 			 const char* filename_format, const char* classdir_format,
 			 const std::string &classnameId,
-			 bool size_infinite
+			 bool size_unlimited
 			 );
 	~FifoDisk();
 	//  void addPkt(const struct pcap_pkthdr *header, const unsigned char *packet);
@@ -79,7 +79,7 @@ protected:
 	const char* classdir_format;
 	std::list <FifoDiskFile*> files;
 	uint64_t size;
-	bool size_infinite;
+	bool size_unlimited;
 	uint64_t file_size;
 	uint64_t tot_bytes;
 	uint64_t tot_pkts;
@@ -101,6 +101,7 @@ public:
 	void open();
 	void close();
 	void remove();
+	void removeNoUnlink();
 	void addPkt(const struct pcap_pkthdr *header, const unsigned char *packet);
 	void addPkt(pkt_ptr p);
 	int64_t getCurFileSize() {

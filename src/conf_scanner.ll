@@ -42,7 +42,7 @@ NEWLINE \n
 "mem"		 return TOK_MEM;
 "disk"		 return TOK_DISK;
 "filesize"	 return TOK_FILESIZE;
-"infinite"   return TOK_INFINITE;
+"unlimited"   return TOK_UNLIMITED;
 "K"|"k"		 return TOK_K;
 "M"|"m"		 return TOK_M;
 "G"|"g"		 return TOK_G;
