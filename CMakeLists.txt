@@ -11,6 +11,8 @@ set(ETC "${BRO_ETC_INSTALL_DIR}")
 ## Dependency Configuration
 
 include(FindRequiredPackage)
+include(CheckSymbolExists)
+
 
 FindRequiredPackage(FLEX)
 FindRequiredPackage(BISON)
@@ -19,7 +21,7 @@ FindRequiredPackage(Readline)
 FindRequiredPackage(Threads)
 
 include_directories(BEFORE ${Readline_INCLUDE_DIR})
-target_link_libraries(-lreadline) 
+# target_link_libraries(-lreadline) 
 
 find_package(OpenSSL REQUIRED)
 include_directories(BEFORE ${OpenSSL_INCLUDE_DIR})

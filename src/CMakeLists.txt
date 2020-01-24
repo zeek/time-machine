@@ -106,7 +106,7 @@ endif()
 
 add_executable(timemachine ${timemachine_SRCS})
 #set_target_properties(timemachine PROPERTIES COMPILE_DEFINITIONS "-save-temps")
-target_link_libraries(timemachine ${CMAKE_THREAD_LIBS_INIT} ${PCAP_LIBRARY} ${Readline_LIBRARY} ${OPTLIBS} ${EXTRA_LIBS} re2Static pcapnavStatic) # "-save-temps")
+target_link_libraries(timemachine PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${PCAP_LIBRARY} ${Readline_LIBRARY} ${OPTLIBS} ${EXTRA_LIBS} re2Static pcapnavStatic) # "-save-temps")
 
 target_link_libraries(timemachine PRIVATE fmt-header-only)
 
