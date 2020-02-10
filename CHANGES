@@ -1,3 +1,8 @@
+0.1-6 | 2020-02-10 10:40:00 -0800
+    * Update CMakeFiles.txt to work on FreeBSD12
+    * Allow for "disk unlimited" to not remove captures at all, along with disabling in-memory indexing for that use.
+    * Allow directory hierarchy and filename of class captures to be created dynamically according to date and time.
+
 0.1-5 | 2014-08-26 15:35:00 -0800
 
     * Implemented the creation of index and query directories by default if the user did not create the index and query directories. Also,
