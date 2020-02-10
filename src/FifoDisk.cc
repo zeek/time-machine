@@ -86,11 +86,11 @@ static void mkdirall(const char *dir) {
     for (p = tmp + 1; *p; p++) {
         if(*p == '/') {
             *p = 0;
-            mkdir(tmp, S_IRWXU);
+            mkdir(tmp, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
             *p = '/';
         }
 	}
-    mkdir(tmp, S_IRWXU);
+    mkdir(tmp, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
 }
 
 // called in Fifo.c, in the pktEviction method definition
