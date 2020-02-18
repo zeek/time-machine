@@ -38,6 +38,7 @@
   void end_new_class() { assert(newclass); newclass=NULL; }
 
   void conf_add_index(const char* name, bool do_disk_index);
+	bool diskIndexesExist();
 /*
   IndexType* newindex=NULL;
   void new_index() { if (!newindex) newindex=new IndexType(); }
@@ -67,7 +68,8 @@
 %token <s> TOK_ID
 %token <ipaddr> TOK_IPADDRESS;
 %token TOK_CLASS TOK_FILTER TOK_MAIN TOK_LOG_INTERVAL TOK_LOG_LEVEL TOK_DEVICE
-%token TOK_LOGFILE TOK_WORKDIR TOK_QUERYFILEDIR TOK_INDEXDIR
+%token TOK_CLASSDIR
+%token TOK_LOGFILE TOK_WORKDIR TOK_QUERYFILEDIR TOK_INDEXDIR TOK_PROFILEPATH
 %token TOK_READ_TRACEFILE TOK_BRO_CONNECT_STR
 %token TOK_MEM TOK_DISK TOK_K TOK_M TOK_G TOK_CUTOFF TOK_PRECEDENCE
 %token TOK_DYN_TIMEOUT
@@ -77,6 +79,8 @@
 %token TOK_BRO_LISTEN TOK_BRO_LISTEN_PORT TOK_BRO_LISTEN_ADDR
 %token TOK_TWEAK_CAPTURE_THREAD TOK_SCOPE TOK_PRIORITY 
 %token TOK_INDEX
+%token TOK_FILENAME_FORMAT TOK_CLASSDIR_FORMAT
+%token TOK_UNLIMITED
 
 %type <s> classname option
 %type <i64> size
@@ -120,6 +124,7 @@ class:
 	  std::string s="class_";
 	  s+=$2;
 	  $4->setClassname(s);
+	  $4->setClassnameId($2);
 	  $$=$4;
 	  end_new_class();
 	}
@@ -142,6 +147,16 @@ classoption:
 	| TOK_DISK size {
 	  new_class();
 	  newclass->setFifoDiskSz($2);
+	  $$=newclass;
+	}
+	| TOK_DISK TOK_UNLIMITED {
+	  new_class();
+		if (diskIndexesExist()) {
+			char msg[2048];
+			snprintf(msg, sizeof(msg), "In class %s, cannot specify disk infinite when disk indexes are used\n", newclass->getClassname().c_str());
+			conferror(msg);
+		}
+	  newclass->setFifoDiskSzUnlimited();
 	  $$=newclass;
 	}
 	| TOK_FILESIZE size {
@@ -186,6 +201,22 @@ classoption:
 		newclass->setDynTimeout($2);
 		$$=newclass;
 	}
+    | TOK_CLASSDIR TOK_STRING {
+		new_class();
+        //conf_classdir = ($2);
+        newclass->setClassdir($2);
+        $$=newclass;
+	}
+	| TOK_FILENAME_FORMAT TOK_STRING {
+		new_class();
+		newclass->setFilenameFormat($2);
+		$$=newclass;
+	}
+	| TOK_CLASSDIR_FORMAT TOK_STRING {
+		new_class();
+		newclass->setClassdirFormat($2);
+		$$=newclass;
+	}
 	;
 size:
 	TOK_INTEGER { $$=$1; }
@@ -195,9 +226,9 @@ size:
 	;
 option:
 	TOK_ID TOK_INTEGER {
-	  printf("option: ignored option %s int value %"PRIi64"\n", $1, $2);
+	  printf("option: ignored option %s int value %" PRIi64 "\n", $1, $2);
 	  $$=(char*)malloc(31);
-	  snprintf($$, 30, "%"PRIi64, $2);
+	  snprintf($$, 30, "%" PRIi64, $2);
 	  free($1);
 	}
 	| TOK_ID TOK_STRING {
@@ -238,6 +269,18 @@ main_option:
 	  conf_main_indexdir=strdup($2);
 	  free($2);
 	}
+	| TOK_CLASSDIR_FORMAT TOK_STRING {
+		conf_main_classdir_format=strdup($2);
+		free($2);
+	}
+	| TOK_FILENAME_FORMAT TOK_STRING {
+		conf_main_filename_format=strdup($2);
+		free($2);
+	}
+        | TOK_PROFILEPATH TOK_STRING {
+          conf_main_profilepath=strdup($2);
+          free($2);
+        }
 	| TOK_BRO_CONNECT_STR TOK_STRING {
 	  conf_main_bro_connect_str=strdup($2);
 	  free($2);
@@ -328,6 +371,18 @@ int parse_config(const char* filename, StorageConfig *s) {
   return conf_parse_errors;
 }
 
+bool diskIndexesExist() {
+	std::list<IndexType*>::iterator i;
+	for (i = conf_parser_storageConf->indexes->begin(); 
+			 i != conf_parser_storageConf->indexes->end();
+	     ++i) {
+		if ((*i)->hasDiskIndex()) {
+			return true;
+		}
+	}
+	return false;
+}
+
 void conf_add_index(const char* name, bool do_disk_index) {
 	if (conf_parser_storageConf->indexes->getIndexByName(name)) {
 		char msg[2048];
@@ -335,23 +390,33 @@ void conf_add_index(const char* name, bool do_disk_index) {
 		conferror(msg);
 		return;
 	}
+        /*
+        uint64_t primes[] = {53, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157, /
+                             98317, 196613, 393241, 786433, 1572869, 3145739, 6291469, /
+                             12582917, 25165843, 50331653, 100663319, 201326611, 402653189, /
+                             805306457, 1610612741, 3221225479, 6442450967, 12884901947};
+        */
 	/* TODO: We really should do index configuration with a regitry that knows 
 	   of all potential IndexTypes .... */
 	if (ConnectionIF4::getIndexNameStatic() == name) {
-		IndexType *idx = new Index<ConnectionIF4>(30, int(250000), do_disk_index, NULL);
+		//IndexType *idx = new Index<ConnectionIF4>(30, int(250000), do_disk_index, NULL);
+        IndexType *idx = new Index<ConnectionIF4>(30, 15, do_disk_index, NULL);
 		conf_parser_storageConf->indexes->addIndex(idx);
 	}
 	else if (ConnectionIF3::getIndexNameStatic() == name) {
-		IndexType *idx = new Index<ConnectionIF3>(30, int(250000), do_disk_index, NULL);
+		//IndexType *idx = new Index<ConnectionIF3>(30, int(250000), do_disk_index, NULL);
+        IndexType *idx = new Index<ConnectionIF3>(30, 15, do_disk_index, NULL);
 		conf_parser_storageConf->indexes->addIndex(idx);
 	}
 
 	else if (ConnectionIF2::getIndexNameStatic() == name) {
-		IndexType *idx = new Index<ConnectionIF2>(30, int(250000), do_disk_index, NULL);
+		//IndexType *idx = new Index<ConnectionIF2>(30, int(250000), do_disk_index, NULL);
+        IndexType *idx = new Index<ConnectionIF2>(30, 15, do_disk_index, NULL);
 		conf_parser_storageConf->indexes->addIndex(idx);
 	}
 	else if (IPAddress::getIndexNameStatic() == name) {
-		IndexType *idx = new Index<IPAddress>(30, int(250000), do_disk_index, NULL);
+		//IndexType *idx = new Index<IPAddress>(30, int(250000), do_disk_index, NULL);
+        IndexType *idx = new Index<IPAddress>(30, 15, do_disk_index, NULL);
 		conf_parser_storageConf->indexes->addIndex(idx);
 	}
 	else {

@@ -38,9 +38,11 @@ NEWLINE \n
 "]"		 return RBRACK;
 ";"		 return SEMICOLON;
 "class"		 return TOK_CLASS;
+"classdir"	 return TOK_CLASSDIR;
 "mem"		 return TOK_MEM;
 "disk"		 return TOK_DISK;
 "filesize"	 return TOK_FILESIZE;
+"unlimited"   return TOK_UNLIMITED;
 "K"|"k"		 return TOK_K;
 "M"|"m"		 return TOK_M;
 "G"|"g"		 return TOK_G;
@@ -57,6 +59,7 @@ NEWLINE \n
 "workdir"	 return TOK_WORKDIR;
 "queryfiledir"	 return TOK_QUERYFILEDIR;
 "indexdir"	 return TOK_INDEXDIR;
+"profilepath"    return TOK_PROFILEPATH;
 "index"      return TOK_INDEX;
 "logfile"	 return TOK_LOGFILE;
 "bro_connect_str" return TOK_BRO_CONNECT_STR;
@@ -68,6 +71,8 @@ NEWLINE \n
 "tweak_capture_thread" return TOK_TWEAK_CAPTURE_THREAD;
 "scope"		return TOK_SCOPE;
 "priority"		return TOK_PRIORITY;
+"filename_format" return TOK_FILENAME_FORMAT;
+"classdir_format" return TOK_CLASSDIR_FORMAT;
 
 "rmtconsole_listen_addr"	return TOK_RMTCONSOLE_LISTEN_ADDR;
 "rmtconsole_port"	return TOK_RMTCONSOLE_PORT;
@@ -90,6 +95,7 @@ NEWLINE \n
 			}
 \".*\"	 { conflval.s=strdup(yytext+1);
 		   conflval.s[strlen(conflval.s)-1]=0;
+           /*free(conflval.s)*/
 		   return TOK_STRING;
 		 } 
 {WHITE}

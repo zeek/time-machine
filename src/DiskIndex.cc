@@ -47,10 +47,29 @@ my_fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
  * class IndexFilesReader
  */
 inline IndexFileReader::IndexFileReader(char *fn) : fp(NULL), fname(fn), eof(false) {
-	fp = fopen(fn, "rb"); 
+
+        char filepath[100];
+
+        strcpy(filepath, conf_main_workdir);
+        strcat(filepath, "/");
+        strcat(filepath, fname);
+        //printf("The index file name is %s\n", filepath);
+
+        if (chdir(conf_main_workdir)) {
+            fprintf(stderr, "cannot chdir to %s\n", conf_main_workdir);
+            //return(1);
+        }
+
+	fp = fopen(fn, "rb"); // read as binary 
 	if (fp == NULL) {
 		//TODO: Decent error handling
 		tmlog(TM_LOG_ERROR, "IFR", "Could not open index file \"%s\" for reading.\n", fname);
+                //char path[70];
+
+                //char errbufnav[PCAP_ERRBUF_SIZE];
+
+                //printf("The directory for Fifo that we are in is %s\n", getcwd(path, 70));
+
 	}
 	my_fread(&first, sizeof(tm_time_t), 1, fp);
 	my_fread(&last, sizeof(tm_time_t), 1, fp);
@@ -171,8 +190,8 @@ IndexFiles<T>::IndexFiles(const std::string& pathname, const std::string& indexn
 		pathname(pathname),
 		num_aggregate_levels(3)
 		{
-			file_number = new uint32_t[num_aggregate_levels];
-			file_number_oldest = new uint32_t[num_aggregate_levels];
+			file_number = new uint64_t[num_aggregate_levels];
+			file_number_oldest = new uint64_t[num_aggregate_levels];
 			for (int i=0; i<num_aggregate_levels; i++) {
 				file_number[i] = file_number_oldest[i] = 0;
 			}
@@ -187,7 +206,7 @@ IndexFiles<T>::~IndexFiles() {
 }
 
 template <class T>
-char *IndexFiles<T>::getFilename(int aggregation_level, uint32_t file_number) {
+char *IndexFiles<T>::getFilename(int aggregation_level, uint64_t file_number) {
 	int fn_size;
 	char *fn;
 
@@ -203,14 +222,15 @@ char *IndexFiles<T>::getFilename(int aggregation_level, uint32_t file_number) {
 	//                     Sum: 14
 	fn_size = pathname.length() + indexname.length() + 14;
 	fn = (char *)malloc(fn_size);
-	snprintf(fn, fn_size, "%s/%s_%02x_%08x", pathname.c_str(), indexname.c_str(), aggregation_level, file_number);
+	snprintf(fn, fn_size, "%s/%s_%02x_%08lu", pathname.c_str(), indexname.c_str(), aggregation_level, file_number);
 	return fn;
 }
 
 template <class T>
 void IndexFiles<T>::lookup(IntervalSet *iset, IndexField *key, tm_time_t t0, tm_time_t t1) {
 	int level;
-	uint32_t curfile;
+	uint64_t curfile;
+    // class IndexFileReader from DiskIndex.hh
 	IndexFileReader *ifr;
 	char *fname;
 
@@ -226,6 +246,7 @@ void IndexFiles<T>::lookup(IntervalSet *iset, IndexField *key, tm_time_t t0, tm_
 				// the intervals [t0,t1] and [first,last] intersect 
 				// ==> look for matches
 				ifr->lookupEntry(iset, key);
+
 			}
 			delete ifr;
 		}
@@ -235,60 +256,144 @@ void IndexFiles<T>::lookup(IntervalSet *iset, IndexField *key, tm_time_t t0, tm_
 
 #define EPS 1e-3
 template <class T>
+
+// This function writes the key, the time interval of the IndexEntry, the overall time interval of the index,
+// and the keysize in network byte order
 void IndexFiles<T>::writeIndex( IndexHash *ih) {
+	//tmlog(TM_LOG_DEBUG, "writeIndex", "beginning to write index");
+    // Object type that identifies a stream and contains the information needed to control 
+    // it, including a pointer to its buffer, its position indicator and all its state indicators.
+    // It will be used to write index files
+
+    /*
+    if (chdir(conf_main_workdir)) {
+        fprintf(stderr, "cannot chdir to %s\n", conf_main_workdir);
+        //return(1);
+    }
+    */
+
 	FILE *fp;
 	char *new_file_name;
-	IndexEntry *ie;
-	const Interval *ci;
+	IndexEntry *ie; // Hash table is made up of IndexEntry's, an IndexEntry is the data object containing 
+                    // the intervals for a single entry in an index.
+	const Interval *ci; // Interval type has 2 tm_time_t variables representing start and end of an interval for
+                        // a single IndexEntry entry
 	tm_time_t interval[2];  // the current interval
 	tm_time_t range[2] = {0, 0};  // First TS in index and last TS in index
-	uint32_t keysize = 0;
+	int keysize = 0; // size of key (can be taken from IndexEntry->getKey()->getKeySize() )
 
 	lock_file_numbers();
+    // gets the file name from aggregation level and file number, puts it in a char array
+    // definition of getFilename is a few lines above in DiskIndex.cc
 	new_file_name = getFilename(0, file_number[0]);
 	unlock_file_numbers();
+    // open the file as a binary file containing that file name with writing privileges
+    // w = writing, b = open as binary file
+    if (chdir(conf_main_workdir)) {
+        fprintf(stderr, "cannot chdir to %s\n", conf_main_workdir);
+        //return(1);
+    }
+
+
 	fp = fopen(new_file_name, "wb");
+    // if the file could not be opened, log error and return
 	if (fp == NULL) {
 		tmlog(TM_LOG_ERROR, T::getIndexNameStatic().c_str(), "Could not open file %s for writing.", new_file_name);
+        // clear the hash table, though don't delete it O.o
 		ih->clear();
 		return;
 	}
+
+    // seeks this position of 2*sizeof(tm_time_t)+sizeof(keysize) from the start of the file (SEEK_SET means
+    // from start of the file) this function seems to be part of standard library
+    // 2*sizeof(tm_time_t) because of the time interval (has 2 tm_time_t variables) and sizeof(keysize) because
+    // of key
 	fseek(fp, 2*sizeof(tm_time_t)+sizeof(keysize), SEEK_SET);
+
+    // initial walk/path for avl tree transversal in the hash table
 	ih->initWalk();
+
+    // Do an in-order tree walk. Delete Elements from the hash if
+    // their node and their subtrees have been vistied. NOTE that the
+    // order in which the elements are delete does NOT correspond with
+    // the order in which the are returned!
+    // This deleted element is of IndexEntry type. We will write this to disk.
+    // getNextDelete is from IndexHash.cc
 	ie=ih->getNextDelete();
+
+    // If it is not NULL, get the keysize of the key of this IndexEntry
 	if (ie) {
 		keysize = ie->getKey()->getKeySize();
 	}
+
 	int count = 0;
+    // While not NULL (NULL happens if there's only the root of the AVL tree left)
 	while(ie)  {
 		count++;
+
+        // intlist is the list head of a linked list of Interval types of the IndexEntry
+        // Interval type has 2 tm_time_t types
+    	// Since most index entries contain only one interval we use
+    	// the listheadd to store the first interval. (from IndexEntry.hh, both
+        // getIntList and Interval)
 		ci = ie->getIntList();
 		//keysize = ie->getKey()->getKeySize();
 		//fprintf(stderr, "%08X:%d - %08X:%d\n", tmp->ip1, tmp->port1, tmp->ip2, tmp->port2);
 		// using do ... while is safe, since getIntList will always return a valid
 		// pointer
 		do {
+            // write the key to the disk file
 			my_fwrite(ie->getKey()->getConstKeyPtr(), 1, keysize, fp);
+            // get the start and last time stamps of the list head of the linked
+            // list of Interval types
 			interval[0] = (*ci).getStart();
 			interval[1] = (*ci).getLast();
+            
+            // if the start of this interval is less than the overall start or
+            // less than the EPS, 1 milisecond,
+            // set the overall start time stamp of the entry to be that
 			if (interval[0] < range[0] || (range[0] < EPS)) 
 				range[0] = interval[0];
+            // on the other end, if the end of this interval is greater than
+            // the overall end, then set the overall end time stamp of the entry to be that
 			if (interval[1] > range[1])
 				range[1] = interval[1];
+
+            // write this particular interval of the IndexEntry to the file
 			my_fwrite(interval, sizeof(tm_time_t), 2, fp);
+
+            // move on to the next interval in the linked list of Interval types of the IndexEntry
 			ci = ci->getNextPtr();
-		} while(ci);
+		} while(ci); // continue to do this while there are still interval in the linked list (not NULL)
+    
+        // set the indexentry to be written to be disk to be the next visited and deleted entry from the hash table
 		ie=ih->getNextDelete();
+        //tmlog(TM_LOG_NOTE, "DiskIndex:wrting", "Deleting the IndexEntry type from the hash table");
 	}
 	tmlog(TM_LOG_DEBUG, T::getIndexNameStatic().c_str(), 
 			"Heigth of tree was: %d. level=%d. we wrote %d entries.", ih->height, ih->level, count);
+
+    // resets the position indicator to beginning of file (recall that we used fseek to alter the position indicator)
 	rewind(fp);
+    
+    // write the first and last overall timestamps in index to the file
 	my_fwrite(range, sizeof(tm_time_t), 2, fp);
+
+    // convert from host byte order (low-order byte is stored on next address (A+1) and high-order byte is
+    // stored on starting address (A), little endian) to network byte order ((low-order byte is stored on 
+    // the starting address (A) and high-order byte is stored 
+    // on the next address (A + 1), big endian).
 	keysize = htonl(keysize);
+
+    // write thie network byte order keysize to the file
 	my_fwrite(&keysize, sizeof(keysize), 1, fp);
+
+    // close the file
 	fclose(fp);
 	free(new_file_name);
 	lock_file_numbers();
+
+    // increment file_number
 	file_number[0]++;
 	unlock_file_numbers();
 }
@@ -317,6 +422,7 @@ void IndexFiles<T>::aggregate(tm_time_t oldestTimestampDisk) {
 			unlink(oldest_fname);
 			file_number_oldest[num_aggregate_levels-1]++;
 		}
+        //free(oldest_fname);
 		delete ifr;
 	}
 	unlock_file_numbers();
@@ -333,9 +439,15 @@ void IndexFiles<T>::aggregate(tm_time_t oldestTimestampDisk) {
  */
 template <class T>
 void IndexFiles<T>::aggregate_internal(int level) {
+    if (chdir(conf_main_workdir)) {
+            fprintf(stderr, "cannot chdir to %s\n", conf_main_workdir);
+            //return(1);
+    }    
+
+    // vector of IndexFileReader pointers
 	std::vector<IndexFileReader *> ifr_vec;
 	std::vector<IndexFileReader *>::iterator it;
-	struct timeval tv1, tv2, tvtmp;
+	//struct timeval tv1, tvtmp; //tv2, tvtmp;
 	IndexFileReader *greatest;
 	FILE *ofp;
 
@@ -347,46 +459,95 @@ void IndexFiles<T>::aggregate_internal(int level) {
 	int count;
 
 	lock_file_numbers();
+    // if the number of files at a particular level to aggregate is less than 
+    // IDX_AGGREGATE_COUNT (10), return
 	if (file_number[level] - file_number_oldest[level]  < IDX_AGGREGATE_COUNT) {
 		unlock_file_numbers();
 		return;
 	}
+    // minimum file number since it is the oldest file number of that
+    // particular level
 	fn_min = file_number_oldest[level];
+
+    // we will aggregate IDX_AGGREGATE_COUNT (10) files
 	count = IDX_AGGREGATE_COUNT;
 
+    // getting a new file name for a file with a level + 1
 	of_name = getFilename(level+1, file_number[level+1]);
 	unlock_file_numbers();
 
+    // open this new file with +1 level
 	ofp = fopen(of_name, "wb");
 
 	//XXX MAybe change to DEUBG level
-	tmlog(TM_LOG_NOTE, "aggregate", "New file is %s\n", of_name);
+	//tmlog(TM_LOG_NOTE, "aggregate", "New file is %s\n", of_name);
+
+    // go through the ten files to aggregate
 	for (int i=fn_min; i<fn_min+count; i++) {
 		if_name = getFilename(level, i);
 		// if_name is now owned by the IndexFileReader
+        // push back this new instance of IndexFileReader in ifr_vec,
+        // a vector of IndexFileReader pointers
 		ifr_vec.push_back(new IndexFileReader(if_name));
 	}
+
+    // get the key size and entry size of the first element in the vector
 	keysize = (ifr_vec.front())->getKeySize();
 	entrysize = (ifr_vec.front())->getEntrySize();
 
+    // initialize the range time's
 	range[0] = ifr_vec.front()->getFirst();
 	range[1] = ifr_vec.front()->getLast();
+
+    // go through the for loop and get the absolute first time
+    // of the entire vector and the absolute last time of the entire
+    // vector
 	for (it = ifr_vec.begin(); it!=ifr_vec.end(); it++) {
+        // since we can do better in start time, set range[0] equal to it
 		if ((*it)->getFirst() < range[0])
 			range[0] = (*it)->getFirst();
+        // since we can do better in end time, set range[1] equal to it
 		if ((*it)->getLast() > range[1])
 			range[1] = (*it)->getLast();
 	}
+
+    // write this range to the new file ofp
 	my_fwrite(range, sizeof(tm_time_t), 2, ofp);
+
+    // convert from host byte order (low-order byte is stored on next address (A+1) and high-order byte is
+    // stored on starting address (A), little endian) to network byte order ((low-order byte is stored on 
+    // the starting address (A) and high-order byte is stored 
+    // on the next address (A + 1), big endian).
 	keysize = htonl( (ifr_vec.front())->getKeySize());
+
+    // write the network byte order keysize to the file
 	my_fwrite(&keysize, sizeof(keysize), 1, ofp);
+
+    // flush the output buffer to the file
 	fflush(ofp);
 	keysize = (ifr_vec.front())->getKeySize();
 
 	int i=0;
 	//unsigned int usec = 500*1000; // 500 ms
-	gettimeofday(&tv1, NULL);
-	tvtmp = tv1;
+	//gettimeofday(&tv1, NULL);
+    /*
+    #ifdef __APPLE__
+    struct tvalspec tv1, tvtmp;
+    clock_get_time(CLOCK_MONOTONIC_COARSE, &tv1);
+    tvtmp = tv1;
+    #endif
+    #ifdef linux
+    struct timespec tv1, tvtmp;;
+    clock_gettime(CLOCK_MONOTONIC_COARSE, &tv1);
+    tvtmp = tv1;
+    #endif
+    #ifdef __FreeBSD__
+    struct timespec tv1, tvtmp;
+    clock_gettime(CLOCK_MONOTONIC_FAST, &tv1);
+    tvtmp = tv1;
+    #endif
+    */
+	//tvtmp = tv1;
 	while (!ifr_vec.empty()) {
 		greatest = NULL;
 		for (it = ifr_vec.begin(); it!=ifr_vec.end(); it++) {
@@ -413,18 +574,18 @@ void IndexFiles<T>::aggregate_internal(int level) {
 		/* Give the rest of the tm time to breath */
 		/*
 		if (i%50000 == 0) {
-			gettimeofday(&tv2, NULL);
+			//gettimeofday(&tv2, NULL);
 			if (to_tm_time(&tv2)-to_tm_time(&tv1)<2.5) {
 				log_file->log("aggregate", "Sleeping for file  %s \n", of_name);
 				usleep(usec);
-				gettimeofday(&tv1, NULL);
+				//gettimeofday(&tv1, NULL);
 			}
 		}
 		*/
 	}
-	gettimeofday(&tv2, NULL);
+	//gettimeofday(&tv2, NULL);
 	fclose(ofp);
-	tmlog(TM_LOG_DEBUG, "aggregate", "File %s done. It took %lf sec", of_name, to_tm_time(&tv2)-to_tm_time(&tvtmp));
+	//tmlog(TM_LOG_DEBUG, "aggregate", "File %s done. It took %lf sec", of_name, to_tm_time(&tv2)-to_tm_time(&tvtmp));
 	free(of_name);
 	lock_file_numbers();
 	file_number[level+1]++;

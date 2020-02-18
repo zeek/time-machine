@@ -1,9 +1,124 @@
 /* Define if you have the Bro's Broccoli library. */
 #cmakedefine USE_BROCCOLI
 
+/* We are on a Linux system */
+#cmakedefine HAVE_LINUX
+
+/* Define if you have the `mallinfo' function. */
+#cmakedefine HAVE_MALLINFO
+
+/* Define if you have gperftools library. */
+#cmakedefine HAVE_PERFTOOLS
+
+/* Define if you have gperftools' cpu profiler */
+#cmakedefine USE_PERFTOOLS_CPU
+
+/* Define if you have the <memory.h> header file. */
+#cmakedefine HAVE_MEMORY_H
+
+/* Define if you have the <netinet/if_ether.h> header file. */
+#cmakedefine HAVE_NETINET_IF_ETHER_H
+
+/* Define if you have the <netinet/ip6.h> header file. */
+#cmakedefine HAVE_NETINET_IP6_H
+
+/* Define if you have the <net/ethernet.h> header file. */
+#cmakedefine HAVE_NET_ETHERNET_H
+
+/* Define if you have the <net/ethertypes.h> header file. */
+#cmakedefine HAVE_NET_ETHERTYPES_H
+
+/* have os-proto.h */
+#cmakedefine HAVE_OS_PROTO_H
+
+/* Define if you have the <pcap-int.h> header file. */
+#cmakedefine HAVE_PCAP_INT_H
+
+/* line editing & history powers */
+#cmakedefine HAVE_READLINE
+
+/* Define if you have the `sigaction' function, but not `sigset'. */
+#cmakedefine HAVE_SIGACTION
+
+/* Define if you have the `sigset' function. */
+#cmakedefine HAVE_SIGSET
+
+/* Define if you have the `strcasestr' function. */
+#cmakedefine HAVE_STRCASESTR
+
+/* Define if you have the `strerror' function. */
+#cmakedefine HAVE_STRERROR
+
+/* Define if you have the `strsep' function. */
+#cmakedefine HAVE_STRSEP
+
+/* Define if you have the <sys/ethernet.h> header file. */
+#cmakedefine HAVE_SYS_ETHERNET_H
+
+/* Define if you have PATH_MAX */
+#cmakedefine HAVE_PATH_MAX
+
+/* Some libpcap versions use an extra parameter (error) in pcap_compile_nopcap
+   */
+#cmakedefine LIBPCAP_PCAP_COMPILE_NOPCAP_HAS_ERROR_PARAMETER
+
+/* Include krb5.h */
+#cmakedefine NEED_KRB5_H
+
+/* Compatibility for Darwin */
+#cmakedefine NEED_NAMESER_COMPAT_H
+
+/* d2i_x509 uses const char** */
+#cmakedefine OPENSSL_D2I_X509_USES_CONST_CHAR
+
+/* Define as the return type of signal handlers (`int' or `void'). */
+#define RETSIGTYPE @RETSIGTYPE@
+
+/* signal function return value */
+#define RETSIGVAL @RETSIGVAL@
+
+/* have sin_len field in sockaddr_in */
+#cmakedefine SIN_LEN
+
+/* The size of `long int', as computed by sizeof. */
+#define SIZEOF_LONG_INT @SIZEOF_LONG_INT@
+
+/* The size of `long long', as computed by sizeof. */
+#define SIZEOF_LONG_LONG @SIZEOF_LONG_LONG@
+
+/* The size of `void *', as computed by sizeof. */
+#ifndef CONFIG_H
+#define CONFIG_H
+
+/* defines SIZEOF_VOID_P to sizeof(void*) depending
+   on the architecture */
+#define SIZEOF_VOID_P @SIZEOF_VOID_P@
+
+#endif
+
+
 /* Version number of package */
 #define VERSION "@VERSION@"
+
+/* The size of `void *', as computed by sizeof. */
+//#define SIZEOF_VOID_P @SIZEOF_VOID_P@
+
+/*
+#undef SIZEOF_VOID_P
+#ifdef __LP64__
+#define SIZEOF_VOID_P 8
+#else
+#define SIZEOF_VOID_P 4
+#endif
+*/
+
 
 /* Define if `lex' declares `yytext' as a `char *' by default, not a
    `char[]'. */
 #cmakedefine YYTEXT_POINTER
+
+/* IPv6 options structure defined by RFC 3542 */
+#cmakedefine HAVE_IP6_OPT
+
+/* Common IPv6 extension structure */
+#cmakedefine HAVE_IP6_EXT

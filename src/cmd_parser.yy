@@ -274,14 +274,14 @@ cmd:
 		if ($3 != NULL) {
 
 			ConnectionID4 cid=*(ConnectionID4*)$3;
-	//		printf("show conn %s\n", cid.getStr().c_str());
-	//		printf("getCopy...\n");
+			//printf("show conn %s\n", cid.getStr().c_str());
+			printf("getCopy...\n");
 			Connection *c=cmd_parser_storage->getConns().getCopy(&cid);
-	//		printf("... getCopy\n");
+			printf("... getCopy\n");
 	//		Connection *c=cmd_parser_storage->getConns().get(&cid);
 			if (c) {
-				if(cmd_parser_outfp)
-					fprintf(cmd_parser_outfp, "* %s\n", c->getStr().c_str());
+		          	if(cmd_parser_outfp);
+					//fprintf(cmd_parser_outfp, "* %s\n", c->getStr().c_str());
 					//fprintf(cmd_parser_outfp, "* %s\n%s\n", $3->getStr().c_str(),
 					//	  c->getStr().c_str());
 			} else if(cmd_parser_outfp)

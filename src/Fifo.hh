@@ -37,7 +37,7 @@ class Fifo: FifoMemEvictionHandler {
 public:
 	Fifo();
 	Fifo(const std::string& classname, uint64_t fifo_mem_sz,
-		 uint64_t fifo_disk_sz, pcap_t*);
+		 uint64_t fifo_disk_sz, pcap_t*, const char* classdir);
 	void start();
 	virtual ~Fifo();
 	uint64_t pktEviction();
@@ -66,11 +66,35 @@ public:
 	std::string getClassname() {
 		return classname;
 	}
+	void setClassnameId(std::string s) {
+		classnameId=s;
+	}
+    void setClassdir(const char* s) {
+        classdir=s;
+    }
+    const char* getClassdir() {
+        return classdir;
+    }
+	void setFilenameFormat(const char *s) {
+		filename_format=s;
+	}
+	const char* getFilenameFormat() {
+		return filename_format;
+	}
+	void setClassdirFormat(const char *s) {
+		classdir_format=s;
+	}
+	const char* getClassdirFormat() {
+		return classdir_format;
+	}
 	void setFifoMemSz(uint64_t s) {
 		fifo_mem_sz=s;
 	}
 	void setFifoDiskSz(uint64_t s) {
 		fifo_disk_sz=s;
+	}
+	void setFifoDiskSzUnlimited() {
+		fifo_disk_unlimited=true;
 	}
 	void setFifoDiskFileSz(uint64_t s) {
 		fifo_disk_filesz=s;
@@ -116,9 +140,14 @@ protected:
 	bool do_cutoff;
 	uint64_t cutoff;
 	std::string classname;
+	std::string classnameId;
 	std::string filter;
+    const char* classdir; 
+        const char* filename_format;
+	const char* classdir_format;
 	uint64_t fifo_mem_sz;
 	uint64_t fifo_disk_sz;
+	bool fifo_disk_unlimited;
 	uint64_t fifo_disk_filesz;
 	int precedence;
 	tm_time_t dynTimeout;

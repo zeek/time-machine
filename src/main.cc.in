@@ -28,6 +28,9 @@
 #define USE_MALLINFO
 #endif
 #include <sys/ioctl.h>
+#ifdef USE_PERFTOOLS_CPU
+#include <gperftools/profiler.h>
+#endif
 
 #ifdef USE_BROCCOLI
 #include "BroccoliComm.hh"
@@ -43,12 +46,15 @@
 #include "LogFile.hh"
 #include "Query.hh"
 #include "Index.hh"
+#include "Hash.h"
 
 
 /***************************************************************************
  * global variables
  */
-unsigned had_to_wait = 0;
+//unsigned had_to_wait = 0;
+
+unsigned num_of_entries = 0;
 
 // FIXME: I want a header file
 void *
@@ -65,7 +71,20 @@ uint64_t querySentPkts = 0;
 uint64_t querySentBytes = 0;
 struct timeval stats_last_call_ts;
 
+/*
+#ifdef __APPLE__
+struct tvalspec stats_last_call_ts;
+#endif
+#if defined(linux) || defined(__FreeBSD__)
+struct timespec stats_last_call_ts;
+#endif
+*/
+
 Storage* storage=NULL;
+
+LogFile *stats_log_file;
+LogFile *classes_log_file;
+LogFile *index_log_file;
 
 
 #define HOSTNAME_MAXLEN 32
@@ -99,6 +118,8 @@ int conf_main_log_interval=60;
 int conf_main_log_level=20;
 const char* conf_main_workdir="./";
 const char* conf_main_indexdir="./";
+const char* conf_main_profilepath="./";
+//const char* conf_classdir = "./";
 const char* conf_main_queryfiledir="./";
 const char* conf_main_logfile_name="timemachine.log";
 const char* conf_main_bro_connect_str=NULL;
@@ -113,7 +134,8 @@ int conf_main_bro_listen = 1;
 int conf_main_bro_listen_port = 47557;
 struct in_addr conf_main_bro_listen_addr; // defualt value is set in main!
 
-
+const char *conf_main_classdir_format = NULL; // default is no special directory naming
+const char *conf_main_filename_format = NULL; // default is no special fifo file naming
 
 /***************************************************************************
  * logging functions
@@ -169,23 +191,36 @@ void print_stats(FILE *outfp) {
 	fprintf(outfp, "%u\tpkts received\t[pcap_stats]\n"
 		   "%u\tpkts dropped by kernel\t[pcap_stats]\n"
 		   "%.2f\t%% dropped/received\t[pcap_stats]\n"
-		   "%"PRIu64"\tpkts total received by capture application\n"
-		   "%"PRIu64"\tbytes total\n",
+		   "%" PRIu64 "\tpkts total received by capture application\n"
+		   "%" PRIu64 "\tbytes total\n",
 		   ps.ps_recv, ps.ps_drop,
 		   (float)ps.ps_drop/ps.ps_recv*100,
 		   tot_pkt_cnt, tot_bytes);
+        /*
 	if (stats_last_call_ts.tv_sec) {
 		struct timeval now;
-		gettimeofday(&now, NULL);
+		//gettimeofday(&now, NULL);
 		
 		//double dt=now.tv_sec-stats_last_call_ts.tv_sec
 		//		  + (now.tv_usec-stats_last_call_ts.tv_usec)/1e6;
-		/* ((now.tv_sec-stats_last_call_ts.tv_sec)*1e6
-		   +now.tv_usec-stats_last_call_ts.tv_usec)/1e6; */
-		/*fprintf(outfp, "%.1f\tMbit/s avg since last stats call (%.1fs ago)\n",
-			   (tot_bytes-stats_last_call_tot_bytes)/dt/125000, dt); */
+		// ((now.tv_sec-stats_last_call_ts.tv_sec)*1e6
+		//   +now.tv_usec-stats_last_call_ts.tv_usec)/1e6;
+		//fprintf(outfp, "%.1f\tMbit/s avg since last stats call (%.1fs ago)\n",
+		//	   (tot_bytes-stats_last_call_tot_bytes)/dt/125000, dt);
 	}
+        */
 
+        /*
+        #ifdef __APPLE__
+        clock_get_time(CLOCK_MONOTONIC_COARSE, &stats_last_call_ts);
+        #endif
+        #ifdef linux
+        clock_gettime(CLOCK_MONOTONIC_COARSE, &stats_last_call_ts);
+        #endif
+        #ifdef __FreeBSD__
+        clock_gettime(CLOCK_MONOTONIC_FAST, &stats_last_call_ts);
+        #endif
+        */
 	gettimeofday(&stats_last_call_ts, NULL);
 
 	storage->debugPrint(outfp);
@@ -251,11 +286,11 @@ tmexit() {
 	// the capture thread will quit.
 	// Deactivating storage will also destroy all indexes and will 
 	// thus cancel all index maintaining threads
-	tmlog(TM_LOG_DEBUG, "main", "deactivating storage... ");
+	//tmlog(TM_LOG_DEBUG, "main", "deactivating storage... ");
 	storage->cancelThread();
 	delete storage;
 
-	tmlog("main", "Storage deactivated");
+	//tmlog("main", "Storage deactivated");
 
 	/*
 	printf("deactivating log file...");
@@ -319,6 +354,8 @@ void *cli_console_thread(void *arg) {
 				free(lastline);
 			lastline=strdup(line);
 			parse_cmd(line, stdout, storage, 0);
+            // NOTE NOTE NOTE
+            //tmlog(TM_LOG_NOTE, "cli console thread", "CLI console thread active");
 			free(line);
 		}
 	} while (line != NULL);
@@ -337,6 +374,8 @@ void *index_aggregation_thread(void *arg) {
 	tmlog(TM_LOG_NOTE, "main", "Index aggregation thread started");
 	while (1) {
 		sleep(2);
+        // NOTE NOTE NOTE
+    	//tmlog(TM_LOG_NOTE, "index aggregation thread", "Index aggregation thread active");
 		storage->aggregateIndexFiles();
 	}
 	return NULL;
@@ -350,14 +389,26 @@ void *index_aggregation_thread(void *arg) {
  *  logging interval: int*
  */
 
-void *statisticslog_thread(void* arg) {
+void *statisticslog_thread(void* arg) 
+{
+    /*
 	LogFile *stats_log_file;
 	LogFile *classes_log_file;
 	LogFile *index_log_file;
-
+    */
 #define LOG_STRING_SIZE 1000
 	struct timeval last_call_ts;
 	struct timeval now;
+
+    /*
+    #ifdef __APPLE__
+    struct tvalspec last_call_ts, now;
+    #endif
+    #if defined(linux) || defined(__FreeBSD__)
+    struct timespec last_call_ts, now;
+    #endif
+    */
+
 	struct rusage r;
 	double last_ru_utime=0;
 	double last_ru_stime=0;
@@ -379,6 +430,8 @@ void *statisticslog_thread(void* arg) {
 
 	stats_log_file = new LogFile(std::string("stats.") + conf_main_logfile_name);
 	classes_log_file = new LogFile(std::string("classes.") + conf_main_logfile_name);
+    // some simple initial play with the code
+	//classes_log_file = new LogFile(std::string("classes_test.") + conf_main_logfile_name);
 	index_log_file = new LogFile(std::string("indexes.") + conf_main_logfile_name);
 
 	stats_log_file->logPlain(
@@ -401,6 +454,7 @@ void *statisticslog_thread(void* arg) {
 			"mem "
 			"queryPkts "
 			"queryBytes "
+                        "p_ifdrop"
 			);
 	classes_log_file->logPlain(std::string("timestamp class ") + Fifo::getStatsStrHeader());
 
@@ -412,10 +466,25 @@ void *statisticslog_thread(void* arg) {
 			);
 	
 	memset(&last_call_ts, 0, sizeof(last_call_ts));
-	while (log_file) {
-		if (storage->getPcapStats(&ps) < 0 ) {
+	while (log_file) 
+    {
+		if (storage->getPcapStats(&ps) < 0 ) 
+        {
 			///TODO:
 		}
+
+        /*
+        #ifdef __APPLE__
+        clock_get_time(CLOCK_MONOTONIC_COARSE, &now);
+        #endif
+        #ifdef linux
+        clock_gettime(CLOCK_MONOTONIC_COARSE, &now);
+        #endif
+        #ifdef __FreeBSD__
+        clock_gettime(CLOCK_MONOTONIC_FAST, &now);
+        #endif
+        */
+
 		gettimeofday(&now, NULL);
 		getrusage(RUSAGE_SELF, &r);
 #ifdef USE_MALLINFO
@@ -427,7 +496,16 @@ void *statisticslog_thread(void* arg) {
 #endif
 		ru_utime = to_tm_time(&(r.ru_utime));
 		ru_stime = to_tm_time(&(r.ru_stime));
-		if (last_call_ts.tv_sec) {
+		if (last_call_ts.tv_sec) 
+        {
+            /*
+            #ifdef __APPLE__
+            dt = valspec_to_tm(&now) - valspec_to_tm(&last_call_ts);
+            #endif
+            #if defined(linux) || defined(__FreeBSD__)
+            dt = spec_to_tm(&now) - spec_to_tm(&last_call_ts);
+            #endif
+            */
 			dt=to_tm_time(&now) - to_tm_time(&last_call_ts);
 
 			utime_perc = 100.*(ru_utime-last_ru_utime)/dt;
@@ -437,7 +515,8 @@ void *statisticslog_thread(void* arg) {
 			uncut_rate = (uncut_bytes-last_call_uncut_bytes)/dt/125000.;
 
 		}
-		else {
+		else 
+        {
 			link_rate = uncut_rate = 0;
 			utime_perc = stime_perc = 0.0;
 
@@ -448,27 +527,120 @@ void *statisticslog_thread(void* arg) {
 
 		last_ru_utime = ru_utime;
 		last_ru_stime = ru_stime;
-
+        /*
+        #ifdef __APPLE__
+        snprintf(s, LOG_STRING_SIZE,
+                 "%.2lf "
+                 "%" PRIu64 " "
+                 "%d " 
+                 "%u "
+                 "%u " 
+                 "%.2lf%% "
+                 "%u "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
+                 "%.2lf "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
+                 "%.2lf "
+                 "%.1lf "
+                 "%.1lf "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
+                                 "%d ",
+                 valspec_to_tm(&now),
+                 storage->getConns().getNumEntries(),
+                 storage->getNumDynClasses(),
+                 ps.ps_recv, 
+                 ps.ps_drop,
+                 (double)ps.ps_drop/tot_pkt_cnt*100, // pcap_recv is always 32Bit and will wrap OFTEN
+                 ps.ps_drop-last_drop,
+                 tot_pkt_cnt,
+                 tot_bytes,
+                 link_rate,
+                 uncut_pkt_cnt,
+                 uncut_bytes,
+                 uncut_rate,
+                 utime_perc,
+                 stime_perc,
+                 mem_from_os,
+                 mem_alloc,
+                 querySentPkts,
+                 querySentBytes,
+                                 ps.ps_ifdrop
+                     
+                );
+        #endif
+        #if defined(linux) || defined(__FreeBSD__)
+        snprintf(s, LOG_STRING_SIZE,
+                 "%.2lf "
+                 "%" PRIu64 " "
+                 "%d " 
+                 "%u "
+                 "%u " 
+                 "%.2lf%% "
+                 "%u "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
+                 "%.2lf "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
+                 "%.2lf "
+                 "%.1lf "
+                 "%.1lf "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
+                 "%" PRIu64 " "
+                                 "%d ",
+                 spec_to_tm(&now),
+                 storage->getConns().getNumEntries(),
+                 storage->getNumDynClasses(),
+                 ps.ps_recv, 
+                 ps.ps_drop,
+                 (double)ps.ps_drop/tot_pkt_cnt*100, // pcap_recv is always 32Bit and will wrap OFTEN
+                 ps.ps_drop-last_drop,
+                 tot_pkt_cnt,
+                 tot_bytes,
+                 link_rate,
+                 uncut_pkt_cnt,
+                 uncut_bytes,
+                 uncut_rate,
+                 utime_perc,
+                 stime_perc,
+                 mem_from_os,
+                 mem_alloc,
+                 querySentPkts,
+                 querySentBytes,
+                                 ps.ps_ifdrop
+                     
+                );
+        #endif
+        */
+        
 		snprintf(s, LOG_STRING_SIZE,
 				 "%.2lf "
-				 "%"PRIu64" "
+				 "%" PRIu64 " "
 				 "%d " 
 				 "%u "
 				 "%u " 
 				 "%.2lf%% "
 				 "%u "
-				 "%"PRIu64" "
-				 "%"PRIu64" "
+				 "%" PRIu64 " "
+				 "%" PRIu64 " "
 				 "%.2lf "
-				 "%"PRIu64" "
-				 "%"PRIu64" "
+				 "%" PRIu64 " "
+				 "%" PRIu64 " "
 				 "%.2lf "
 				 "%.1lf "
 				 "%.1lf "
-				 "%"PRIu64" "
-				 "%"PRIu64" "
-				 "%"PRIu64" "
-				 "%"PRIu64" ",
+				 "%" PRIu64 " "
+				 "%" PRIu64 " "
+				 "%" PRIu64 " "
+				 "%" PRIu64 " "
+                                 "%d ",
 				 to_tm_time(&now),
 				 storage->getConns().getNumEntries(),
 				 storage->getNumDynClasses(),
@@ -487,11 +659,14 @@ void *statisticslog_thread(void* arg) {
 				 mem_from_os,
 				 mem_alloc,
 				 querySentPkts,
-				 querySentBytes
+				 querySentBytes,
+                                 ps.ps_ifdrop
 					 
 				);
+        
 		stats_log_file->logPlain(s);
-		if (last_drop != ps.ps_drop) {
+		if (last_drop != ps.ps_drop) 
+        {
 			log_file->log("DROP" , "we dropped packets: %u", ps.ps_drop-last_drop);
 			last_drop = ps.ps_drop;
 		}
@@ -500,23 +675,73 @@ void *statisticslog_thread(void* arg) {
 		
 		// TODO: make fifos stats and index stats consistent
 		fifos = storage->getFifos();
-		for(std::list<Fifo*>::iterator i=fifos.begin(); i!=fifos.end(); i++) {
+		for(std::list<Fifo*>::iterator i=fifos.begin(); i!=fifos.end(); i++) 
+        {
+            /*
+            if (chdir((*i)->getClassdir())) {
+                fprintf(stderr, "cannot class chdir to %s\n", (*i)->getClassdir());
+                //return;
+            }
+            */
+            
 			snprintf(s, LOG_STRING_SIZE, "%.2lf %s %s", to_tm_time(&now),  (*i)->getClassname().c_str(), (*i)->getStatsStr().c_str());
+            /*
+            #ifdef __APPLE__
+            snprintf(s, LOG_STRING_SIZE, "%.2lf %s %s", valspec_to_tm(&now),  (*i)->getClassname().c_str(), (*i)->getStatsStr().c_str());
+            #endif
+            #if defined(linux) || defined(__FreeBSD__)
+            snprintf(s, LOG_STRING_SIZE, "%.2lf %s %s", spec_to_tm(&now),  (*i)->getClassname().c_str(), (*i)->getStatsStr().c_str());
+            #endif
+            */
 			classes_log_file->logPlain(s);
 		}
-
+        /*
+        if (chdir(conf_main_workdir)) {
+                fprintf(stderr, "cannot chdir to %s\n", conf_main_workdir);
+                //return(1);
+        }
+        */
 		indexes = storage->getIndexes();
-		for (std::list<IndexType*>::iterator i=indexes->begin(); i!=indexes->end(); i++) {
+		for (std::list<IndexType*>::iterator i=indexes->begin(); i!=indexes->end(); i++) 
+        {
+            /*
+            #ifdef __APPLE__
+            snprintf(s, LOG_STRING_SIZE, 
+                    "%.2lf "
+                    "%s "
+                    "%" PRIu64 " "
+                    "%u ",
+                    valspec_to_tm(&now),
+                    (*i)->getIndexName().c_str(),
+                    (*i)->getNumEntriesRAM(),
+                    (*i)->getQlen()
+                );
+            #endif
+            #if defined(linux) || defined(__FreeBSD__)
+            snprintf(s, LOG_STRING_SIZE, 
+                    "%.2lf "
+                    "%s "
+                    "%" PRIu64 " "
+                    "%u ",
+                    spec_to_tm(&now),
+                    (*i)->getIndexName().c_str(),
+                    (*i)->getNumEntriesRAM(),
+                    (*i)->getQlen()
+                );
+            #endif
+            */
+            
 			snprintf(s, LOG_STRING_SIZE, 
 					"%.2lf "
 					"%s "
-					"%"PRIu64" "
+					"%" PRIu64 " "
 					"%u ",
 					to_tm_time(&now),
 					(*i)->getIndexName().c_str(),
 					(*i)->getNumEntriesRAM(),
 					(*i)->getQlen()
 				);
+            
 			index_log_file->logPlain(s);
 		}
 
@@ -524,9 +749,9 @@ void *statisticslog_thread(void* arg) {
 		//log_file->log("stats_indexes", "wait: %u. %s", had_to_wait, storage->getStatsIndexesStr().c_str());
 
 //		log_file->log("stats_queries", "%u query subscriptions",
-//					  storage->getConns().getSubscriptions());
+//				  storage->getConns().getSubscriptions());
 #ifdef USE_BROCCOLI
-//		log_file->log("stats_broccoli", "peak receive queue %d bytes",
+		//log_file->log("stats_broccoli", "peak receive queue %d bytes",
 //					  broccoli_recv_q_peak);
 		broccoli_recv_q_peak=0;
 #endif
@@ -560,8 +785,18 @@ void *statisticslog_thread(void* arg) {
 		*/
 #endif
 
+/*
+    if (!log_file)
+    {
+        delete stats_log_file;
+        delete classes_log_file;
+        delete index_log_file;  
+
+    }
+*/
 		sleep(*(int*)arg);
-	}
+	}  
+
 	// log file was closed
 	return NULL;
 }
@@ -579,6 +814,12 @@ void usage() {
 	exit(1);
 }
 
+void print_version()
+{
+    printf("TimeMachine version %s\n", VERSION);
+    exit(1); 
+}
+
 
 
 /***************************************************************************
@@ -587,6 +828,30 @@ void usage() {
 
 int
 main(int argc, char** argv) {
+
+        /*
+        char filepath[100];
+
+        strcpy(filepath, conf_main_workdir);
+        strcat(filepath, "/");
+        strcat(filepath, conf_main_profilepath);
+
+        struct stat st;
+
+        printf("the directory to the profile is: %s\n", filepath);
+
+        if (stat(filepath, &st) != 0)
+        {
+            printf("The index directory %s did not exist. Creating the directory ...\n", conf_main_profilepath);
+            mkdir("home/lakers/timemachine_results/profile", 0755);
+        }
+
+        char path[70];
+
+        printf("The directory for initial main that we are in is %s\n", getcwd(path, 70));       
+ 
+        ProfilerStart(filepath);
+        */
 	const char *conffile="@BRO_ETC_INSTALL_DIR@/timemachine.cfg";
 	struct sigaction exit_action;
 	int i;
@@ -602,7 +867,15 @@ main(int argc, char** argv) {
 	 */
 
 	int opt;
-	while ((opt=getopt(argc, argv, "i:r:f:c:h")) != -1) {
+    /*
+    if (getopt(argc, argv, "v") != -1)
+    {
+        print_version();
+    }
+    */
+	while ((opt=getopt(argc, argv, "i:r:f:c:v:h")) != -1) {
+        //std::cout << "the command line arg you put in is: " << opt << std::endl;
+        //std::cout << "the second command line arg you put in is: " << argv[1] << std::endl;
 		switch(opt) {
 		case 'f':
 			storageConf.filter.assign(optarg);
@@ -616,6 +889,9 @@ main(int argc, char** argv) {
 		case 'c':
 			conffile=strdup(optarg);
 			break;
+        case 'v':
+            print_version();
+            break;
 		case 'h':
 		default:
 			usage();
@@ -635,8 +911,9 @@ main(int argc, char** argv) {
 	}
 
 
-
+        #if defined(__APPLE__) || defined(linux) || defined(__FreeBSD__)
 	memset(&stats_last_call_ts, 0, sizeof(stats_last_call_ts));
+        #endif
 
 	if (chdir(conf_main_workdir)) {
 		fprintf(stderr, "cannot chdir to %s\n", conf_main_workdir);
@@ -644,7 +921,7 @@ main(int argc, char** argv) {
 	}
 
 	log_file=new LogFile(conf_main_logfile_name);
-	tmlog("main", "TimeMachine version %s", VERSION);
+	tmlog("main: main.cc.in, ~line 655", "TimeMachine version %s", VERSION);
 
 	if (!conf_main_daemon)
 		printf("TimeMachine version %s\n", VERSION);
@@ -674,7 +951,33 @@ main(int argc, char** argv) {
 		/* don't close stderr yet. wait until startup is finished */
 	}
 
+        char filepath[100];
 
+        strcpy(filepath, conf_main_workdir);
+        strcat(filepath, "/");
+        strcat(filepath, conf_main_profilepath);
+
+        
+
+        //struct stat st;
+
+        //printf("the directory to the profile is: %s\n", filepath);
+
+        /*
+        if (stat(filepath, &st) != 0)
+        {
+            printf("The index directory %s did not exist. Creating the directory ...\n", conf_main_profilepath);
+            mkdir(filepath, 0755);
+        }
+        */
+
+        //char path[70];
+
+        //printf("The directory for initial main that we are in is %s\n", getcwd(path, 70));
+
+        #ifdef USE_PERFTOOLS_CPU 
+        ProfilerStart(filepath);
+        #endif
 
 
 	// Blocl all signals. This signal mask is then inherited by spawned 
@@ -696,6 +999,8 @@ main(int argc, char** argv) {
 	// Initialise cmd_parser
 	cmd_parser_init();
 
+        init_hash_function();
+
 	try {
 		storage = new Storage(storageConf);
 	} catch (const std::string& str) {
@@ -703,16 +1008,21 @@ main(int argc, char** argv) {
 		delete log_file;
 		exit(1);
 	}
-	tmlog(TM_LOG_NOTE, "main", "capture started, capture thread");
+	//tmlog(TM_LOG_NOTE, "main: main.cc.in, ~line 714", "capture started, capture thread come on");
+
+	//tmlog(TM_LOG_NOTE, "main", "capture started, capture thread WORK WORK WORK WORK WORK WORK WORK WORK WORK WORK");
 
 #ifdef TM_HEAVY_DEBUG
-	tmlog(TM_LOG_NOTE, "main", "Compiled with TM_HEAVY_DEBUG");
+	tmlog(TM_LOG_NOTE, "main: main.cc.in, ~line 719", "Compiled with TM_HEAVY_DEBUG");
 #endif
 
 	if (!conf_main_daemon) 
 		printf("capture started\n");
 
 	i = pthread_create(&index_aggregation_thread_tid, NULL, index_aggregation_thread, NULL);
+
+    // NOTE NOTE NOTE
+    //tmlog(TM_LOG_NOTE, "index aggregation thread: main.cc.in, ~line 728", "creating index aggregation thread");
 	if (i) {
 		tmlog(TM_LOG_ERROR, "main", "Could not start index aggregation thread.\n");
 		exit(1);
@@ -737,6 +1047,9 @@ main(int argc, char** argv) {
 
 	if (conf_main_rmtconsole) {
 		i=pthread_create(&rmtconsole_listen_thread_tid, NULL, rmtconsole_listen_thread, NULL);
+
+        // NOTE NOTE NOTE
+        //tmlog(TM_LOG_NOTE, "remote console thread: main.cc.in, ~line 755", "creating remote console thread");
 		if (i) {
 			tmlog(TM_LOG_ERROR, "main", "Could not start remote console listen thread.\n");
 			exit(1);
@@ -749,6 +1062,9 @@ main(int argc, char** argv) {
 
 	if (conf_main_console) {
 		i=pthread_create(&cli_console_thread_tid, NULL, cli_console_thread, NULL);
+
+        // NOTE NOTE NOTE
+        //tmlog(TM_LOG_NOTE, "command line interface console thread: main.cc.in, ~line 770", "creating command line interface console thread");
 		if (i) {
 			tmlog(TM_LOG_ERROR, "main", "Could not start console thread.\n");
 			exit(1);
@@ -764,6 +1080,10 @@ main(int argc, char** argv) {
 
 		i=pthread_create(&statisticslog_thread_tid, NULL,
 						 statisticslog_thread, &conf_main_log_interval);
+
+        // NOTE NOTE NOTE
+       // tmlog(TM_LOG_NOTE, "statistics log thread: main.cc.in, ~line 788", "creating statistics log thread");
+
 		if (i) {
 			tmlog(TM_LOG_ERROR, "main", "Could not start statistics log thread.\n");
 			exit(1);
@@ -803,6 +1123,14 @@ main(int argc, char** argv) {
 			while (1) 
 				pause();
 		}
+
+        #ifdef USE_PERFTOOLS_CPU
+        ProfilerStop();
+        #endif
+        delete stats_log_file;
+        delete classes_log_file;
+        delete index_log_file; 
+
 		tmexit();
 
 }

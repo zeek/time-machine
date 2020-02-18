@@ -9,6 +9,7 @@
 #include "FifoMem.hh"
 #include "Query.hh"
 #include "Index.hh"
+//#include "bro_inet_ntop.h"
 
 
 FifoMem::FifoMem(uint64_t size): size(size), oldestTimestamp(0), newestTimestamp(0) {
@@ -57,6 +58,7 @@ FifoMem::~FifoMem() {
  *                 0 and a_s are valid
  *        TODO: WHAT HAPPENS IF a_s == a_lp ?? WHEN IS THIS THE CASE???
  *
+ * TODO (now) : understand the rest of FifoMem::addPkt, the align parts
  */
 void FifoMem::addPkt(const struct pcap_pkthdr *header,
 					 const unsigned char *packet) {
@@ -66,38 +68,76 @@ void FifoMem::addPkt(const struct pcap_pkthdr *header,
 
 		unsigned int pktlen=sizeof(struct pcap_pkthdr)+header->caplen;
 
+        // while there are a nonzero number of packets currently in block and current 
+        // writing position in the memory ring buffer is <= position of most recently
+        // aded packet, and (wp + packet length including header) >= s
+        // don't want to evict the most recently added packet
 		while (held_pkts && (wp<=s && (wp+pktlen)>=s)) {
 			/* only when wp is lower than s can there be a problem. if wp>s
 			 * wp will hit end _before_ reaching s. when this happend, wp 
 			 * wraps around and is thus <= s
 			 */
-			// pktEviction eventually calls popPkt() which advances s
+			// pktEviction eventually calls popPkt() which advances s - this is from Fifo.c
+            // The path seems to be Storage::addPkt->Fifo::addPkt->FifoMem::addPkt -> FifoMem::pktEviction-> virtual FifoMemEvictionHandler: pktEviction -> Fifo::pktEviction -> FifoDisk::addPkt
+            // note that pktEviction() returns the number of bytes evicted from the memory ring buffer
 			if (pktEviction()) continue;
 			assert(false);
 		}
 
 		/* Write the packet to the FIFO */
+        // get the timestamp of the oldest packet in the memory ring buffer, which is at the front of the buffer
 		oldestTimestamp = to_tm_time(&((struct pcap_pkthdr*)s)->ts);
+
+        // get the time stamp of the newest packet, the packet we are to add to the memory ring buffer
 		newestTimestamp = to_tm_time(&(header->ts));
+        // copy the packet and the pcap packet header to writing position of the memory ring buffer
 		memcpy(wp, header, sizeof(struct pcap_pkthdr));
 		memcpy(wp+sizeof(struct pcap_pkthdr), packet, header->caplen);
 
+
+
+
+        //char str1[INET6_ADDRSTRLEN];
+
+        //bro_inet_ntop(AF_INET6, &(IP6(wp + 4 + sizeof(struct pcap_pkthdr))->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
+
+        //char s1[INET6_ADDRSTRLEN];
+
+        //inet_pton(AF_INET6, s1, str1);
+
+        //char str2[INET6_ADDRSTRLEN];
+
+        //bro_inet_ntop(AF_INET6, &(IP6(wp + 4 + sizeof(struct pcap_pkthdr))->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
+
+        //tmlog(TM_LOG_NOTE, "FifoMem::addPkt", "we just wrote to the fifo memory ring buffer the packet with src ip %s and dst ip %s", str1, str2);
+
+
+
+
 		/* Adjust align array and a_lp 
 		 * wp now points to the packet that we just wrote */
+        // if position of most recently added packet > current writing position
 		if (lp > wp) { 
 			/* previous call to addPkt wrapped wp 
 			   Must make sure that remainder of align array points to a valid addr */
+            // if this happens, writing position is at start of buffer block
 			assert(wp == start);
+            // set the remaning align array points equal to lp
 			for (uint64_t i=a_lp+1; i<align_num; i++) {
 				align[i] = lp;
 			}
 			/* wrap a_lp */ 
 			a_lp = 0;
+            // set the first element in the align array to the start of the buffer block
 			align[0] = start;
-			a_next = start + align_gran;
+            // then have packet pointer a_next point to the start + align_gran, takes care of the rest
+			a_next = start + align_gran; // align_gran seems to be the size between two aligned packets
 		}
+        // if the position of most recently added packet <= current writing position
 		else {
-
+            //go through all the packets until we reach the packet that we most recently wrote
+            // for some reason, this doesn't feel very efficient - seems like the align array keeps
+            // rewriting itself with respect to the packet stuff in the memory ring buffer
 			while (a_next<=wp) {
 				a_lp++;
 				a_next+=align_gran;
@@ -106,6 +146,8 @@ void FifoMem::addPkt(const struct pcap_pkthdr *header,
 		}
 
 		/* Adjust wp and lp */
+        // set the last newly added packet pointer to the beginning of the newly written packet
+        // move the writing pointer from the beginning of the newly written packet to after it
 		lp=wp;
 		wp+=pktlen;
 
@@ -113,9 +155,9 @@ void FifoMem::addPkt(const struct pcap_pkthdr *header,
 			/* Wrap around */
 			wp=start;
 		}
-
+        // increment these since we are adding a packet with bytes
 		tot_pkts++;
-		tot_pktbytes+=header->caplen;
+		tot_pktbytes+=header->caplen; //len;
 		held_pkts++;
 		held_bytes+=header->caplen;
 
@@ -158,24 +200,37 @@ uint64_t FifoMem::getTotLostPktbytes() const {
 
 uint64_t FifoMem::popPkt() {
 	uint64_t n=0;
+    // if nonzero number of packets held in the memory ring buffer
 	if (held_pkts) {
+        // length of the first packet in the buffer
 		n=((struct pcap_pkthdr *)s)->caplen;
+        // advance s
 		s+=sizeof(struct pcap_pkthdr)+((struct pcap_pkthdr *)s)->caplen;
+        // if s is greater than end, wrap around and start from the beginning of
+        // the memory ring buffer
+        // also set the start of valid align entries to 0
 		if (s>=end) {
 			s=start;
 			a_s=0;
 		} 
+        // move a_s so it is close to where s is, to follow the above comment that
+        // align[a_lp] points to a mem location where a packet starts and that
+        // is close to lp
 		else {
 			while (align[a_s+1]<s) {
 				a_s++;
 			}
 		}
+        // decrement the number of held packets by 1 and the number of held bytes
+        // by n since we popped the first packet
 		held_pkts--;
 		held_bytes-=n;
 	}
+    // returns the length of the popped packet
 	return n;
 }
 
+// This goes to FifoMemEvictionHandler::pktEviction() in FifoMem.hh
 uint64_t FifoMem::pktEviction() {
 	if (eviction_handler)
 		return eviction_handler->pktEviction();
@@ -204,7 +259,7 @@ void FifoMem::debugPrint() const {
 void FifoMem::debugPrint(FILE *fp) const {
 	fprintf(fp, "\nstart = %ld  s = %ld  wp = %ld  lp = %ld  end = %ld  held_pkts = %lu\n",
 		   (long int)(start-start), (long int)(s-start), (long int)(wp-start), (long int)(lp-start), (long int)(end-start), (long int)held_pkts);
-	fprintf(fp, "a_next = %ld  a_wp = XX  a_s = %"PRIu64" a_lp = %"PRIu64" a_max = %"PRIu64"\n",
+	fprintf(fp, "a_next = %ld  a_wp = XX  a_s = %" PRIu64 " a_lp = %" PRIu64 " a_max = %" PRIu64 "\n",
 		   (long int)(a_next-start), a_s, a_lp, a_max);
 
 	/*
@@ -241,6 +296,12 @@ inline tm_time_t pkt_t (pkt_ptr p) {
 	return to_tm_time(&((struct pcap_pkthdr*)p)->ts);
 }
 
+// note that pkt_ptr is u_char* (typedef in types.h)
+// makes sure that the packet pointer is before end + size
+// if packet pointer is before end, return the pointer,
+// else return the pointer - size (which will be before end)
+// recall that end is position after last byte of block (start+size)
+// recall that size is size of block in bytes
 inline pkt_ptr FifoMem::block (pkt_ptr p) {
 	assert (p<end+size);
 	return p<end ? p : p-size;
@@ -323,6 +384,7 @@ uint64_t FifoMem::query(QueryRequest *qreq, QueryResult *qres,
 					qres->getQueryID(), i->getStart());
 
 		if (found) {
+            //p += 4;
 			p_orig = p;
 			tmlog(TM_LOG_DEBUG, "query", "%d First packet after bin-search is: ts=%lf, addr=%p, offset=%zu len=%u",
 					qres->getQueryID(), pkt_t(p), p, p-start, ((struct pcap_pkthdr *)p)->caplen);
@@ -351,6 +413,30 @@ uint64_t FifoMem::query(QueryRequest *qreq, QueryResult *qres,
 #endif
 			while ( (p_will_wrap || (p<=lp)) 
 					&& pkt_t(p) <= i->getLast() ) {
+                //char str1[INET6_ADDRSTRLEN];
+
+                //bro_inet_ntop(AF_INET6, &(IP6(p)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
+
+                //inet_ntop(AF_INET6, &(IP6(p)->ip6_src.s6_addr), str1, INET6_ADDRSTRLEN);
+
+                //char s1[INET6_ADDRSTRLEN];
+
+                //inet_pton(AF_INET6, s1, str1);
+
+                //char str2[INET6_ADDRSTRLEN];
+
+                //bro_inet_ntop(AF_INET6, &(IP6(p)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
+                
+                //inet_ntop(AF_INET6, &(IP6(p)->ip6_dst.s6_addr), str2, INET6_ADDRSTRLEN);
+
+                //char s2[INET6_ADDRSTRLEN];
+
+                //inet_pton(AF_INET6, s2, str2);
+                /*
+                //tmlog(TM_LOG_NOTE, "FifoMem.cc: query", "the query packet has source ip address: %s and dst ip address %s", str1, str2);
+                //tmlog(TM_LOG_NOTE, "FifoMem.cc:query", "the query parameters in mem are that it has a time interval from %f to %f, a hash of %lu, a timestamp of %f, and a form of %s", \
+                qreq->getT0(), qreq->getT1(), qreq->getField()->hash(), qreq->getField()->ts, qreq->getField()->getStr().c_str());
+                */
 				if (qreq->matchPkt(p) && last_match_ts < pkt_t(p))  {
 					qres->sendPkt(p);
 					if (qreq->isSubscribe()) {

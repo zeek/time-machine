@@ -11,12 +11,20 @@ set(ETC "${BRO_ETC_INSTALL_DIR}")
 ## Dependency Configuration
 
 include(FindRequiredPackage)
+include(CheckSymbolExists)
+
 
 FindRequiredPackage(FLEX)
 FindRequiredPackage(BISON)
 FindRequiredPackage(PCAP)
 FindRequiredPackage(Readline)
 FindRequiredPackage(Threads)
+
+include_directories(BEFORE ${Readline_INCLUDE_DIR})
+# target_link_libraries(-lreadline) 
+
+find_package(OpenSSL REQUIRED)
+include_directories(BEFORE ${OpenSSL_INCLUDE_DIR})
 
 # Optional Dependencies
 
@@ -28,12 +36,73 @@ if (BROCCOLI_FOUND)
     list(APPEND OPTLIBS ${Broccoli_LIBRARY})
 endif ()
 
+set(HAVE_PERFTOOLS false)
+set(USE_PERFTOOLS_DEBUG false)
+set(USE_PERFTOOLS_TCMALLOC false)
+set(USE_PERFTOOLS_CPU false)
+
+if (NOT DISABLE_PERFTOOLS)
+   find_package(GooglePerftools)
+endif ()
+
+if (GOOGLEPERFTOOLS_FOUND)
+    set(HAVE_PERFTOOLS true)
+    # Non-Linux systems may not be well-supported by gperftools, so
+    # require explicit request from user to enable it in that case.
+    if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ENABLE_PERFTOOLS)
+        set(USE_PERFTOOLS_TCMALLOC true)
+
+        if (ENABLE_PERFTOOLS_DEBUG)
+            # Enable heap debugging with perftools.
+            set(USE_PERFTOOLS_DEBUG true)
+            include_directories(BEFORE ${GooglePerftools_INCLUDE_DIR})
+            list(APPEND OPTLIBS ${GooglePerftools_LIBRARIES_DEBUG})
+        else ()
+            # Link in tcmalloc for better performance.
+            list(APPEND OPTLIBS ${GooglePerftools_LIBRARIES})
+        endif ()
+        
+        if (ENABLE_PERFTOOLS_CPU)
+            # Enable CPU usage debugging with perftools.
+            set(USE_PERFTOOLS_CPU true)
+            include_directories(BEFORE ${GooglePerftools_INCLUDE_CPU})
+            list(APPEND OPTLIBS ${GooglePerftools_LIBRARIES_CPU})
+        else ()
+            list(APPEND OPTLIBS ${GooglePerftools_LIBRARIES})
+        endif ()
+    endif ()
+endif ()
+
 if (MISSING_PREREQS)
     foreach (prereq ${MISSING_PREREQ_DESCS})
         message(SEND_ERROR ${prereq})
     endforeach ()
     message(FATAL_ERROR "Configuration aborted due to missing prerequisites")
 endif ()
+
+if (ENABLE_PERFTOOLS_CPU OR ENABLE_PERFTOOLS_DEBUG OR ENABLE_PERFTOOLS)
+    # Just a no op to prevent CMake from complaining about manually-specified
+    # ENABLE_PERFTOOLS_DEBUG or ENABLE_PERFTOOLS not being used if google
+    # perftools weren't found
+endif ()
+
+set(CMAKE_CXX_FLAGS "-g -Wall -O3")
+set(CMAKE_C_FLAGS "-g -Wall -O3")
+add_definitions("-O3")
+
+#detect 32 or 64 bit compiler
+# Also in config.h.in
+IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86|x86_64)$")
+    include(CheckTypeSize)
+    check_type_size("void*" SIZEOF_VOID_P BUILTIN_TYPES_ONLY)
+    if (${SIZEOF_VOID_P} EQUAL 8)
+        set(CMAKE_SYSTEM_PROCESSOR_x86 64)
+    else()
+        set(CMAKE_SYSTEM_PROCESSOR_x86 32)
+    endif()
+ENDIF()
+
+check_symbol_exists(PATH_MAX limits.h HAVE_PATH_MAX)
 
 ########################################################################
 ## System Introspection
@@ -85,6 +154,10 @@ message(
     "\nCPP:               ${CMAKE_CXX_COMPILER}"
     "\n"
     "\nBroccoli:          ${USE_BROCCOLI}"
+    "\ngperftools found:  ${HAVE_PERFTOOLS}"
+    "\n        tcmalloc:  ${USE_PERFTOOLS_TCMALLOC}"
+    "\n       debugging:  ${USE_PERFTOOLS_DEBUG}"
+    "\n     cpu_profile:  ${USE_PERFTOOLS_CPU}"
     "\n================================================================\n"
 )
 

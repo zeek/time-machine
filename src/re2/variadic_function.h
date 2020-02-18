@@ -337,6 +337,148 @@ class VariadicFunction2 {
         &a21, &a22, &a23, &a24, &a25, &a26, &a27, &a28, &a29, &a30, &a31 };
     return Func(p0, p1, args, 32);
   }
+  Result operator()(Param0 p0, Param1 p1, const Arg& a0, const Arg& a1,
+      const Arg& a2, const Arg& a3, const Arg& a4, const Arg& a5,
+      const Arg& a6, const Arg& a7, const Arg& a8, const Arg& a9,
+      const Arg& a10, const Arg& a11, const Arg& a12, const Arg& a13,
+      const Arg& a14, const Arg& a15, const Arg& a16, const Arg& a17,
+      const Arg& a18, const Arg& a19, const Arg& a20, const Arg& a21,
+      const Arg& a22, const Arg& a23, const Arg& a24, const Arg& a25,
+      const Arg& a26, const Arg& a27, const Arg& a28, const Arg& a29,
+      const Arg& a30, const Arg& a31, const Arg& a32) const {
+    const Arg* const args[] = { &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8,
+        &a9, &a10, &a11, &a12, &a13, &a14, &a15, &a16, &a17, &a18, &a19, &a20,
+        &a21, &a22, &a23, &a24, &a25, &a26, &a27, &a28, &a29, &a30, &a31, &a32 };
+    return Func(p0, p1, args, 33);
+  }
+  Result operator()(Param0 p0, Param1 p1, const Arg& a0, const Arg& a1,
+      const Arg& a2, const Arg& a3, const Arg& a4, const Arg& a5,
+      const Arg& a6, const Arg& a7, const Arg& a8, const Arg& a9,
+      const Arg& a10, const Arg& a11, const Arg& a12, const Arg& a13,
+      const Arg& a14, const Arg& a15, const Arg& a16, const Arg& a17,
+      const Arg& a18, const Arg& a19, const Arg& a20, const Arg& a21,
+      const Arg& a22, const Arg& a23, const Arg& a24, const Arg& a25,
+      const Arg& a26, const Arg& a27, const Arg& a28, const Arg& a29,
+      const Arg& a30, const Arg& a31, const Arg& a32, const Arg& a33) const {
+    const Arg* const args[] = { &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8,
+        &a9, &a10, &a11, &a12, &a13, &a14, &a15, &a16, &a17, &a18, &a19, &a20,
+        &a21, &a22, &a23, &a24, &a25, &a26, &a27, &a28, &a29, &a30, &a31, &a32,
+        &a33 };
+    return Func(p0, p1, args, 34);
+  }
+
+  Result operator()(Param0 p0, Param1 p1, const Arg& a0, const Arg& a1,
+      const Arg& a2, const Arg& a3, const Arg& a4, const Arg& a5,
+      const Arg& a6, const Arg& a7, const Arg& a8, const Arg& a9,
+      const Arg& a10, const Arg& a11, const Arg& a12, const Arg& a13,
+      const Arg& a14, const Arg& a15, const Arg& a16, const Arg& a17,
+      const Arg& a18, const Arg& a19, const Arg& a20, const Arg& a21,
+      const Arg& a22, const Arg& a23, const Arg& a24, const Arg& a25,
+      const Arg& a26, const Arg& a27, const Arg& a28, const Arg& a29,
+      const Arg& a30, const Arg& a31, const Arg& a32, const Arg& a33,
+      const Arg& a34) const {
+    const Arg* const args[] = { &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8,
+        &a9, &a10, &a11, &a12, &a13, &a14, &a15, &a16, &a17, &a18, &a19, &a20,
+        &a21, &a22, &a23, &a24, &a25, &a26, &a27, &a28, &a29, &a30, &a31, &a32, 
+        &a33, &a34 };
+    return Func(p0, p1, args, 35);
+  }
+
+  Result operator()(Param0 p0, Param1 p1, const Arg& a0, const Arg& a1,
+      const Arg& a2, const Arg& a3, const Arg& a4, const Arg& a5,
+      const Arg& a6, const Arg& a7, const Arg& a8, const Arg& a9,
+      const Arg& a10, const Arg& a11, const Arg& a12, const Arg& a13,
+      const Arg& a14, const Arg& a15, const Arg& a16, const Arg& a17,
+      const Arg& a18, const Arg& a19, const Arg& a20, const Arg& a21,
+      const Arg& a22, const Arg& a23, const Arg& a24, const Arg& a25,
+      const Arg& a26, const Arg& a27, const Arg& a28, const Arg& a29,
+      const Arg& a30, const Arg& a31, const Arg& a32, const Arg& a33,
+      const Arg& a34, const Arg& a35) const {
+    const Arg* const args[] = { &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8,
+        &a9, &a10, &a11, &a12, &a13, &a14, &a15, &a16, &a17, &a18, &a19, &a20,
+        &a21, &a22, &a23, &a24, &a25, &a26, &a27, &a28, &a29, &a30, &a31, &a32,
+        &a33, &a34, &a35 };
+    return Func(p0, p1, args, 36);
+  }
+
+  Result operator()(Param0 p0, Param1 p1, const Arg& a0, const Arg& a1,
+      const Arg& a2, const Arg& a3, const Arg& a4, const Arg& a5,
+      const Arg& a6, const Arg& a7, const Arg& a8, const Arg& a9,
+      const Arg& a10, const Arg& a11, const Arg& a12, const Arg& a13,
+      const Arg& a14, const Arg& a15, const Arg& a16, const Arg& a17,
+      const Arg& a18, const Arg& a19, const Arg& a20, const Arg& a21,
+      const Arg& a22, const Arg& a23, const Arg& a24, const Arg& a25,
+      const Arg& a26, const Arg& a27, const Arg& a28, const Arg& a29,
+      const Arg& a30, const Arg& a31, const Arg& a32, const Arg& a33,
+      const Arg& a34, const Arg& a35, const Arg& a36) const {
+    const Arg* const args[] = { &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8,
+        &a9, &a10, &a11, &a12, &a13, &a14, &a15, &a16, &a17, &a18, &a19, &a20,
+        &a21, &a22, &a23, &a24, &a25, &a26, &a27, &a28, &a29, &a30, &a31, &a32,
+        &a33, &a34, &a35, &a36 };
+    return Func(p0, p1, args, 37);
+  }
+  Result operator()(Param0 p0, Param1 p1, const Arg& a0, const Arg& a1,
+      const Arg& a2, const Arg& a3, const Arg& a4, const Arg& a5,
+      const Arg& a6, const Arg& a7, const Arg& a8, const Arg& a9,
+      const Arg& a10, const Arg& a11, const Arg& a12, const Arg& a13,
+      const Arg& a14, const Arg& a15, const Arg& a16, const Arg& a17,
+      const Arg& a18, const Arg& a19, const Arg& a20, const Arg& a21,
+      const Arg& a22, const Arg& a23, const Arg& a24, const Arg& a25,
+      const Arg& a26, const Arg& a27, const Arg& a28, const Arg& a29,
+      const Arg& a30, const Arg& a31, const Arg& a32, const Arg& a33,
+      const Arg& a34, const Arg& a35, const Arg& a36, const Arg& a37,
+      const Arg& a38, const Arg& a39, const Arg& a40, const Arg& a41) const {
+    const Arg* const args[] = { &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8,
+        &a9, &a10, &a11, &a12, &a13, &a14, &a15, &a16, &a17, &a18, &a19, &a20,
+        &a21, &a22, &a23, &a24, &a25, &a26, &a27, &a28, &a29, &a30, &a31, &a32,
+        &a33, &a34, &a35, &a36, &a37, &a38, &a39, &a40, &a41};
+    return Func(p0, p1, args, 42);
+  }
+
+  Result operator()(Param0 p0, Param1 p1, const Arg& a0, const Arg& a1,
+      const Arg& a2, const Arg& a3, const Arg& a4, const Arg& a5,
+      const Arg& a6, const Arg& a7, const Arg& a8, const Arg& a9,
+      const Arg& a10, const Arg& a11, const Arg& a12, const Arg& a13,
+      const Arg& a14, const Arg& a15, const Arg& a16, const Arg& a17,
+      const Arg& a18, const Arg& a19, const Arg& a20, const Arg& a21,
+      const Arg& a22, const Arg& a23, const Arg& a24, const Arg& a25,
+      const Arg& a26, const Arg& a27, const Arg& a28, const Arg& a29,
+      const Arg& a30, const Arg& a31, const Arg& a32, const Arg& a33,
+      const Arg& a34, const Arg& a35, const Arg& a36, const Arg& a37,
+      const Arg& a38, const Arg& a39, const Arg& a40, const Arg& a41,
+      const Arg& a42) const {
+    const Arg* const args[] = { &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8,
+        &a9, &a10, &a11, &a12, &a13, &a14, &a15, &a16, &a17, &a18, &a19, &a20,
+        &a21, &a22, &a23, &a24, &a25, &a26, &a27, &a28, &a29, &a30, &a31, &a32,
+        &a33, &a34, &a35, &a36, &a37, &a38, &a39, &a40, &a41, &a42};
+    return Func(p0, p1, args, 43);
+  }
+  Result operator()(Param0 p0, Param1 p1, const Arg& a0, const Arg& a1,
+      const Arg& a2, const Arg& a3, const Arg& a4, const Arg& a5,
+      const Arg& a6, const Arg& a7, const Arg& a8, const Arg& a9,
+      const Arg& a10, const Arg& a11, const Arg& a12, const Arg& a13,
+      const Arg& a14, const Arg& a15, const Arg& a16, const Arg& a17,
+      const Arg& a18, const Arg& a19, const Arg& a20, const Arg& a21,
+      const Arg& a22, const Arg& a23, const Arg& a24, const Arg& a25,
+      const Arg& a26, const Arg& a27, const Arg& a28, const Arg& a29,
+      const Arg& a30, const Arg& a31, const Arg& a32, const Arg& a33,
+      const Arg& a34, const Arg& a35, const Arg& a36, const Arg& a37,
+      const Arg& a38, const Arg& a39, const Arg& a40, const Arg& a41,
+      const Arg& a42, const Arg& a43, const Arg& a44, const Arg& a45,
+      const Arg& a46, const Arg& a47, const Arg& a48, const Arg& a49,
+      const Arg& a50, const Arg& a51, const Arg& a52, const Arg& a53,
+      const Arg& a54, const Arg& a55, const Arg& a56, const Arg& a57,
+      const Arg& a58, const Arg& a59, const Arg& a60) const {
+    const Arg* const args[] = { &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8,
+        &a9, &a10, &a11, &a12, &a13, &a14, &a15, &a16, &a17, &a18, &a19, &a20,
+        &a21, &a22, &a23, &a24, &a25, &a26, &a27, &a28, &a29, &a30, &a31, &a32,
+        &a33, &a34, &a35, &a36, &a37, &a38, &a39, &a40, &a41, &a42, &a43, &a44,
+        &a45, &a46, &a47, &a48, &a49, &a50, &a51, &a52, &a53, &a54, &a55, &a56,
+        &a57, &a58, &a59, &a60};
+    return Func(p0, p1, args, 61);
+  }
+
+
 };
 
 }  // namespace re2

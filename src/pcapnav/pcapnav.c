@@ -22,9 +22,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
-#if HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include "config.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -34,6 +32,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include "pcapnav_globals.c"
 
@@ -57,7 +56,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 static char pcap_errbuf[PCAP_ERRBUF_SIZE];
 
-
+// mentioned in pcapnav.h and pcapnav_debug.c
+// according to netdude online,
+// debug: enables debugging output when set to a value >= 1, and disables it when set to 0. Initialially, it is disabled.
+// calldepth_limit: you can limit the calldepth up to which debugging output is displayed, to avoid excessive logging. By default, everything is logged (loglevel 0) O.o
+// The function initializes the static options of the library, such as debugging switches etc.
 void
 pcapnav_init(void)
 {
@@ -67,7 +70,7 @@ pcapnav_init(void)
 
 
 pcapnav_t      *
-pcapnav_open_offline(const char *fname)
+pcapnav_open_offline_tm(const char *fname, const char* classdirectory)
 {
   pcapnav_t               *pn;
   u_int32_t                magic;
@@ -75,11 +78,78 @@ pcapnav_open_offline(const char *fname)
   FILE                    *fp;
   struct stat              st;
 
+  FILE *fp_log;
+
+#ifdef HAVE_PATH_MAX
+  char filepath[PATH_MAX];
+#else
+  char filepath[1024];
+#endif
+
+  if (fname[0] != '/') {
+    strcpy(filepath, classdirectory);
+    strcat(filepath, "/");
+    strcat(filepath, fname);
+  } else {
+    strcpy(filepath, fname);
+  }
+
+  char logpath[] = "/home/neto/data/pcapLog.txt";
+
+  if (chdir(classdirectory)) {
+      fprintf(stderr, "cannot class(Fifo:query) chdir to %s\n", classdirectory);
+      //return;
+  }
+  /*  
+  fp_log = fopen(logpath, "a");
+
+  if (fp_log == NULL) {
+    fprintf(stderr, "Can't open the log file pcapLog.txt\n");
+  }
+  else
+  {
+      char pcappath[70];
+
+      fprintf(fp_log, "The directory that we are in while in the pcapnav.c file is %s for filename %s\n", getcwd(pcappath, 70), filepath);
+      fclose(fp_log);
+  }
+  */
+  /*
+  fp_log = fopen("/home/lakers/pcapLog.txt", "a");
+
+  if (fp_log == NULL) {
+    fprintf(stderr, "Can't open the log file pcapLog.txt\n");
+  }
+  else
+  {
+      fprintf(fp_log, "come on, work with filename %s!\n", fname);
+      fclose(fp_log);
+  }
+  */
+  //fclose(fp_log);
+
+  //fp_log = fopen("/home/lakers/pcapLog.txt", "w");
+
   D_ENTER;
 
-  if (!fname || fname[0] == '\0')
+  if (filepath[0] == '\0')
     {
+      fp_log = fopen(logpath, "a");
+
+      if (fp_log == NULL) {
+         fprintf(stderr, "Can't open the log file pcapLog.txt\n");
+      }
+
+      else
+      {
+          fprintf(fp_log, "Invalid filename: %s\n", fname);
+          fclose(fp_log);
+      }      
+
       D(("Invalid filename: %s\n", fname));
+
+      //fprintf(stderr, "Invalid filename: %s\n", filepath); //fname);
+
       errno = ENOENT;
       D_RETURN_(NULL);
     }
@@ -88,44 +158,159 @@ pcapnav_open_offline(const char *fname)
   
   if (! (pn = NEW(pcapnav_t)))
     {
+      fp_log = fopen(logpath, "a");
+
+      if (fp_log == NULL) {
+         fprintf(stderr, "Can't open the log file pcapLog.txt\n");
+      }
+
+      else
+      {
+          fprintf(fp_log, "Out of memory\n");
+          fclose(fp_log);
+      }
+      //fclose(fp_log);
+
       D(("Out of memory.\n"));
+
+      //fprintf(stderr, "Out of memory.\n");
+
       errno = ENOMEM;
       D_RETURN_(NULL);
     }
+  /*
+  if (chdir(classdirectory)) {
+      fprintf(stderr, "cannot class(Fifo:query) chdir to %s\n", classdirectory);
+      //return;
+  }
 
-  if (lstat(fname, &st) < 0)
+  fp_log = fopen("/home/lakers/pcapLog.txt", "a");
+
+  if (fp_log == NULL) {
+    fprintf(stderr, "Can't open the log file pcapLog.txt\n");
+  }
+  else
+  {
+      char pcappath[70];
+
+      fprintf(fp_log, "The directory that we are in while in the pcapnav.c file is %s for filename %s\n", getcwd(pcappath, 70), fname);
+      fclose(fp_log);
+  }  
+  */
+  
+  //if (lstat(fname, &st) < 0)
+  if (lstat(filepath, &st) < 0)
     {
+      fp_log = fopen(logpath, "a");
+
+      if (fp_log == NULL) {
+         fprintf(stderr, "Can't open the log file pcapLog.txt\n");
+      }
+
+      else
+      {
+          char path[70];
+          fprintf(fp_log, "lstat failed for file %s and error %s, we are in the path %s\n", filepath, strerror(errno), getcwd(path, 70));
+
+          fclose(fp_log);
+      }
+      //fclose(fp_log);
+
       D(("lstat failed: %s\n", strerror(errno)));
+
+      //fprintf("lstat failed: %s for file %s\n", strerror(errno), fname);
+
       goto free_return;
     }
-
+  
   pn->size = st.st_size;
 
   /* Allocate pcap handle */
-  if (! (pn->pcap = pcap_open_offline(fname, pcap_errbuf)))
+  if (! (pn->pcap = pcap_open_offline(filepath, pcap_errbuf)))
     {
-      D(("%s (from pcap, re. %s)\n", pcap_errbuf, fname));
+        if (pn->pcap == NULL) {
+            fp_log = fopen(logpath, "a");
+
+            if (fp_log == NULL) {
+                fprintf(stderr, "Can't open the log file pcapLog.txt\n");
+            }
+
+            else
+            {
+                char path[70];
+                fprintf(fp_log, "Could not open the file %s and error %s, the path is %s\n", filepath, pcap_errbuf, getcwd(path, 70));
+                fclose(fp_log);
+            }
+            //fclose(fp_log);
+
+            //fprintf(stderr, "Couldn't open the file: %s\n", pcap_errbuf);
+            //exit(EXIT_FAILURE);
+        }
+
+      D(("%s (from pcap, re. %s)\n", pcap_errbuf, filepath)); //fname));
       /* Let's hope errno is meaningful now ... */
       goto free_return;
     }
+
+    /*
+    if (pn->pcap == NULL) {
+        fprintf(stderr, "Couldn't open the file: %s\n", pcap_errbuf);
+        //exit(EXIT_FAILURE);
+    }
+    */
   
   /* Hook pcap's file stream into our own structure: */
   pn->fp = pcap_file(pn->pcap);
 
-  if ((fp = fopen(fname, "r")) == NULL)
+  if (chdir(classdirectory)) {
+      fprintf(stderr, "cannot class(Fifo:query) chdir to %s\n", classdirectory);
+      //return;
+  }
+  
+  if ((fp = fopen(filepath, "r")) == NULL)
     {
-      D(("Could not open trace file %s for reading.\n", fname));
-      /* errno set already */
+      fp_log = fopen(logpath, "a");
+      if (fp_log == NULL) {
+         fprintf(stderr, "Can't open the log file pcapLog.txt\n");
+      }
+
+      else
+      {
+          char path[70];
+          fprintf(fp_log, "Could not open trace file %s for reading. The path is %s\n", filepath, getcwd(path, 70));
+          fclose(fp_log);
+      }
+      //fclose(fp_log);
+
+      //fprintf(stderr, "Couldn't open the trace file for reading: %s\n", fname);
+
+      D(("Could not open trace file %s for reading.\n", filepath));
+      // errno set already
       goto free_return;
     }
-
+  
   if (fread((char *)&pn->trace.filehdr, sizeof(struct pcap_file_header), 1, fp) != 1)
     {
-      D(("Could not read trace file header from %s\n", fname));
-      /* errno set already */
+
+      fp_log = fopen(logpath, "a");
+
+      if (fp_log == NULL) {
+         fprintf(stderr, "Can't open the log file pcapLog.txt\n");
+      }
+      else
+      {
+         fprintf(fp_log, "Could not read trace file header from %s\n", filepath); //fname);
+         fclose(fp_log);
+      }
+      //fclose(fp_log);
+
+      //fprintf(stderr, "Couldn't open the trace file header for reading: %s\n", fname);
+
+      D(("Could not read trace file header from %s\n", filepath)); //fname));
+      //errno set already
       goto cleanup_return;
     }
-
+  
   /* Look at magic to determine byte order. */
 
   magic = pn->trace.filehdr.magic;
@@ -137,7 +322,22 @@ pcapnav_open_offline(const char *fname)
 
       if (magic != TCPDUMP_MAGIC && magic != PATCHED_TCPDUMP_MAGIC)
 	{
-	  D(("Invalid trace file %s -- didn't recognize file magic.\n", fname));
+	  D(("Invalid trace file %s -- didn't recognize file magic.\n", filepath)); //fname));
+
+          fp_log = fopen(logpath, "a");
+
+          if (fp_log == NULL) {
+               fprintf(stderr, "Can't open the log file pcapLog.txt\n");
+           }
+          else
+          { 
+              fprintf(fp_log, "Invalid trace file %s, did not recognize file magic.\n", filepath); //fname);
+              fclose(fp_log);
+          }
+          //fclose(fp_log);
+
+          //fprintf(stderr, "Invalid trace file %s -- didn't recognize file magic \n", fname);
+
 	  goto cleanup_return;
 	}
 
@@ -178,21 +378,55 @@ pcapnav_open_offline(const char *fname)
   /* Get length of file: */
   if (fseek(fp, 0, SEEK_END) != 0)
     {
+      fp_log = fopen(logpath, "a");
+
+      if (fp_log == NULL) {
+         fprintf(stderr, "Can't open the log file pcapLog.txt\n");
+      }
+
+      else
+      {
+          fprintf(fp_log, "Could not determine file length, fseek failed: %s with error %s\n", filepath, strerror(errno)); //fname, strerror(errno));
+          fclose(fp_log);
+      }
+      //fclose(fp_log);
+
       D(("Couldn't determine file length, fseek() failed: %s\n", strerror(errno)));
+
+      //fprintf(stderr, "Couldn't determine the file length, fseek failed: %s for file %s", strerror(errno), fname);
+
       goto cleanup_return;
     }
 
   if ((pn->trace.length = ftell(fp)) < 0)
     {
+      fp_log = fopen(logpath, "a");
+
+      if (fp_log == NULL) {
+         fprintf(stderr, "Can't open the log file pcapLog.txt\n");
+      }
+      else
+      {
+          fprintf(fp_log, "Could not determine file length, ftell failed: %s with error %s\n", filepath, strerror(errno)); //fname, strerror(errno));
+          fclose(fp_log);
+      }
+      //fclose(fp_log);
+
       D(("Couldn't determine file length, ftell() failed: %s\n", strerror(errno)));
+
+      //fprintf(stderr, "Coudln't determine file length, ftell failed: %s for file %s\n", strerror(errno), fname);
+
       goto cleanup_return;
     }
+
+  //fclose(fp_log);
 
   fclose(fp);  
   D_RETURN_(pn);
   
  cleanup_return:
   fclose(fp);
+  //fclose(fp_log);
   
  free_return:
   FREE(pn);
@@ -679,7 +913,7 @@ pcapnav_geterr(pcapnav_t *pn)
 
 
 pcap_dumper_t *
-pcapnav_dump_open(pcap_t *pcap, const char *filename, pcapnav_dumpmode_t mode)
+pcapnav_dump_open_tm(pcap_t *pcap, const char *filename, pcapnav_dumpmode_t mode, const char* classdirectory)
 {
   if (!pcap)
     {
@@ -699,10 +933,10 @@ pcapnav_dump_open(pcap_t *pcap, const char *filename, pcapnav_dumpmode_t mode)
   switch (mode)
     {
     case PCAPNAV_DUMP_APPEND_FAST:
-      return pcapnav_append_fast(pcap, filename);
+      return pcapnav_append_fast(pcap, filename, classdirectory);
       
     case PCAPNAV_DUMP_APPEND_SAFE:
-      return pcapnav_append_safe(pcap, filename);
+      return pcapnav_append_safe(pcap, filename, classdirectory);
 
     case PCAPNAV_DUMP_TRUNC:
     default:      

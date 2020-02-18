@@ -11,6 +11,7 @@
 #include <sstream>
 #include <pthread.h>
 #include <time.h>
+//#include <gperftools/profiler.h>
 
 #include "types.h"
 #include "tm.h"
@@ -91,6 +92,7 @@ class MyQueue {
 			if (entries>0) {
 				rp++;
 				entries--;
+                //tmlog(TM_LOG_NOTE, "idx_queue", "We pop the entry from back, decrement entry count to %d", entries);
 				if (rp>=maxsize)
 					rp = 0;
 			}
@@ -102,6 +104,7 @@ class MyQueue {
 			if (entries>=maxsize) {
 				drops++;
 				delete elem;
+                //tmlog(TM_LOG_NOTE, "idx_queue", "we do not add this to the number of entries. Number of entries is: %d", entries);
 				return;
 			}
 
@@ -112,6 +115,7 @@ class MyQueue {
 			q[wp] = elem;
 			wp++;
 			entries++;
+            //tmlog(TM_LOG_NOTE, "idx_queue", "increment the number of entries to %d", entries);
 			if (wp>=maxsize) 
 				wp = 0;
 		}
@@ -169,6 +173,8 @@ public:
 	virtual void debugPrint() const = 0;
 	virtual void debugPrint(FILE *fp) const = 0;
 	pthread_t maintainer_thread;
+	virtual bool hasDiskIndex() const = 0;
+
 protected:
 	pthread_mutex_t hash_lock_mutex;
 	pthread_mutex_t queue_lock_mutex;
@@ -190,6 +196,7 @@ protected:
 	 * YOU MUST HOLD THE queue_lock WHEN CALLING THIS */
 	void cond_broadcast_queue() {
 		pthread_cond_broadcast(&queue_cond);
+	    //tmlog(TM_LOG_DEBUG, "Mantainer IndexThread", "signaling to Maintainer IndexThread that we added something to the queue");
 	}
 	/** 
 	 * Wait for signal, that data is availabe in the queue 
@@ -216,7 +223,7 @@ template <class T> class Index: public IndexType {
 public:
 	// rot_offset is a (small) offset to delay the rotation and thus the writing of
 	// the index to disk. This should be used 
-	Index(tm_time_t d_t, uint32_t hash_size, bool do_disk_index, Storage * storage);
+	Index(tm_time_t d_t, int hash_size, bool do_disk_index, Storage * storage);
 	~Index();
 	void cancelThread();
 	void lookupMem(IntervalSet* set, IndexField* key);
@@ -248,6 +255,9 @@ public:
 	}
 	void debugPrint() const;
 	void debugPrint(FILE *fp) const;
+	virtual bool hasDiskIndex() const {
+		return disk_index != NULL;
+	}
 protected:
 	MyQueue input_q;
 	//std::deque<IndexField *> input_q;
@@ -261,7 +271,7 @@ protected:
 	 */
 	tm_time_t cap_thread_oldestTimestampDisk;
 	tm_time_t cap_thread_oldestTimestampMem;
-	tm_time_t cap_thread_iat; // InterArrivalTime 
+	tm_time_t cap_thread_iat; // InterArrivalTime, 1/rateOfArrival 
 	tm_time_t idx_thread_oldestTimestampDisk;
 	tm_time_t idx_thread_oldestTimestampMem;
 	tm_time_t idx_thread_iat; // InterArrivalTime 
@@ -280,6 +290,12 @@ protected:
 
 	int qlen;
 
+    /*
+    //uint64_t primes[35]; // = {1, 2, 3, 7, 13, 29, 53, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157, \
+                             98317, 196613, 393241, 786433, 1572869, 3145739, 6291469, \
+                             12582917, 25165843, 50331653, 100663319, 201326611, 402653189, \
+                             805306457, 1610612741, 3221225479, 6442450967, 12884901947};
+    */
 };
 
 
@@ -290,11 +306,13 @@ protected:
  * I.e. Indexes will take care of deallocation the storage for
  * Index.
  */
-extern unsigned had_to_wait;
+//extern unsigned had_to_wait;
+extern unsigned num_of_entries;
+
 class Indexes {
 public:
 	Indexes() {
-		last_write_ts = 0;
+		//last_write_ts = 0;
 		pthread_mutex_init(&disk_write_mutex, NULL);
 	}
 	~Indexes() {
@@ -323,22 +341,102 @@ public:
 		for (std::list<IndexType*>::iterator i=indexes.begin();
 				i!=indexes.end();
 				i++)
-			if ((*i)->getIndexName()==name) return (*i);
+			if ((*i)->getIndexName()==name) 
+            {
+                //tmlog(TM_LOG_NOTE, "Indexes: getIndexByName", "we have a match with the index name %s", name.c_str());
+                return (*i);
+            }
 		return NULL;
 	};
 	int trylockDiskWrite() {
-		struct timeval tmptv;
-		gettimeofday(&tmptv, NULL);
+		//struct timeval tmptv;
+        /*
+        #ifdef __APPLE__
+        struct tvalspec tmptv;
+        clock_get_time(CLOCK_MONOTONIC_COARSE, &tmptv)i;
+        if (valspec_to_tm(&tmptv) - last_write_ts < IDX_MIN_TIME_BETWEEN_WRITES) {
+                had_to_wait++;
+                num_of_entries++;
+                return EBUSY;
+        }
+        #endif
+        #ifdef linux
+        struct timespec tmptv;
+        clock_gettime(CLOCK_MONOTONIC_COARSE, &tmptv);
+        if (spec_to_tm(&tmptv) - last_write_ts < IDX_MIN_TIME_BETWEEN_WRITES) {
+        */
+                /*
+                printf("The time part in nanosecods is: %ld\n", tmptv.tv_nsec);
+                int rc;
+
+                rc = clock_getres(CLOCK_MONOTONIC, &tmptv);
+                if (!rc)
+                    tmlog(TM_LOG_ERROR, "trylockDiskWrite", "CLOCK_MONOTONIC: %ldns", tmptv.tv_nsec);
+
+                rc = clock_getres(CLOCK_MONOTONIC_COARSE, &tmptv);
+                if (!rc)
+                    tmlog(TM_LOG_ERROR, "trylockDiskWrite", "CLOCK_MONOTONIC_COARSE: %ldns", tmptv.tv_nsec);
+                //printf("The time part in nanosecods is: %ld", tmptv.tv_nsec);
+                */
+                /*
+                had_to_wait++;
+                num_of_entries++;
+                return EBUSY;
+        }
+        #endif
+        #ifdef __FreeBSD__
+        struct timespec tmptv;
+        clock_gettime(CLOCK_MONOTONIC_FAST, &tmptv);
+        if (spec_to_tm(&tmptv) - last_write_ts < IDX_MIN_TIME_BETWEEN_WRITES) {
+                had_to_wait++;
+                num_of_entries++;
+                return EBUSY;
+        }
+        #endif
+        */ 
+		//gettimeofday(&tmptv, NULL);
+                /*
 		if (to_tm_time(&tmptv) - last_write_ts < IDX_MIN_TIME_BETWEEN_WRITES) {
 			had_to_wait++;
 			return EBUSY;
 		}
+                */
+        // returns 0 if lock was successfully achieved
+
+        // 500000 came from testing. In the above commented out code, you can see that previously, gettimeofday was used.
+        // Basically, I did a counter while it was doing gettimeofday, and found that it did around 500000 entries before trying
+        // disk write lock. It was pretty consistent on two different machines.
+        if (num_of_entries < 500000)
+        {
+            num_of_entries++;
+            return EBUSY;
+        }
+
+        //tmlog(TM_LOG_ERROR, "trylockDiskWrite", "the number of entries befor the attempt to lock is %ld", num_of_entries);
+        num_of_entries = 0;
 		return pthread_mutex_trylock(&disk_write_mutex);
 	}
 	void unlockDiskWrite() {
-		struct timeval tmptv;
-		gettimeofday(&tmptv, NULL);
-		last_write_ts = to_tm_time(&tmptv);
+		//struct timeval tmptv;
+		//gettimeofday(&tmptv, NULL);
+		//last_write_ts = to_tm_time(&tmptv);
+        /*
+        #ifdef __APPLE__
+        struct tvalspec tmptv;
+        clock_get_time(CLOCK_MONOTONIC_COARSE, &tmptv)i;
+        last_write_ts = valspec_to_tm(&tmptv);
+        #endif
+        #ifdef linux
+        struct timespec tmptv;
+        clock_gettime(CLOCK_MONOTONIC_COARSE, &tmptv);
+        last_write_ts = spec_to_tm(&tmptv);
+        #endif
+        #ifdef __FreeBSD__
+        struct timespec tmptv;
+        clock_gettime(CLOCK_MONOTONIC_FAST, &tmptv);
+        last_write_ts = spec_to_tm(&tmptv);
+        #endif
+        */
 		pthread_mutex_unlock(&disk_write_mutex);
 	}
 	std::list<IndexType*>::iterator begin() {
@@ -350,7 +448,7 @@ public:
 protected:
 	std::list<IndexType*> indexes;
 	pthread_mutex_t disk_write_mutex;
-	tm_time_t last_write_ts;
+	//tm_time_t last_write_ts;
 };
 
 

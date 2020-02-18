@@ -117,7 +117,7 @@ void               pcapnav_init(void);
  * file not readable etc). In that case check errno to
  * see what went wrong.
  */
-pcapnav_t         *pcapnav_open_offline(const char *filename);
+pcapnav_t         *pcapnav_open_offline_tm(const char *filename, const char* classdirectory);
 
 
 /**
@@ -509,8 +509,8 @@ char              *pcapnav_geterr(pcapnav_t *pn);
  * Returns: a pcap dumper, or %NULL if something went wrong, in which
  * case you'll find the reason in the error buffer in the @pcap handle.
  */
-pcap_dumper_t     *pcapnav_dump_open(pcap_t *pcap, const char *filename,
-				     pcapnav_dumpmode_t mode);
+pcap_dumper_t     *pcapnav_dump_open_tm(pcap_t *pcap, const char *filename,
+				     pcapnav_dumpmode_t mode, const char* classdirectory);
 
 #ifdef __cplusplus
 }

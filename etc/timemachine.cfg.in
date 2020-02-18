@@ -6,25 +6,25 @@ main {
 
 	## Directories for packet captures, logs, and indexes. 
 	## These directories must exist when timemachine starts!
-	workdir "@CMAKE_INSTALL_PREFIX@/var/tm";
+	workdir "/home/lakers/timemachine_results";
 	## These will be relative to <workdir> if not 
 	## given as full paths.
-	indexdir "indexes";
-	queryfiledir "queries";
+	indexdir "indexes/";
+	queryfiledir "queries/";
 
 	## Name for the log to be stored in <workdir>
 	logfile "timemachine.log";
 
 	## Set this value to '1' if you'd like timemachine to
 	## start in daemon mode.
-	daemon 1;
+	daemon 0;
 	## If you are running in daemon mode, this setting 
 	## MUST be set to '0'
-	console 0;
+	console 1;
 	
 	## How often in seconds timemachine should log statistical 
 	## information.
-	log_interval 600;
+	log_interval 60;
 
 	## A BPF filter to apply before sniffing any traffic.
 	#filter "not port 80";
@@ -36,13 +36,13 @@ main {
 
 	## Set this to '0' to disable the remote console.
 	rmtconsole  1;
-	rmtconsole_listen_addr 127.0.0.1;
+	rmtconsole_listen_addr 128.3.11.244;
 	rmtconsole_port 42042;
 
 	## If TimeMachine was built Broccoli support, this 
 	## will enable it and the other options will configure
 	## how it behaves.
-	bro_listen 1;
+	bro_listen 0;
 	bro_listen_port 47757;
 	bro_listen_addr 127.0.0.1;
 
@@ -54,11 +54,38 @@ main {
 	index "ip" disk;
 }
 
-class "all" {
-	filter "";
-	precedence 10;
+class "UDP_DNS" {
+	filter "port 53";
+	precedence 5;
 	cutoff 10k;
-	disk 50g;
-	filesize 128m;
-	mem 1g;
+	disk 1g;
+	filesize 1m;
+	mem 10k;
+}
+
+class "HTTP" {
+	filter "port 80";
+	precedence 5;
+	cutoff 10k;
+	disk 1g;
+	filesize 1m;
+	mem 10k;
+}
+
+class "ICMP_ping" {
+	filter "icmp";
+	precedence 2;
+	cutoff 10k;
+	disk 1g;
+	filesize 200k;
+	mem 10k;
+}
+
+class "rest" {
+	filter "";
+	precedence 1;
+	cutoff 10k;
+	disk 1g;
+	filesize 1m;
+	mem 10k;
 }

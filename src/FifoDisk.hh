@@ -20,7 +20,11 @@ class FifoDiskFile;
 class FifoDisk {
 public:
 	FifoDisk(const std::string& classname, uint64_t size,
-			 uint64_t file_size, pcap_t*);
+			 uint64_t file_size, pcap_t*, const char* classdir,
+			 const char* filename_format, const char* classdir_format,
+			 const std::string &classnameId,
+			 bool size_unlimited
+			 );
 	~FifoDisk();
 	//  void addPkt(const struct pcap_pkthdr *header, const unsigned char *packet);
 	void addPkt(const pkt_ptr p);
@@ -69,8 +73,13 @@ public:
 
 protected:
 	std::string classname;
+	std::string classnameId;
+        const char* classdir;
+	const char* filename_format;
+	const char* classdir_format;
 	std::list <FifoDiskFile*> files;
 	uint64_t size;
+	bool size_unlimited;
 	uint64_t file_size;
 	uint64_t tot_bytes;
 	uint64_t tot_pkts;
@@ -92,6 +101,7 @@ public:
 	void open();
 	void close();
 	void remove();
+	void removeNoUnlink();
 	void addPkt(const struct pcap_pkthdr *header, const unsigned char *packet);
 	void addPkt(pkt_ptr p);
 	int64_t getCurFileSize() {
@@ -117,9 +127,10 @@ public:
 	}
 	/* iterator will be increased up to the first interval completeley
 	   not in file */
-	uint64_t query( QueryRequest*, QueryResult*, IntervalSet*);
+	uint64_t query( QueryRequest*, QueryResult*, IntervalSet*, const char* classdirectory);
 protected:
 	std::string filename;
+        const char* classdir;
 	bool is_open;
 	pcap_dumper_t *pcap_dumper_handle;
 	int64_t cur_file_size;

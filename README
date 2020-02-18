@@ -9,3 +9,44 @@ For more documentation, research publications, and community contact
 information, please see the Time Machines's home page:
 
 	http://www.bro.org/community/time-machine.html
+
+To compile and link, we can do the following:
+sudo ./configure --enable-debug --prefix=<path_to_binary_file_and_config_file>
+sudo make -j 8 && sudo make install
+(the -j 8 lets it make with 8 processors)
+
+To run, do the following:
+sudo ./timemachine -r <path_to_pcap_file> -c <path_to_config_file>
+
+One example way to compile and run is:
+sudo ./configure --enable-debug --prefix=/home/lakers/tm
+sudo make -j 8 && sudo make install
+sudo ./timemachine -r <fullpathnametopcapfile> -c </home/lakers/tm/etc/timemachine.cfg.in>
+
+To exit, press Ctrl + D
+
+To do querying for ipv6 addresses, please use brackets around the ipv6 address.
+So, for example,
+query to_file "testquery.pcap" index ip "[2001:558:fe0d:1c::2]"
+
+Not using brackets around an ipv6 address will result in a querying error.
+
+Note that to use gperftools' CPU profiler, you will have to first install libunwind.
+
+Also note that to use pprof to read the .prof files, you will need to install
+perl5, gv, and dot. You can use apt-get install for the gv and dot (if on Ubuntu),
+and install perl5 from source.
+
+Note that to add the appropriate directories for gperftools, the file to look at is
+cmake/FindGooglePerftools.cmake
+
+Also, make sure to change the directory in the ProfilerStart function's argument in
+main.cc.in and/or reposition the ProfilerStart and ProfilerStop
+
+To enable cpu profiler debugging, add --enable-perftools-cpu to the configuring
+So, something like:
+
+./configure --enable-perftools-cpu --enable-debug --prefix=/home/lakers/tm
+
+will work.
+

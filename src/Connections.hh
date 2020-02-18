@@ -5,7 +5,7 @@
 
 #include "tm.h"
 
-#include "Queue.hh"
+//#include "Queue.hh"
 #include "Query.hh"
 #include "Connection.hh"
 
@@ -162,6 +162,9 @@ protected:
 	// these are 
 	inline Connection* lookup(ConnectionID4 *c_id);
 	inline Connection* addPkt (const struct pcap_pkthdr*, const u_char*);
+
+	//void addConnHelper(ConnectionID4 *c_id);
+
 	Connection* addConn(ConnectionID4 *c_id); 
 
 private:
@@ -176,6 +179,10 @@ private:
 	unsigned size;
 	// the hashtable containing the connections
 	hash_t* htable;
+
+	//Connection* addedconn;
+
+	//Connection* addedpacket;
 
 	/* every connection is in the hashtable and in a de-queue, where newest is
 	 * the connection that has been accessed last. I.e. oldest it the connection
@@ -210,24 +217,24 @@ inline Connection* Connections::lookup(ConnectionID4 *c_id) {
  */
 inline Connection* Connections::addPkt(const struct pcap_pkthdr* header, const u_char* packet) {
 	ConnectionID4* c_id=new ConnectionID4(packet);
-	Connection* c;
+	Connection* addedpacket;
 
 #ifdef TM_HEAVY_DEBUG
 	checkme(to_tm_time(&header->ts));
 #endif
-	c = lookup(c_id);
-	if (c == NULL) {
-		c = addConn(c_id);
+	addedpacket = lookup(c_id);
+	if (addedpacket == NULL) {
+		addedpacket = addConn(c_id);
 		// c_id now belongs to c
 	}
 	else {
 		delete c_id;
-		q_remove(c);
+		q_remove(addedpacket);
 	}
 
-	c->addPkt(header, packet);
-	q_add_newest(c);
-	return c;
+	addedpacket->addPkt(header, packet);
+	q_add_newest(addedpacket);
+	return addedpacket;
 }
 
 

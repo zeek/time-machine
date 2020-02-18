@@ -59,6 +59,27 @@ Main section options
     Determine the working directory where all class storage files and index
     files should be kept.  This directory must exist upon timemachine startup.
 
+  classdir_format "<path_with_formatting_directives>"
+    Optionally specify default directory where class storage files should be kept.
+    This directory will be created if it doesn't already exist.
+
+    If ``{class_name}`` appears in the format, it expands to ``class_classid`` for the
+    classid specified for the class.
+
+    If ``{class_id}`` appears in the format, it expands to ``classid`` for the
+    classid specified for the class.
+
+    If ``{newest_timestamp:XXX}`` appears in the format, the time formatting directive
+    ``XXX`` is expanded using the timestamp of the earliest packet written to the file
+    using strftime formatting interpretation ( http://fmtlib.net/latest/api.html#time-api )
+
+  filename_format "<name_with_formatting_directives>"
+    Optionally specify filename pattern where a class storage file will be written.
+    This file naming pattern should have enough time resolution so that newly
+    created files don't overwrite old ones.  E.g. it could have a seconds level resolution.
+    
+    The ``{class_name}`` ``{class_id}`` and ``{newest_timestamp}`` directives can be used.
+
   indexdir "<path>"
     Path, absolute or relative to 'workdir' (see above), where the 
     disk indexes will reside. This directory must exist upon timemachine startup.
@@ -176,6 +197,12 @@ The following values are available for configuration::
     The timeout for dynamic classes. If a dynamic rule for an  IP Adresses
     is pointing to this class, the dynamic rule be removed dyn_timeout
     seconds after the rule has been set. 
+
+  classdir_format "<path_with_formatting_directives>"
+    Overrides main classdir_format for this class.
+
+  filename_format "<name_with_formatting_directives>"
+    Overrides main filename_format for this class.
 
 
 Connection Table
