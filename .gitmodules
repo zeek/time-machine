@@ -1,6 +1,6 @@
 [submodule "cmake"]
 	path = cmake
-	url = git://git.bro-ids.org/cmake
+	url = https://github.com/zeek/cmake
 
 [submodule "src/fmt"]
 	path = src/fmt
