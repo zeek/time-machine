@@ -1,3 +1,30 @@
+0.1-13 | 2025-04-21 14:42:05 -0700
+
+  * cmake: Update url to https://github.com/zeek/cmake (Arne Welzel, Corelight)
+
+  * Add date/class based directory dynamic naming, IPv6, indexing and performance improvements (#7) (Case Larsen)
+
+    These changes have been baking for a week so far, and had run for a month or so earlier:
+ 
+    - Update CMakeLists.txt to deal with FreeBSD12 and OSX 10.14.
+    - Add dependence on fmt library (MIT license) https://github.com/fmtlib/fmt.git
+    - Allow for not removing captures at all along with disabling of in-memory indexing via "disk unlimited" class directive.
+    - Allow for class directory hierarchy and filename to be dynamically generated from class id, date and time of earliest packet written to file.
+ 
+    These changes have been running in production for a number of years:
+ 
+    - IPv6, indexing, and performance improvements from Naoki Eto (from https://github.com/zeek/time-machine/tree/topic/aashish/ipv6 )
+
+  * Add README.rst -> README symlink. (Johanna Amann)
+
+    Addresses BIT-1413
+
+  * I still had timemachine.cfg broken.  I think it's better now. (Seth Hall)
+
+  * Fixed url in README. (Seth Hall)
+
+  * Fix a clang compile issue. (Seth Hall)
+
 0.1-6 | 2020-02-10 10:40:00 -0800
     * Update CMakeFiles.txt to work on FreeBSD12
     * Allow for "disk unlimited" to not remove captures at all, along with disabling in-memory indexing for that use.
